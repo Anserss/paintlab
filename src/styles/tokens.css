@@ -1,0 +1,99 @@
+/* ==========================================================================
+   PIGMENT DEPOT · design tokens (spec 4.2 / 4.4 / 10.3)
+   唯一真相：任何组件不得硬编码色值、字号、间距。
+   ========================================================================== */
+
+:root {
+  /* 基底：7 级无彩灰 */
+  --bg-0: #0b0c0d;
+  --bg-1: #111314;
+  --surface: #17191b;
+  --surface-2: #1e2124;
+  --surface-3: #262a2e;
+  --surface-4: #31363b;
+  --swatch-bed: #0e1011;
+
+  /* 描边 */
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --accent: #e8a33d;
+  --line-hot: var(--accent);
+
+  /* 文字 */
+  --text-1: #ecedee;
+  --text-2: #a6abb0;
+  --text-3: #6e7479;
+  --text-inv: #0b0c0d;
+
+  /* 主强调：工业琥珀 */
+  --accent-dim: #8a6224;
+  --accent-ink: #100c05;
+
+  /* 包豪斯三原色（语义化使用） */
+  --bh-red: #e2554b;
+  --bh-blue: #3e7fc1;
+  --bh-yellow: #f0c24b;
+
+  /* 状态 */
+  --ok: var(--bh-blue);
+  --warn: var(--accent);
+  --danger: var(--bh-red);
+  --ghost: rgba(255, 255, 255, 0.06);
+
+  /* 色块描边（2.3 渲染约束 2） */
+  --swatch-ring: rgba(255, 255, 255, 0.16);
+
+  /* 尺寸 */
+  --side-nav: 72px;
+  --top-bar: 44px;
+  --row: 72px;
+  --row-compact: 56px;
+  --tile-w: 120px;
+  --tile-h: 148px;
+  --toolbar-h: 48px;
+  --radius-card: 2px;
+  --radius-button: 0px;
+  --radius-tag: 0px;
+  --radius-dot: 999px;
+
+  /* 间距阶梯 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 由 tailwind 默认刻度提供 */
+
+  /* 动效 */
+  --dur-hover: 120ms;
+  --dur-panel: 180ms;
+  --dur-liquid: 220ms;
+
+  /* 层级 */
+  --z-topbar: 30;
+  --z-toolbar: 40;
+  --z-overlay: 50;
+  --z-toast: 60;
+
+  /* 字体 */
+  --font-display: Rajdhani, "Barlow Condensed", "Noto Sans SC", system-ui, sans-serif;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", Consolas, monospace;
+
+  /* 斜切角（4.4） */
+  --chamfer: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+
+/* 浅色主题：只替换基底与文字层（4.2 末段） */
+:root[data-theme="light"] {
+  --bg-0: #f2f1ee;
+  --bg-1: #eae8e3;
+  --surface: #ffffff;
+  --surface-2: #f4f2ee;
+  --surface-3: #e7e4de;
+  --surface-4: #dad6ce;
+  --swatch-bed: #fbfaf7;
+
+  --line: rgba(0, 0, 0, 0.12);
+  --line-strong: rgba(0, 0, 0, 0.28);
+  --text-1: #14161a;
+  --text-2: #4c5257;
+  --text-3: #7a8085;
+  --text-inv: #f2f1ee;
+  --ghost: rgba(0, 0, 0, 0.05);
+  --swatch-ring: rgba(0, 0, 0, 0.18);
+}

@@ -1,0 +1,56 @@
+import type { Config } from 'tailwindcss';
+
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        'bg-0': 'var(--bg-0)',
+        'bg-1': 'var(--bg-1)',
+        surface: 'var(--surface)',
+        'surface-2': 'var(--surface-2)',
+        'surface-3': 'var(--surface-3)',
+        'surface-4': 'var(--surface-4)',
+        'swatch-bed': 'var(--swatch-bed)',
+        line: 'var(--line)',
+        'line-strong': 'var(--line-strong)',
+        accent: 'var(--accent)',
+        'accent-dim': 'var(--accent-dim)',
+        'accent-ink': 'var(--accent-ink)',
+        'text-1': 'var(--text-1)',
+        'text-2': 'var(--text-2)',
+        'text-3': 'var(--text-3)',
+        'text-inv': 'var(--text-inv)',
+        ok: 'var(--ok)',
+        warn: 'var(--warn)',
+        danger: 'var(--danger)',
+        'bh-red': 'var(--bh-red)',
+        'bh-blue': 'var(--bh-blue)',
+        'bh-yellow': 'var(--bh-yellow)',
+        ghost: 'var(--ghost)',
+      },
+      fontFamily: {
+        display: 'var(--font-display)',
+        body: 'var(--font-body)',
+        mono: 'var(--font-mono)',
+      },
+      borderRadius: {
+        card: 'var(--radius-card)',
+        tag: 'var(--radius-tag)',
+        dot: 'var(--radius-dot)',
+      },
+      height: {
+        topbar: 'var(--top-bar)',
+        row: 'var(--row)',
+        'row-compact': 'var(--row-compact)',
+      },
+      width: { sidenav: 'var(--side-nav)', tile: 'var(--tile-w)' },
+      minWidth: { sidenav: 'var(--side-nav)' },
+      maxWidth: { shell: '1600px' },
+      transitionDuration: { hover: '120ms', panel: '180ms', liquid: '220ms' },
+      boxShadow: { panel: '0 12px 32px rgba(0,0,0,.55)' },
+      gridTemplateColumns: { '12': 'repeat(12, minmax(0, 1fr))' },
+    },
+  },
+  plugins: [],
+} satisfies Config;

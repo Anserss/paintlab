@@ -1,0 +1,83 @@
+{
+  "format": "pigment-depot/brand/v1",
+  "brand": {
+    "id": "ak",
+    "name": "AK Interactive",
+    "nameZh": "AK",
+    "shortName": "AK",
+    "accentHex": "#2E2E2E",
+    "country": "ES",
+    "sort": 40
+  },
+  "version": "seed-1",
+  "verifiedAt": null,
+  "lines": [
+    {
+      "id": "ak-real-colors",
+      "brandId": "ak",
+      "name": "Real Colors",
+      "nameZh": "AK 真实色彩（硝基）",
+      "packaging": "bottle",
+      "defaultVolumeMl": 10,
+      "kind": "lacquer",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "gloss",
+      "thinnerFamily": "AK Real Colors Thinner",
+      "defaultRatioN": 2
+    }
+  ],
+  "paints": [
+    {
+      "id": "ak-rc236",
+      "lineId": "ak-real-colors",
+      "brandId": "ak",
+      "code": "RC236",
+      "name": "Blue Fs 35190",
+      "nameZh": null,
+      "hex": "#618a9e",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": null,
+      "verifiedAt": null,
+      "source": "gk-colormixer (observation)",
+      "origin": "seed"
+    },
+    {
+      "id": "ak-rc291",
+      "lineId": "ak-real-colors",
+      "brandId": "ak",
+      "code": "RC291",
+      "name": "Raf Azure Blue",
+      "nameZh": null,
+      "hex": "#7d9fc4",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": null,
+      "verifiedAt": null,
+      "source": "gk-colormixer (observation)",
+      "origin": "seed"
+    },
+    {
+      "id": "ak-rc316",
+      "lineId": "ak-real-colors",
+      "brandId": "ak",
+      "code": "RC316",
+      "name": "Amt-7 Light Blue",
+      "nameZh": null,
+      "hex": "#678da4",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": null,
+      "verifiedAt": null,
+      "source": "gk-colormixer (observation)",
+      "origin": "seed"
+    }
+  ]
+}

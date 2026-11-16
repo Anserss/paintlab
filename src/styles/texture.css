@@ -1,0 +1,47 @@
+/* ==========================================================================
+   纹理（4.4）：极低强度，不得影响可读性。
+   仅三类，禁止新增装饰纹理。
+   ========================================================================== */
+
+/* 全局网点 4px×4px — 仅 --swatch-bed 与空状态区 */
+.tex-grid {
+  background-color: var(--swatch-bed);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+:root[data-theme="light"] .tex-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+}
+
+/* 扫描线 — 仅顶部状态栏 */
+.tex-scan {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.012) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* 警示斜纹 — 仅低库存 / 危险区 */
+.tex-hazard {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--bh-red) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* 停产 / 限定的左侧 45° 细斜纹（3.2 列表行状态） */
+.tex-retired::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--line-strong) 0 2px,
+    transparent 2px 6px
+  );
+  pointer-events: none;
+}
