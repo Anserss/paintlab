@@ -17,7 +17,7 @@ export function Toolbar({ count, children, className }: ToolbarProps) {
       aria-label="批量操作"
       className={cn(
         'fixed inset-x-0 bottom-0 z-[var(--z-toolbar)] mx-auto flex h-12 max-w-[1600px] items-center justify-between gap-4 border-t border-line-strong px-6',
-        'bg-[rgba(10,11,12,.94)] backdrop-blur-[2px]',
+        'bg-[var(--chrome-bg)] backdrop-blur-[2px]',
         className,
       )}
     >

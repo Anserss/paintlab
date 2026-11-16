@@ -7,10 +7,12 @@ import {
   createBottle as createBottleRepo,
   listBottles,
   mixBottle as mixBottleRepo,
+  setBottleCapacity as setBottleCapacityRepo,
   useBottle as useBottleRepo,
 } from '@/data/repos/bottle';
 import type {
   ArchiveBottleInput,
+  BottleCapacityInput,
   BottleUseInput,
   CreateBottleInput,
   MixBottleInput,
@@ -28,6 +30,8 @@ export interface MixSlice {
   mixIntoBottle: (input: MixBottleInput) => Promise<Result<MixBottlePayload>>;
   useBottle: (input: BottleUseInput) => Promise<Result<{ command: Command; bottle: Bottle }>>;
   clearBottle: (input: { bottleId: string }) => Promise<Result<{ command: Command; bottle: Bottle }>>;
+  /** 改瓶容量（5–250 整数；新容量 < 余量时结构化失败，spec 3.4.3） */
+  updateBottleCapacity: (input: BottleCapacityInput) => Promise<Result<{ command: Command; bottle: Bottle }>>;
   archiveBottle: (input: ArchiveBottleInput) => Promise<Result<{ command: Command; item: StockItem }>>;
   getBottleById: (id: string) => Bottle | undefined;
 }
@@ -95,15 +99,25 @@ export const createMixSlice: StateCreator<AppState, [], [], MixSlice> = (set, ge
     return result;
   },
 
+  async updateBottleCapacity(input) {
+    const result = await setBottleCapacityRepo(getStore(), input);
+    if (!result.ok) {
+      notifyError(get, result.error);
+      return result;
+    }
+    await get().refreshBottles();
+    get().refreshHistory();
+    notifyUndoable(get, '瓶容量已改为 ' + String(result.data.bottle.capacityMl) + ' ml');
+    return result;
+  },
+
   async archiveBottle(input) {
     const result = await archiveBottleRepo(getStore(), input);
     if (!result.ok) {
       notifyError(get, result.error);
       return result;
     }
-    await get().refreshBottles();
-    await get().refreshInventory();
-    get().refreshHistory();
+    await get().refreshAllReadModels();
     notifyUndoable(get, '已归档进仓库 ' + result.data.item.volumeMl.toFixed(1) + ' ml');
     return result;
   },

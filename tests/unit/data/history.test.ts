@@ -5,6 +5,7 @@ import { ensureSystemGroup } from '@/data/repos/group';
 import { clearHistory, hydrateHistory, redo, snapshotHistory, undo } from '@/data/repos/history';
 import { createStockItem } from '@/data/repos/stock';
 import { estimateStorage, exportAll, importAll, readSettings, resetAll, writeSetting } from '@/data/repos/settings';
+import { useAppStore } from '@/store';
 
 const paint = {
   id: 'gsi-c80',
@@ -120,5 +121,71 @@ describe('导出 / 导入 / 重置（spec 3.8）', () => {
     expect(skipped.ok).toBe(true);
     if (!skipped.ok) return;
     expect(skipped.data.added).toBe(0);
+  });
+});
+
+describe('撤销后的读模型一致性（骨架职责，不下放给特性层）', () => {
+  it('撤销一次「放回仓库」后，stationItems / workstations / 库存读模型同步回到撤销前', async () => {
+    // beforeEach 已 setStore(createMemoryStore()) 并清空历史
+    useAppStore.setState({
+      stockItems: [],
+      bottles: [],
+      workstations: [],
+      stationItems: [],
+      groups: [],
+      tree: [],
+      selected: [],
+      toasts: [],
+      undoCount: 0,
+      redoCount: 0,
+      canUndo: false,
+      canRedo: false,
+    });
+    const app = () => useAppStore.getState();
+
+    const purchased = await app().purchase({ paint, initialMl: 17, state: 'neat', groupId: null });
+    expect(purchased.ok).toBe(true);
+    if (!purchased.ok) return;
+    const stockId = purchased.data.item.id;
+
+    const station = await app().newWorkstation({ name: '工位 A' });
+    expect(station.ok).toBe(true);
+    if (!station.ok) return;
+    const stationId = station.data.id;
+
+    const added = await app().addToStation({
+      workstationId: stationId,
+      refs: [{ refType: 'stock', refId: stockId }],
+    });
+    expect(added.ok).toBe(true);
+    expect(app().stationItems).toHaveLength(1);
+    expect(app().workstations).toHaveLength(1);
+
+    const stationItemId = app().stationItems[0].id;
+    const returned = await app().returnToDepot({
+      workstationId: stationId,
+      entries: [{ itemId: stationItemId, usedMl: 5 }],
+    });
+    expect(returned.ok).toBe(true);
+    expect(app().stationItems).toHaveLength(0);
+    expect(app().stockItems.find((item) => item.id === stockId)?.volumeMl).toBe(12);
+
+    const undone = await app().undo();
+    expect(undone.ok).toBe(true);
+
+    expect(app().stationItems).toHaveLength(1);
+    expect(app().stationItems[0].id).toBe(stationItemId);
+    expect(app().stationItems[0].workstationId).toBe(stationId);
+    expect(app().workstations).toHaveLength(1);
+    expect(app().workstations[0].id).toBe(stationId);
+    expect(app().stockItems.find((item) => item.id === stockId)?.volumeMl).toBe(17);
+    expect(app().undoCount).toBe(2);
+    expect(app().redoCount).toBe(1);
+
+    const redone = await app().redo();
+    expect(redone.ok).toBe(true);
+    expect(app().stationItems).toHaveLength(0);
+    expect(app().stockItems.find((item) => item.id === stockId)?.volumeMl).toBe(12);
+    expect(app().redoCount).toBe(0);
   });
 });

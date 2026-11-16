@@ -16,6 +16,8 @@ export interface HistorySlice {
   canRedo: boolean;
   hydrateHistoryState: () => Promise<void>;
   refreshHistory: () => void;
+  /** 撤销/反撤销后统一重读所有读模型（库存 / 瓶 / 工位 / 历史计数） */
+  refreshAllReadModels: () => Promise<void>;
   undo: () => Promise<Result<Command>>;
   redo: () => Promise<Result<Command>>;
 }
@@ -46,6 +48,14 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
     });
   },
 
+  async refreshAllReadModels() {
+    get().refreshHistory();
+    await get().refreshInventory();
+    await get().refreshBottles();
+    await get().refreshStations();
+    get().refreshHistory();
+  },
+
   async hydrateHistoryState() {
     try {
       const result = await hydrateHistory(getStore());
@@ -71,10 +81,10 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
     const result = await undoCommand(getStore());
     if (!result.ok) {
       notifyError(get, result.code === 'invariant' ? result.error : '无法撤销：' + result.error);
-      get().refreshHistory();
+      await get().refreshAllReadModels();
       return result;
     }
-    get().refreshHistory();
+    await get().refreshAllReadModels();
     get().pushToast({
       message: '已撤销：' + result.data.label,
       tone: 'neutral',
@@ -83,7 +93,6 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
         void get().redo();
       },
     });
-    await get().refreshInventory();
     return result;
   },
 
@@ -91,12 +100,11 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
     const result = await redoCommand(getStore());
     if (!result.ok) {
       notifyError(get, '无法反撤销：' + result.error);
-      get().refreshHistory();
+      await get().refreshAllReadModels();
       return result;
     }
-    get().refreshHistory();
+    await get().refreshAllReadModels();
     get().pushToast({ message: '已反撤销：' + result.data.label, tone: 'neutral' });
-    await get().refreshInventory();
     return result;
   },
 });

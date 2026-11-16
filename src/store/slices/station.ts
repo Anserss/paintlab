@@ -124,10 +124,7 @@ export const createStationSlice: StateCreator<AppState, [], [], StationSlice> = 
       notifyError(get, result.error);
       return result;
     }
-    await get().refreshStations();
-    await get().refreshInventory();
-    await get().refreshBottles();
-    get().refreshHistory();
+    await get().refreshAllReadModels();
     notifyUndoable(get, '已记录用量并放回仓库 ×' + result.data.count);
     return result;
   },

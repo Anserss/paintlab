@@ -19,7 +19,9 @@ import {
   listGroups,
   moveGroup,
   renameGroup,
+  reorderGroups,
 } from '@/data/repos/group';
+import { createBottle, mixBottle, setBottleCapacity } from '@/data/repos/bottle';
 import { clearHistory, makeCommand, recordCommand, redo, snapshotHistory, undo } from '@/data/repos/history';
 import { commitCommand } from '@/data/repos/patch';
 
@@ -30,6 +32,8 @@ const paint = {
   nameZh: '钴蓝',
   hex: '#1838a8',
   brandShortName: '郡士',
+  brandId: 'gsi',
+  paintClass: 'solid' as const,
 };
 
 let store: DepotStore;
@@ -237,6 +241,130 @@ describe('分组（spec 3.3 / 3.7.2）', () => {
 
     const tree = groupTree(await listGroups(store), await listStockItems(store));
     expect(tree.some((node) => node.group.name === '未分组')).toBe(true);
+  });
+
+  it('分组拖拽排序：sort 写入、撤销回旧值、异父/重复/系统分组被拒且数据不变（spec 3.3）', async () => {
+    const a = await createGroup(store, { name: 'A' });
+    const b = await createGroup(store, { name: 'B' });
+    const c = await createGroup(store, { name: 'C' });
+    if (!a.ok || !b.ok || !c.ok) throw new Error('seed groups failed');
+    const childOfA = await createGroup(store, { name: 'A-1', parentId: a.data.group.id });
+    if (!childOfA.ok) throw new Error(childOfA.error);
+
+    const rootIds = async (): Promise<string[]> =>
+      (await listGroups(store))
+        .filter((group) => group.parentId === null && !group.system)
+        .map((group) => group.id);
+    const sortOf = async (id: string): Promise<number | undefined> =>
+      (await listGroups(store)).find((group) => group.id === id)?.sort;
+
+    expect(await rootIds()).toEqual([a.data.group.id, b.data.group.id, c.data.group.id]);
+    expect(await sortOf(a.data.group.id)).toBe(1);
+
+    const reordered = await reorderGroups(store, {
+      parentId: null,
+      orderedIds: [c.data.group.id, a.data.group.id, b.data.group.id],
+    });
+    expect(reordered.ok).toBe(true);
+    expect(await rootIds()).toEqual([c.data.group.id, a.data.group.id, b.data.group.id]);
+    expect(await sortOf(c.data.group.id)).toBe(0);
+    expect(await sortOf(a.data.group.id)).toBe(1);
+    expect(await sortOf(b.data.group.id)).toBe(2);
+    const tree = groupTree(await listGroups(store), await listStockItems(store));
+    const treeChildren = tree
+      .filter((node) => !node.group.system)
+      .map((node) => node.group.id);
+    expect(treeChildren).toEqual([c.data.group.id, a.data.group.id, b.data.group.id]);
+
+    const undone = await undo(store);
+    expect(undone.ok).toBe(true);
+    expect(await sortOf(a.data.group.id)).toBe(1);
+    expect(await sortOf(b.data.group.id)).toBe(2);
+    expect(await sortOf(c.data.group.id)).toBe(3);
+
+    // 混入异父 id：拒绝且数据不变
+    const beforeMixed = await rootIds();
+    const mixed = await reorderGroups(store, {
+      parentId: null,
+      orderedIds: [b.data.group.id, childOfA.data.group.id],
+    });
+    expect(mixed.ok).toBe(false);
+    if (!mixed.ok) expect(mixed.code).toBe('validation');
+    expect(await rootIds()).toEqual(beforeMixed);
+
+    // 重复 id / 系统分组 / 不存在的 id
+    const duplicated = await reorderGroups(store, {
+      parentId: null,
+      orderedIds: [a.data.group.id, a.data.group.id],
+    });
+    expect(duplicated.ok).toBe(false);
+
+    const system = await reorderGroups(store, {
+      parentId: null,
+      orderedIds: [UNGROUPED_ID, a.data.group.id],
+    });
+    expect(system.ok).toBe(false);
+
+    const missing = await reorderGroups(store, { parentId: null, orderedIds: ['group-does-not-exist'] });
+    expect(missing.ok).toBe(false);
+
+    // 子级排序独立生效
+    const childSibling = await createGroup(store, { name: 'A-2', parentId: a.data.group.id });
+    if (!childSibling.ok) throw new Error(childSibling.error);
+    const childReorder = await reorderGroups(store, {
+      parentId: a.data.group.id,
+      orderedIds: [childSibling.data.group.id, childOfA.data.group.id],
+    });
+    expect(childReorder.ok).toBe(true);
+    const childRow = (await listGroups(store)).find((group) => group.id === childSibling.data.group.id);
+    expect(childRow?.sort).toBe(0);
+  });
+
+  it('瓶容量：改大成功、小于余量被拒且数据不变、撤销后回到旧容量（spec 3.4.3）', async () => {
+    const source = await createStockItem(store, { paint, initialMl: 30, state: 'neat', groupId: null });
+    const thinner = await createStockItem(store, {
+      paint: { ...paint, id: 'gsi-thinner', name: 'Thinner' },
+      initialMl: 30,
+      state: 'neat',
+      groupId: null,
+    });
+    if (!source.ok || !thinner.ok) throw new Error('seed failed');
+
+    const bottle = await createBottle(store, { name: '瓶 1', capacityMl: 60 });
+    if (!bottle.ok) throw new Error(bottle.error);
+    const mixed = await mixBottle(store, {
+      bottleId: bottle.data.id,
+      mode: 'neat',
+      neatMl: 5,
+      ratioN: 2,
+      sourceStockItemId: source.data.item.id,
+      thinnerStockItemId: thinner.data.item.id,
+      paint,
+    });
+    if (!mixed.ok) throw new Error(mixed.error);
+
+    const shrunk = await setBottleCapacity(store, { bottleId: bottle.data.id, capacityMl: 30 });
+    expect(shrunk.ok).toBe(true);
+    const after = await store.bottles.get(bottle.data.id);
+    expect(after?.capacityMl).toBe(30);
+    expect(after?.remainingMl).toBe(15);
+    expect(after?.baselineMl).toBe(15);
+    expect((await store.ledger.toArray()).filter((row) => row.type === 'adjust')).toHaveLength(1);
+
+    const tooSmall = await setBottleCapacity(store, { bottleId: bottle.data.id, capacityMl: 10 });
+    expect(tooSmall.ok).toBe(false);
+    if (!tooSmall.ok) {
+      expect(tooSmall.error).toContain('瓶内尚有 15 ml');
+      expect(tooSmall.error).toContain('≥ 15 ml 的瓶');
+    }
+    expect((await store.bottles.get(bottle.data.id))?.capacityMl).toBe(30);
+
+    const fractional = await setBottleCapacity(store, { bottleId: bottle.data.id, capacityMl: 12.5 });
+    expect(fractional.ok).toBe(false);
+
+    const undone = await undo(store);
+    expect(undone.ok).toBe(true);
+    expect((await store.bottles.get(bottle.data.id))?.capacityMl).toBe(60);
   });
 
   it('批量移动到分组只产生 1 个 Command（spec 3.6 R5）', async () => {

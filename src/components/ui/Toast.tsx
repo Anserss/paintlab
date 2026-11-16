@@ -31,7 +31,7 @@ export function ToastStack({ items, onDismiss }: ToastStackProps) {
         <div
           key={item.id}
           role="status"
-          className="u-chamfer pointer-events-auto flex items-stretch bg-[rgba(12,13,14,.92)] text-xs text-text-1"
+          className="u-chamfer pointer-events-auto flex items-stretch bg-[var(--chrome-bg)] text-xs text-text-1"
         >
           <span className={'w-[3px] shrink-0 ' + STRIPE[item.tone ?? 'neutral']} />
           <div className="flex flex-1 items-center justify-between gap-3 px-3 py-2">

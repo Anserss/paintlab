@@ -10,8 +10,15 @@ import {
   listGroups,
   moveGroup as moveGroupRepo,
   renameGroup as renameGroupRepo,
+  reorderGroups as reorderGroupsRepo,
 } from '@/data/repos/group';
-import type { CreateGroupInput, DeleteGroupInput, MoveGroupInput, RenameGroupInput } from '@/data/repos/group';
+import type {
+  CreateGroupInput,
+  DeleteGroupInput,
+  MoveGroupInput,
+  RenameGroupInput,
+  ReorderGroupsInput,
+} from '@/data/repos/group';
 import type { Result } from '@/data/repos/patch';
 import {
   adjustStockVolume,
@@ -48,6 +55,8 @@ export interface InventorySlice {
   renameGroup: (input: RenameGroupInput) => Promise<Result<{ command: Command; group: Group }>>;
   removeGroup: (input: DeleteGroupInput) => Promise<Result<{ command: Command; removed: string[] }>>;
   relocateGroup: (input: MoveGroupInput) => Promise<Result<{ command: Command }>>;
+  /** 分组拖拽排序：orderedIds 按目标顺序把 sort 写成 0..n-1（一次事务、一个 Command） */
+  reorderGroups: (input: ReorderGroupsInput) => Promise<Result<{ command: Command }>>;
 }
 
 export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice> = (set, get) => ({
@@ -110,8 +119,8 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
       notifyError(get, result.error);
       return result;
     }
-    await get().refreshInventory();
-    get().refreshHistory();
+    // 删除条目会连带移除其工位引用，必须一并重读工位读模型
+    await get().refreshAllReadModels();
     notifyUndoable(get, result.data.message);
     return result;
   },
@@ -162,6 +171,18 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
     await get().refreshInventory();
     get().refreshHistory();
     notifyUndoable(get, '已删除分组（' + result.data.removed.length + ' 个）');
+    return result;
+  },
+
+  async reorderGroups(input) {
+    const result = await reorderGroupsRepo(getStore(), input);
+    if (!result.ok) {
+      notifyError(get, result.error);
+      return result;
+    }
+    await get().refreshInventory();
+    get().refreshHistory();
+    notifyUndoable(get, '已调整分组顺序（' + input.orderedIds.length + ' 个）');
     return result;
   },
 

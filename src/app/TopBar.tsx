@@ -44,7 +44,7 @@ export function TopBar() {
     redoCount === 0 ? '没有可反撤销的操作（最多 ' + undoDepth + ' 步）' : '反撤销：' + (redoLabel ?? '') + '（Ctrl+Shift+Z）';
 
   return (
-    <header className="tex-scan sticky top-0 z-[var(--z-topbar)] flex h-topbar shrink-0 items-center justify-between gap-4 border-b border-line bg-[rgba(10,11,12,.94)] px-4 backdrop-blur-[2px]">
+    <header className="tex-scan sticky top-0 z-[var(--z-topbar)] flex h-topbar shrink-0 items-center justify-between gap-4 border-b border-line bg-[var(--chrome-bg)] px-4 backdrop-blur-[2px]">
       <nav
         aria-label="面包屑"
         data-slot="breadcrumb"

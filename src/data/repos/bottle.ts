@@ -84,6 +84,80 @@ export async function createBottle(s: DepotStore, input: CreateBottleInput): Pro
   return ok(bottle);
 }
 
+const mlText = (value: number): string => String(r1(value));
+
+export interface BottleCapacityInput {
+  bottleId: string;
+  capacityMl: number;
+  at?: number;
+}
+
+/**
+ * 改瓶容量（spec 3.4.3）：容量 5–250 整数；新容量 < 当前余量时必须拒绝并给出可行动文案。
+ * 成功只改 capacityMl（baselineMl/remainingMl 不动，除非基准量超过新容量），写 ledger 并入撤销栈。
+ */
+export async function setBottleCapacity(
+  s: DepotStore,
+  input: BottleCapacityInput,
+): Promise<Result<{ command: Command; bottle: Bottle }>> {
+  const bottle = await s.bottles.get(input.bottleId);
+  if (!bottle) return fail('调漆瓶不存在', 'conflict');
+  const capacity = input.capacityMl;
+  if (!Number.isInteger(capacity) || capacity < 5 || capacity > 250) {
+    return fail('容量必须是 5–250 的整数', 'validation');
+  }
+  if (capacity + 1e-6 < bottle.remainingMl) {
+    const ml = mlText(bottle.remainingMl);
+    return fail('瓶内尚有 ' + ml + ' ml，请先倒出或选择 ≥ ' + ml + ' ml 的瓶', 'validation');
+  }
+  if (capacity === bottle.capacityMl) return fail('新容量与当前容量相同', 'conflict');
+
+  const nextBaseline = Math.min(bottle.baselineMl, capacity);
+  const at = input.at ?? Date.now();
+  const ledgerEntry: LedgerEntry = {
+    id: newId('ledger'),
+    type: 'adjust',
+    refId: bottle.id,
+    at,
+    meta: { action: 'bottle-capacity', from: bottle.capacityMl, to: capacity },
+  };
+  const nextBottle: Bottle = { ...bottle, capacityMl: capacity, baselineMl: nextBaseline, updatedAt: at };
+  const parsed = parseOrErrors(BottleSchema, nextBottle);
+  if (!parsed.ok) {
+    return fail(
+      parsed.errors.map((issue) => (issue.path ? issue.path + '：' : '') + issue.message).join('；'),
+      'validation',
+      { issues: parsed.errors },
+    );
+  }
+
+  const forward: Patch[] = [
+    patch.replace('bottles', bottle.id, 'capacityMl', capacity),
+    patch.replace('bottles', bottle.id, 'updatedAt', at),
+    appendPatch('ledger', ledgerEntry),
+  ];
+  const inverse: Patch[] = [
+    patch.replace('bottles', bottle.id, 'capacityMl', bottle.capacityMl),
+    patch.replace('bottles', bottle.id, 'updatedAt', bottle.updatedAt),
+    patch.remove('ledger', ledgerEntry.id),
+  ];
+  if (nextBaseline !== bottle.baselineMl) {
+    forward.push(patch.replace('bottles', bottle.id, 'baselineMl', nextBaseline));
+    inverse.push(patch.replace('bottles', bottle.id, 'baselineMl', bottle.baselineMl));
+  }
+
+  const command = createCommand(
+    'adjust',
+    '瓶容量「' + bottle.name + '」' + mlText(bottle.capacityMl) + ' → ' + mlText(capacity) + ' ml',
+    forward,
+    inverse,
+    at,
+  );
+  const recorded = await recordCommand(s, command);
+  if (!recorded.ok) return recorded;
+  return ok({ command, bottle: nextBottle });
+}
+
 export interface MixBottleInput {
   bottleId: string;
   mode: 'fill' | 'neat';

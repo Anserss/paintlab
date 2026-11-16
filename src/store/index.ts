@@ -51,6 +51,19 @@ export async function hydrateApp(): Promise<void> {
   } catch {
     /* 目录不可用时保持空列表 */
   }
+  /**
+   * 一旦本工作区已有库存或工位，各页面都需要解析 paintId → Paint/Line/Brand
+   * （仓库行、工位磁贴、调漆取用）。品牌包只有 4 个静态 JSON，这里统一预热，
+   * 避免每个页面各自实现「按需补包」而漏掉一条路径。
+   */
+  try {
+    const ready = useAppStore.getState();
+    if (ready.stockItems.length > 0 || ready.workstations.length > 0) {
+      await Promise.all(ready.brands.map((brand) => ready.ensureBrand(brand.id)));
+    }
+  } catch {
+    /* 目录包不可用时页面自行降级 */
+  }
 }
 
 export function resetHydration(): void {

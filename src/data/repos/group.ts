@@ -1,6 +1,6 @@
 import { createCommand, newId, patch } from '@/core/history/command';
 import { nameSchema, parseOrErrors, GroupSchema } from '@/core/model/schemas';
-import type { Command, Group, StockItem } from '@/core/model/types';
+import type { Command, Group, LedgerEntry, StockItem } from '@/core/model/types';
 import { buildGroupTree, canCreateChild, canMoveGroup, collectDescendants, depthOf, isDuplicateName, UNGROUPED_ID } from '@/core/rules/groups';
 import type { GroupNode } from '@/core/rules/groups';
 import { MAX_GROUP_DEPTH } from '@/core/rules/invariants';
@@ -169,6 +169,60 @@ export async function deleteGroup(s: DepotStore, input: DeleteGroupInput): Promi
   const recorded = await recordCommand(s, command);
   if (!recorded.ok) return recorded;
   return ok({ command, removed: removedIds });
+}
+
+export interface ReorderGroupsInput {
+  /** 同一父级下的分组（null = 顶层，系统分组"未分组"除外） */
+  parentId: string | null;
+  /** 按目标顺序排列的分组 id（完整或部分子集） */
+  orderedIds: string[];
+  at?: number;
+}
+
+/** 分组手动拖拽排序（spec 3.3 分组视图）：按数组顺序写 sort = index，一次事务、一个 Command、可撤销 */
+export async function reorderGroups(
+  s: DepotStore,
+  input: ReorderGroupsInput,
+): Promise<Result<{ command: Command }>> {
+  const orderedIds = input.orderedIds.slice();
+  if (orderedIds.length === 0) return fail('没有需要排序的分组', 'validation');
+  if (new Set(orderedIds).size !== orderedIds.length) return fail('分组顺序里有重复项', 'validation');
+  if (orderedIds.includes(UNGROUPED_ID)) return fail('系统分组「未分组」不可排序', 'conflict');
+
+  const groups = await listGroups(s);
+  if (input.parentId !== null) {
+    const parent = groups.find((group) => group.id === input.parentId);
+    if (!parent) return fail('父分组不存在', 'validation');
+  }
+
+  const affected: Group[] = [];
+  for (const id of orderedIds) {
+    const group = groups.find((entry) => entry.id === id);
+    if (!group) return fail('分组不存在：' + id, 'conflict');
+    if (group.system) return fail('系统分组「未分组」不可排序', 'conflict');
+    if (group.parentId !== input.parentId) return fail('分组不属于同一父级，无法一起排序', 'validation');
+    affected.push(group);
+  }
+  const unchanged = affected.every((group) => group.sort === orderedIds.indexOf(group.id));
+  if (unchanged) return fail('分组顺序未变化', 'conflict');
+
+  const at = input.at ?? Date.now();
+  const ledgerEntry: LedgerEntry = {
+    id: newId('ledger'),
+    type: 'group',
+    refId: input.parentId ?? UNGROUPED_ID,
+    at,
+    meta: { action: 'reorder', ids: orderedIds },
+  };
+  const forward = affected.map((group) => patch.replace('groups', group.id, 'sort', orderedIds.indexOf(group.id)));
+  forward.push(patch.append('ledger', record(ledgerEntry)));
+  const inverse = affected.map((group) => patch.replace('groups', group.id, 'sort', group.sort));
+  inverse.push(patch.remove('ledger', ledgerEntry.id));
+
+  const command = createCommand('group', '分组排序 ×' + affected.length, forward, inverse, at);
+  const recorded = await recordCommand(s, command);
+  if (!recorded.ok) return recorded;
+  return ok({ command });
 }
 
 export interface MoveGroupInput {
