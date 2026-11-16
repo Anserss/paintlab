@@ -48,17 +48,25 @@ describe('品牌包归一化（null -> undefined、aliases -> []、丢弃未知�
 
     expect(bundle.brand.id).toBe('ak');
     expect(bundle.brand.aliases).toEqual([]);
-    expect(bundle.lines).toHaveLength(1);
-    expect(bundle.paints).toHaveLength(3);
+    // 色卡线 + 辅料线（稀释剂按容量分 SKU）
+    expect(bundle.lines).toHaveLength(2);
+    expect(bundle.paints).toHaveLength(4);
 
     const first = bundle.paints[0];
     expect(first.hex).toMatch(/^#[0-9a-fA-F]{6}$/);
     expect(first.nameZh).toBeUndefined();
     expect(first.sourceUrl).toBeUndefined();
     expect(first.verifiedAt).toBeUndefined();
-    expect(Object.prototype.hasOwnProperty.call(first, 'volumeMl')).toBe(false);
-    expect(Object.prototype.hasOwnProperty.call(first, 'source')).toBe(false);
     expect(first.origin).toBe('seed');
+    // volumeMl 属于运行期需要的事实（采购默认规格），必须保留；未知字段仍被丢弃
+    expect(first.volumeMl).toBe(10);
+    expect(Object.prototype.hasOwnProperty.call(first, 'format')).toBe(false);
+
+    const aux = bundle.paints.find((paint) => paint.id === 'ak-rc701');
+    expect(aux?.paintClass).toBe('aux');
+    expect(aux?.category).toBe('thinner');
+    expect(aux?.volumeMl).toBe(200);
+    expect(aux?.source).toBeTruthy();
   });
 
   it('校验失败时能定位到哪个 id 的哪个字段', () => {
@@ -86,6 +94,6 @@ describe('品牌包归一化（null -> undefined、aliases -> []、丢弃未知�
 
     await cacheBundle(store, loaded.data);
     expect((await store.brands.get('ak'))?.shortName).toBe('AK');
-    expect(await readCachedPaints(store, 'ak')).toHaveLength(3);
+    expect(await readCachedPaints(store, 'ak')).toHaveLength(4);
   });
 });

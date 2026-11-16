@@ -1,5 +1,10 @@
-# PIGMENT-DEPOT · 漆料管理软件设计包 v1.3
+# PAINTLAB 1.0 · 漆料资产与调漆工作台
 
+> 工程代号 **PAINTLAB**（前身：PIGMENT DEPOT 设计包 v1.3）。
+> 交班要点与工程描述：`docs/PAINTLAB-1.0-交班总结与工程描述.md`；分层与脚本速查：`IMPLEMENTATION.md`。
+> 单文件启动器：`release/PAINTLAB.exe`（`npm run launcher` 重建）。
+
+---
 面向模型涂装玩家的**漆料资产与调漆工作台**：采购登记 → 仓库管理 → 稀释调配 → 工位使用，
 本地优先、离线可用，视觉走「明日方舟式工业实用主义 × 包豪斯构成」。
 

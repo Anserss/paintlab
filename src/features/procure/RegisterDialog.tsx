@@ -55,7 +55,8 @@ export function RegisterDialog({
 }: RegisterDialogProps) {
   const first = paints[0];
   const line = first ? linesById[first.lineId] : undefined;
-  const lineVolume = line?.defaultVolumeMl ?? 10;
+  /** 单件规格：辅料 50/110/250/400 ml 各自成 SKU，优先取 paint.volumeMl */
+  const lineVolume = first?.volumeMl ?? line?.defaultVolumeMl ?? 10;
 
   const [mode, setMode] = useState<CapacityMode>('whole');
   const [customMl, setCustomMl] = useState(lineVolume);
@@ -67,7 +68,7 @@ export function RegisterDialog({
   useEffect(() => {
     if (!open) return;
     const nextLine = paints[0] ? linesById[paints[0].lineId] : undefined;
-    const nextVolume = nextLine?.defaultVolumeMl ?? 10;
+    const nextVolume = paints[0]?.volumeMl ?? nextLine?.defaultVolumeMl ?? 10;
     setMode('whole');
     setCustomMl(nextVolume);
     setState('neat');

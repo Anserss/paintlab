@@ -19,9 +19,20 @@ export interface ProcureToolbarProps {
 }
 
 /** 色号列表顶部：搜索 + 产品线 / 漆类 / 光泽 / 仅未入库 + 排序（spec 3.2） */
+const KIND_OPTIONS = [
+  { value: 'color' as const, label: '颜色' },
+  { value: 'aux' as const, label: '辅料' },
+];
+
 export function ProcureToolbar({ filters, options, total, onChange }: ProcureToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-line bg-bg-1 px-3 py-2">
+      <Segmented
+        ariaLabel="货架"
+        options={KIND_OPTIONS}
+        value={filters.kind}
+        onChange={(kind) => onChange({ kind, lineId: '', paintClass: '' })}
+      />
       <input
         aria-label="搜索色号、名称、色值或属性"
         value={filters.query}

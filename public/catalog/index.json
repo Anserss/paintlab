@@ -1,6 +1,6 @@
 {
   "format": "pigment-depot/catalog/v1",
-  "generatedAt": "2026-11-16T12:18:34.678Z",
+  "generatedAt": "2026-11-16T14:06:44.033Z",
   "brands": [
     {
       "id": "ak",
@@ -8,7 +8,7 @@
       "nameZh": "AK",
       "shortName": "AK",
       "accentHex": "#2E2E2E",
-      "count": 3,
+      "count": 4,
       "file": "ak.json"
     },
     {
@@ -17,7 +17,7 @@
       "nameZh": "郡士",
       "shortName": "GSI",
       "accentHex": "#1B4FA0",
-      "count": 130,
+      "count": 137,
       "file": "gsi.json"
     },
     {
@@ -26,7 +26,7 @@
       "nameZh": "匠域",
       "shortName": "JW",
       "accentHex": "#C0453A",
-      "count": 106,
+      "count": 107,
       "file": "jy.json"
     },
     {
@@ -35,7 +35,7 @@
       "nameZh": "田宫",
       "shortName": "TAMIYA",
       "accentHex": "#1F5C8B",
-      "count": 17,
+      "count": 19,
       "file": "tamiya.json"
     }
   ]

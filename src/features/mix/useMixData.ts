@@ -41,6 +41,15 @@ export function useNeatRows(): NeatRow[] {
   }, [stockItems, paintsById]);
 }
 
+/**
+ * 「取用原浆」候选：state=neat 且**不是辅料**。
+ * 稀释剂/缓干剂也在库存里，但它们是配料不是原浆，混进来会让用户拿稀释剂当漆用。
+ */
+export function useMixableNeatRows(): NeatRow[] {
+  const rows = useNeatRows();
+  return useMemo(() => rows.filter((row) => !row.isAux), [rows]);
+}
+
 /** 稀释剂候选：paintClass='aux' 且有余量的 neat 条目（3.4.2 稀释剂来源） */
 export function useThinnerRows(): NeatRow[] {
   const rows = useNeatRows();

@@ -25,9 +25,57 @@
       "defaultFinish": "gloss",
       "thinnerFamily": "田宫 LP 稀释剂",
       "defaultRatioN": 2
+    },
+    {
+      "id": "tamiya-lacquer-aux",
+      "brandId": "tamiya",
+      "name": "Lacquer Auxiliaries",
+      "nameZh": "田宫 硝基辅料",
+      "packaging": "bottle",
+      "defaultVolumeMl": 250,
+      "kind": "auxiliary",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "other",
+      "thinnerFamily": null,
+      "defaultRatioN": 2
     }
   ],
   "paints": [
+    {
+      "id": "tamiya-87077",
+      "lineId": "tamiya-lacquer-aux",
+      "brandId": "tamiya",
+      "code": "87077",
+      "name": "Lacquer Thinner 250",
+      "nameZh": "田宫 硝基稀释剂 250 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "finish": "additive",
+      "category": "thinner",
+      "volumeMl": 250,
+      "sourceUrl": "https://www.tamiya.com/english/products/87077/index.htm",
+      "verifiedAt": null,
+      "source": "待核验：型号与规格来自常见零售目录，本次会话未取到官方页",
+      "origin": "seed"
+    },
+    {
+      "id": "tamiya-87198",
+      "lineId": "tamiya-lacquer-aux",
+      "brandId": "tamiya",
+      "code": "87198",
+      "name": "Lacquer Thinner (Retarder Type) 250",
+      "nameZh": "田宫 缓干型稀释剂 250 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "finish": "additive",
+      "category": "thinner",
+      "volumeMl": 250,
+      "sourceUrl": "https://www.tamiya.com/english/products/87198/index.htm",
+      "verifiedAt": null,
+      "source": "待核验：同上",
+      "origin": "seed"
+    },
     {
       "id": "tamiya-lp-1",
       "lineId": "tamiya-lp",

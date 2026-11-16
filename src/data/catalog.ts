@@ -84,6 +84,8 @@ const RawPaintSchema = z.object({
   finish: z.string().nullish(),
   opacityOverride: z.number().nullish(),
   sourceUrl: z.string().nullish(),
+  source: z.string().nullish(),
+  volumeMl: z.number().nullish(),
   verifiedAt: z.string().nullish(),
   origin: z.string().nullish(),
 });
@@ -228,6 +230,10 @@ export function normalizeBrandBundle(raw: unknown): Result<CatalogBundle> {
     if (sourceUrl) candidate.sourceUrl = sourceUrl;
     const verifiedAt = undef(rawPaint.verifiedAt);
     if (verifiedAt) candidate.verifiedAt = verifiedAt;
+    // 辅料按容量分 SKU：volumeMl 与来源说明必须带进读模型，否则采购拿不到正确默认规格
+    if (typeof rawPaint.volumeMl === 'number') candidate.volumeMl = rawPaint.volumeMl;
+    const source = undef(rawPaint.source);
+    if (source) candidate.source = source;
 
     const check = PaintSchema.safeParse(candidate);
     if (!check.success) {

@@ -1,4 +1,6 @@
-# PIGMENT DEPOT · 实现说明（Application Implementation）
+# PAINTLAB 1.0 · 实现说明（Application Implementation）
+
+> 交班总结与工程描述见 `docs/PAINTLAB-1.0-交班总结与工程描述.md`；本文件偏目录、脚本与分层的速查。
 
 设计包 `v1.3` 的可运行实现：Vite 5 + React 18 + TypeScript 5.6(strict) + Tailwind 3.4 + Zustand 4 + Dexie 4 + Zod 3。
 本文件记录「已实现什么 / 怎么跑 / 验收怎么过 / 与规格的已知偏差」，设计依据仍是 `docs/漆料管理软件-项目设计描述书.md`。

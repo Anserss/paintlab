@@ -15,7 +15,7 @@ import {
   planFor,
   stockShortText,
 } from './mixMath';
-import { useMixRecords, useNeatRows, useThinnerRows } from './useMixData';
+import { useMixRecords, useMixableNeatRows, useThinnerRows } from './useMixData';
 
 type PaintRef = Pick<Paint, 'id' | 'brandId' | 'code' | 'name' | 'hex' | 'paintClass'>;
 
@@ -46,7 +46,8 @@ export function MixPage() {
   const updateSetting = useAppStore((state) => state.updateSetting);
   const pushToast = useAppStore((state) => state.pushToast);
 
-  const neatRows = useNeatRows();
+  // 只列可作原浆的条目：稀释剂等 aux 走「稀释剂来源」，不在此列
+  const neatRows = useMixableNeatRows();
   const thinnerRows = useThinnerRows();
   const records = useMixRecords(8);
 

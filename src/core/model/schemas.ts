@@ -92,6 +92,8 @@ export const PaintSchema = z.object({
   finish: FinishSchema.optional(),
   opacityOverride: z.number().min(0).max(1).optional(),
   sourceUrl: z.string().url().optional(),
+  source: z.string().optional(),
+  volumeMl: z.number().min(0.5).max(2500).optional(),
   verifiedAt: z.string().optional(),
   origin: OriginSchema,
 });

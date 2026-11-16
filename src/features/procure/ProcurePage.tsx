@@ -14,6 +14,7 @@ import {
   DEFAULT_PROCURE_FILTERS,
   filterOptionsOf,
   filterPaints,
+  paintsOfKind,
   sortPaints,
 } from './procureFilters';
 import type { ProcureFilters } from './procureFilters';
@@ -113,7 +114,10 @@ export function ProcurePage() {
     return sortPaints(filtered, filters.sort);
   }, [pool, linesById, filters, stockAggregate]);
 
-  const options = useMemo(() => filterOptionsOf(pool, linesById), [pool, linesById]);
+  const options = useMemo(
+    () => filterOptionsOf(paintsOfKind(pool, filters.kind), linesById),
+    [pool, linesById, filters.kind],
+  );
 
   const brandRows = useMemo<BrandRowModel[]>(() => {
     const loadedCount = (id: string): number | undefined => bundles[id]?.paints.length;
@@ -306,7 +310,12 @@ export function ProcurePage() {
                         {!paint.verifiedAt && (
                           <Badge
                             tone="warn"
-                            title={'该规格尚未核验，按默认 ' + line.defaultVolumeMl + ' ml 记账'}
+                            title={
+                              '该规格尚未核验，按 ' +
+                              (paint.volumeMl ?? line.defaultVolumeMl) +
+                              ' ml 记账' +
+                              (paint.source ? '（来源：' + paint.source + '）' : '')
+                            }
                           >
                             ⚠ 待核验
                           </Badge>

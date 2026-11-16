@@ -6,7 +6,11 @@ import { paintDescription } from '@/core/render/label';
 
 export type ProcureSort = 'code' | 'hue';
 
+/** 采购大厅的两个货架：颜色与辅料（稀释剂/缓干剂等）分开陈列，避免互相淹没 */
+export type ProcureKind = 'color' | 'aux';
+
 export interface ProcureFilters {
+  kind: ProcureKind;
   query: string;
   /** '' = 全部产品线 */
   lineId: string;
@@ -17,6 +21,7 @@ export interface ProcureFilters {
 }
 
 export const DEFAULT_PROCURE_FILTERS: ProcureFilters = {
+  kind: 'color',
   query: '',
   lineId: '',
   paintClass: '',
@@ -102,15 +107,22 @@ export function sortPaints(paints: readonly Paint[], sort: ProcureSort): Paint[]
   return copy.sort(byCode);
 }
 
+/** 按货架（颜色 / 辅料）切分品牌池，下拉候选项也据此收敛 */
+export function paintsOfKind(paints: readonly Paint[], kind: ProcureKind): Paint[] {
+  return paints.filter((paint) => (kind === 'aux' ? paint.paintClass === 'aux' : paint.paintClass !== 'aux'));
+}
+
 export function filterPaints(
   paints: readonly Paint[],
   linesById: Record<string, PaintLine>,
   filters: ProcureFilters,
   registeredOf: (paint: Paint) => number,
 ): Paint[] {
-  return paints.filter((paint) =>
-    matchesFilters(paint, linesById[paint.lineId], filters, registeredOf(paint)),
-  );
+  return paints
+    .filter((paint) => (filters.kind === 'aux' ? paint.paintClass === 'aux' : paint.paintClass !== 'aux'))
+    .filter((paint) =>
+      matchesFilters(paint, linesById[paint.lineId], filters, registeredOf(paint)),
+    );
 }
 
 export interface FilterOptions {

@@ -1,5 +1,5 @@
 // 生成并编译「单文件启动器」：把 dist 全部文件嵌进一个 exe，双击即可在默认浏览器打开应用。
-// 用法：node scripts/make-launcher.mjs  （产物：release/PIGMENT-DEPOT.exe）
+// 用法：node scripts/make-launcher.mjs  （产物：release/PAINTLAB.exe）
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -93,7 +93,7 @@ ${dictMime}
 
         string url = "http://127.0.0.1:" + port + "/";
         Console.WriteLine();
-        Console.WriteLine("  PIGMENT DEPOT · 漆料工作台");
+        Console.WriteLine("  PAINTLAB 1.0 · 漆料工作台");
         Console.WriteLine("  " + url);
         Console.WriteLine("  关闭此窗口即停止服务。");
         Console.WriteLine();
@@ -215,6 +215,7 @@ ${dictMime}
 fs.rmSync(work, { recursive: true, force: true });
 fs.mkdirSync(work, { recursive: true });
 fs.writeFileSync(path.join(work, 'Launcher.cs'), cs);
+const q = (target) => '"' + path.win32.normalize(target) + '"';
 const rsp = [
   '/nologo',
   '/target:exe',
@@ -222,19 +223,30 @@ const rsp = [
   '/optimize+',
   // 源码是 UTF-8：不指定 codepage 时旧版 csc 按 ANSI 解读，中文串会在 exe 里变成乱码
   '/codepage:65001',
-  '/out:' + JSON.stringify(path.join(outDir, 'PIGMENT-DEPOT.exe')),
-  ...(fs.existsSync(path.join(root, 'build', 'icon.ico')) ? ['/win32icon:' + JSON.stringify(path.join(root, 'build', 'icon.ico'))] : []),
-  ...entries.map((e) => '/resource:' + JSON.stringify(e.abs) + ',' + e.resource),
-  JSON.stringify(path.join(work, 'Launcher.cs')),
+  '/out:' + q(path.join(outDir, 'PAINTLAB.exe')),
+  ...(fs.existsSync(path.join(root, 'build', 'icon.ico')) ? ['/win32icon:' + q(path.join(root, 'build', 'icon.ico'))] : []),
+  ...entries.map((e) => '/resource:' + q(e.abs) + ',' + e.resource),
+  q(path.join(work, 'Launcher.cs')),
 ].join('\r\n');
 fs.writeFileSync(path.join(work, 'build.rsp'), rsp);
 
 fs.mkdirSync(outDir, { recursive: true });
+// 旧 exe 可能被上一次启动的进程或杀软扫描占用，先删再编译（失败就退避重试）
+const finalExe = path.join(outDir, 'PAINTLAB.exe');
+for (let attempt = 1; attempt <= 10; attempt += 1) {
+  try {
+    if (fs.existsSync(finalExe)) fs.rmSync(finalExe, { force: true });
+    if (!fs.existsSync(finalExe)) break;
+  } catch {
+    /* 占用中，稍后重试 */
+  }
+  await new Promise((resolve) => setTimeout(resolve, 700));
+}
 try {
   execFileSync(CSC, ['@' + path.join(work, 'build.rsp')], { stdio: 'inherit' });
 } catch (error) {
   console.error('csc 编译失败：' + error.message);
   process.exit(1);
 }
-const exe = path.join(outDir, 'PIGMENT-DEPOT.exe');
+const exe = finalExe;
 console.log('启动器: ' + exe + '  (' + (fs.statSync(exe).size / 1024 / 1024).toFixed(2) + ' MB)');

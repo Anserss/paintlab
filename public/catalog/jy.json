@@ -25,9 +25,40 @@
       "defaultFinish": "gloss",
       "thinnerFamily": "匠域稀释剂",
       "defaultRatioN": 2
+    },
+    {
+      "id": "jw-aux",
+      "brandId": "jy",
+      "name": "Jumpwind Auxiliaries",
+      "nameZh": "匠域 辅料",
+      "packaging": "bottle",
+      "defaultVolumeMl": 100,
+      "kind": "auxiliary",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "other",
+      "thinnerFamily": null,
+      "defaultRatioN": 2
     }
   ],
   "paints": [
+    {
+      "id": "jw-ct01",
+      "lineId": "jw-aux",
+      "brandId": "jy",
+      "code": "CT01",
+      "name": "Levelling Thinner",
+      "nameZh": "匠域 CT01 缓干型稀释剂 100 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "finish": "additive",
+      "category": "thinner",
+      "volumeMl": 100,
+      "sourceUrl": "https://www.txrevo.com/collections/jumpwind-paint",
+      "verifiedAt": null,
+      "source": "待核验：规格来自零售页标题，型号 CT01 已见，容量待复核",
+      "origin": "seed"
+    },
     {
       "id": "jy-jw-001",
       "lineId": "jy-lacquer",

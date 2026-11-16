@@ -76,6 +76,10 @@ export interface Paint {
   finish?: Finish;
   opacityOverride?: number;
   sourceUrl?: string;
+  /** 来源说明；辅料常带"待核验"字样 */
+  source?: string;
+  /** 单件规格：辅料按 50/110/250/400 ml 分 SKU，色卡缺省沿用 PaintLine.defaultVolumeMl */
+  volumeMl?: number;
   verifiedAt?: string;
   origin: Origin;
 }

@@ -25,6 +25,20 @@
       "defaultFinish": "gloss",
       "thinnerFamily": "AK Real Colors Thinner",
       "defaultRatioN": 2
+    },
+    {
+      "id": "ak-aux",
+      "brandId": "ak",
+      "name": "Real Colors Auxiliaries",
+      "nameZh": "AK 稀释与缓干",
+      "packaging": "bottle",
+      "defaultVolumeMl": 200,
+      "kind": "auxiliary",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "other",
+      "thinnerFamily": null,
+      "defaultRatioN": 2
     }
   ],
   "paints": [
@@ -77,6 +91,23 @@
       "sourceUrl": null,
       "verifiedAt": null,
       "source": "gk-colormixer (observation)",
+      "origin": "seed"
+    },
+    {
+      "id": "ak-rc701",
+      "lineId": "ak-aux",
+      "brandId": "ak",
+      "code": "RC701",
+      "name": "Real Colors Thinner 200",
+      "nameZh": "AK Real Colors 稀释剂 200 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "finish": "additive",
+      "category": "thinner",
+      "volumeMl": 200,
+      "sourceUrl": "https://www.ozone.bg/product/universalen-razreditel-ak-interactive-za-seriia-boi-real-colors-podhodiashch-i-za-drugi-akrilni-boi-200ml-rc701/",
+      "verifiedAt": null,
+      "source": "零售页观察（待官方页复核）",
       "origin": "seed"
     }
   ]

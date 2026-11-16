@@ -145,9 +145,9 @@ describe('AC-02 补满算法', () => {
     expect((screen.getByLabelText('瓶容量 C') as HTMLInputElement).value).toBe('60.0');
     expect((screen.getByLabelText('当前余量 R') as HTMLInputElement).value).toBe('10.0');
 
-    // 左栏为 state='neat' 的条目，单选
+    // 左栏只列可作原浆的 neat 条目（稀释剂属辅料，不进原浆列表），单选
     const rows = view.container.querySelectorAll('[data-neat-item]');
-    expect(rows).toHaveLength(2);
+    expect(rows).toHaveLength(1);
     expect(view.container.querySelectorAll('[data-neat-item][aria-checked="true"]')).toHaveLength(1);
 
     const mixButton = view.container.querySelector('[data-action="mix"]') as HTMLButtonElement;

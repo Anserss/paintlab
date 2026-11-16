@@ -34,7 +34,8 @@ export function PaintMeta({ paint, line, brand, stock, compact = false, classNam
   const title = paintTitle(paint);
   const desc = paintDescription(paint, line);
   const origin = paintOriginLine(brandNameOf(brand), line.name);
-  const spec = line.defaultVolumeMl + ' ml';
+  // 辅料按容量分 SKU（T-103 250 ml 等），有 volumeMl 时优先用它
+  const spec = (paint.volumeMl ?? line.defaultVolumeMl) + ' ml';
   const reading = stock ? formatMl(stock.volumeMl) + '/' + formatMl(stock.initialMl) + ' ml' : null;
   const low = stock ? isLowStock(stock.volumeMl, stock.initialMl) : false;
 
