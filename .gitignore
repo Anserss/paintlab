@@ -8,3 +8,7 @@ playwright-report
 .DS_Store
 *.log
 .npmcache
+release/
+.launcher-build/
+desktop-build/
+.tmpbuild/

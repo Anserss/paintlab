@@ -69,6 +69,24 @@ features → store → data → core        方向不可逆
 | AC-16 | 品牌纯文字、无图标 | DOM 中 `<img>` 计数 0（单测断言） |
 | AC-17 | 非油性拒收 / 同号异线不合并 | 由设计包的 `verify-catalog` 与导入校验覆盖（应用不做厂商数据导入） |
 
+## 桌面启动器（单文件 exe）
+
+```bash
+npm run launcher      # = npm run build && node scripts/make-launcher.mjs
+```
+
+产物：`release/PIGMENT-DEPOT.exe`（约 1.1 MB，单文件）。双击即用：
+
+1. 进程内起一个只监听 `127.0.0.1` 的静态服务（端口 8787 起，占用则顺延），把 `dist/` 全部文件编译期嵌入 exe；
+2. 自动用默认浏览器打开 `http://127.0.0.1:8787/`；
+3. 关闭那个控制台窗口即停止服务。
+
+不需要安装 Node、不需要联网、不需要管理员权限（用 TcpListener 手写 HTTP 响应，避开 HttpListener 的 URL ACL 限制）。
+运行前提只有 Windows 自带的 .NET Framework 4.x（Win10/11 默认存在）。
+数据仍存在浏览器的 IndexedDB 里，按 origin（`127.0.0.1:8787`）隔离；换端口等于换一份数据，所以不要随意改端口。
+
+已知限制：这是「启动器」而不是原生窗口应用——它用系统默认浏览器承载界面（要原生窗口得走 Electron/Tauri，属规格 5.6 的 P1，本包未做）。
+
 ## 已知缺口与偏差（均为声明项，不是隐藏缺陷）
 
 1. **目录里没有 aux 类稀释剂**（`grep '"paintClass": "aux"' public/catalog` → 0），而默认 `trackThinner=true`。调漆台已给出三段式可行动提示 + 「本次不扣减稀释剂」一键出路，但**真实的稀释剂扣减流程需要先有稀释剂 SKU**（属设计包 M7 数据补齐范围，需有来源的色卡，不虚构）。

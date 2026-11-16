@@ -16,7 +16,8 @@
     "e2e": "playwright test",
     "verify:catalog": "node scripts/verify-catalog.mjs --file docs/seed/paint-catalog.seed.json --out reports/catalog-todo.csv",
     "build:catalog": "node scripts/build-catalog.mjs --file docs/seed/paint-catalog.seed.json --out public/catalog",
-    "check": "npm run verify:catalog && npm run build:catalog"
+    "check": "npm run verify:catalog && npm run build:catalog",
+    "launcher": "npm run build && node scripts/make-launcher.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
@@ -35,8 +36,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
-    "zustand": "^4.5.5",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.2",
