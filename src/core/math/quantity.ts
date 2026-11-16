@@ -10,10 +10,9 @@ export const quantize1 = (n: number): number => Math.round(n * 10) / 10;
 
 export const isFiniteNumber = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n);
 
-/** 毫升展示：整数不带小数，其余保留 1 位 */
+/** 毫升展示：恒为 1 位小数，保证列表纵向对齐（4.3） */
 export function formatMl(n: number): string {
-  const v = r1(n);
-  return Number.isInteger(v) ? v.toFixed(1) : v.toFixed(1);
+  return r1(n).toFixed(1);
 }
 
 export function formatRatio(n: number): string {
