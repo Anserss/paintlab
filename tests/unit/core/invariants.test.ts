@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   MAX_GROUP_DEPTH,
-  MAX_WORKSTATIONS,
+  MAX_WORKBENCHES,
   checkBottleLevel,
   checkGroupDepth,
   checkHistoryDepth,
@@ -10,7 +10,7 @@ import {
   checkStockVolume,
   checkUndoPreconditions,
   checkUsageAmount,
-  checkWorkstationCount,
+  checkWorkbenchCount,
 } from '@/core/rules/invariants';
 
 /** spec 2.4 C (298-310) / 3.7.4 / 7.2 invariants.test —— I1–I8 逐条触发 */
@@ -87,18 +87,18 @@ describe('I3 · depth <= 3 且 child.depth = parent.depth + 1', () => {
   });
 });
 
-describe('I4 · workstations.length <= 5（AC-08）', () => {
-  it('第 6 个工位被拒', () => {
-    expect(checkWorkstationCount(6)).toEqual({
+describe('I4 · workbenches.length <= 5（AC-08）', () => {
+  it('第 6 个工作台被拒', () => {
+    expect(checkWorkbenchCount(6)).toEqual({
       id: 'I4',
-      message: '最多 5 个工位，请先删除或复用现有工位',
+      message: '最多 5 个工作台，请先删除或复用现有工作台',
     });
   });
 
   it('5 个以内合法', () => {
-    expect(checkWorkstationCount(5)).toBeNull();
-    expect(checkWorkstationCount(0)).toBeNull();
-    expect(MAX_WORKSTATIONS).toBe(5);
+    expect(checkWorkbenchCount(5)).toBeNull();
+    expect(checkWorkbenchCount(0)).toBeNull();
+    expect(MAX_WORKBENCHES).toBe(5);
   });
 });
 

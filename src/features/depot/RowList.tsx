@@ -9,7 +9,7 @@ import type { DepotRow } from './model';
 
 export interface DepotRowActions {
   onOpen?: (row: DepotRow) => void;
-  onAddToStation?: (row: DepotRow) => void;
+  onOpenCoat?: (row: DepotRow) => void;
   onUse?: (row: DepotRow) => void;
 }
 
@@ -58,7 +58,7 @@ function DepotRowItem({ row, draggable, selected, actions, onSelect }: RowItemPr
         onDetail={() => actions.onOpen?.(row)}
         actions={{
           onOpen: handleOpen,
-          onAddToStation: () => actions.onAddToStation?.(row),
+          onOpenCoat: () => actions.onOpenCoat?.(row),
           onUse: () => actions.onUse?.(row),
         }}
       />

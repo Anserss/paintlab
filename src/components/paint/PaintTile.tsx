@@ -20,7 +20,7 @@ export interface PaintTileProps {
   className?: string;
 }
 
-/** PaintTile：120×148 工位磁贴（4.5.1 变体），色块铺满顶部，其下名/色号/属性各一行 */
+/** PaintTile：120×148 工作台磁贴（4.5.1 变体），色块铺满顶部，其下名/色号/属性各一行 */
 export const PaintTile = memo(function PaintTile({
   paint,
   line,

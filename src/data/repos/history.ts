@@ -79,7 +79,7 @@ export async function recordCommand(s: DepotStore, cmd: Command): Promise<Result
 
 function txTables(inverse: Command): TableName[] {
   return Array.from(
-    new Set<TableName>([...tablesFor(inverse.inverse), ...tablesFor(inverse.forward), 'commands', 'stockItems', 'bottles', 'groups', 'stationItems']),
+    new Set<TableName>([...tablesFor(inverse.inverse), ...tablesFor(inverse.forward), 'commands', 'stockItems', 'bottles', 'groups', 'workbenchItems']),
   );
 }
 

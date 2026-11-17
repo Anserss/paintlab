@@ -32,12 +32,12 @@ export const ADJUST_REASON_OPTIONS: { value: AdjustReasonCode; label: string }[]
 
 const LEDGER_TYPE_ZH: Record<LedgerEntry['type'], string> = {
   purchase: '采购',
-  mix: '调漆取用',
-  use: '取用',
+  mix: '调漆',
+  use: '调漆',
   adjust: '调整',
   group: '归组',
-  station: '工位',
-  archive: '归档',
+  workbench: '工作台',
+  archive: '入库',
 };
 
 export interface LedgerRow {

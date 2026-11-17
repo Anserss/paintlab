@@ -9,12 +9,12 @@ import type { MixSlice } from './slices/mix';
 import { createMixSlice } from './slices/mix';
 import type { SettingsSlice } from './slices/settings';
 import { createSettingsSlice } from './slices/settings';
-import type { StationSlice } from './slices/station';
-import { createStationSlice } from './slices/station';
+import type { WorkbenchSlice } from './slices/workbench';
+import { createWorkbenchSlice } from './slices/workbench';
 import type { UiSlice } from './slices/ui';
 import { createUiSlice } from './slices/ui';
 
-export type AppState = UiSlice & SettingsSlice & CatalogSlice & InventorySlice & MixSlice & StationSlice & HistorySlice;
+export type AppState = UiSlice & SettingsSlice & CatalogSlice & InventorySlice & MixSlice & WorkbenchSlice & HistorySlice;
 
 /**
  * 唯一全局 store（features -> store -> data -> core）。
@@ -26,7 +26,7 @@ export const useAppStore = create<AppState>()((...args) => ({
   ...createCatalogSlice(...args),
   ...createInventorySlice(...args),
   ...createMixSlice(...args),
-  ...createStationSlice(...args),
+  ...createWorkbenchSlice(...args),
   ...createHistorySlice(...args),
 }));
 
@@ -42,7 +42,7 @@ export async function hydrateApp(): Promise<void> {
     await state.hydrateHistoryState();
     await state.refreshInventory();
     await state.hydrateBottles();
-    await state.hydrateStations();
+    await state.hydrateWorkbenches();
   } catch {
     /* 无持久化环境：保持默认态 */
   }
@@ -52,13 +52,13 @@ export async function hydrateApp(): Promise<void> {
     /* 目录不可用时保持空列表 */
   }
   /**
-   * 一旦本工作区已有库存或工位，各页面都需要解析 paintId → Paint/Line/Brand
-   * （仓库行、工位磁贴、调漆取用）。品牌包只有 4 个静态 JSON，这里统一预热，
+   * 一旦本工作区已有库存或工作台，各页面都需要解析 paintId → Paint/Line/Brand
+   * （仓库行、工作台磁贴、调漆）。品牌包只有 4 个静态 JSON，这里统一预热，
    * 避免每个页面各自实现「按需补包」而漏掉一条路径。
    */
   try {
     const ready = useAppStore.getState();
-    if (ready.stockItems.length > 0 || ready.workstations.length > 0) {
+    if (ready.stockItems.length > 0 || ready.workbenches.length > 0) {
       await Promise.all(ready.brands.map((brand) => ready.ensureBrand(brand.id)));
     }
   } catch {
@@ -70,7 +70,7 @@ export function resetHydration(): void {
   hydrationStarted = false;
 }
 
-export type { UiSlice, SettingsSlice, CatalogSlice, InventorySlice, MixSlice, StationSlice, HistorySlice };
+export type { UiSlice, SettingsSlice, CatalogSlice, InventorySlice, MixSlice, WorkbenchSlice, HistorySlice };
 export type { Toast, ToastTone } from './slices/ui';
 export type { BrandLoadState } from './slices/catalog';
 export { notifyError, notifyUndoable, isSelected, MAX_TOASTS } from './slices/ui';

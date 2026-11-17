@@ -17,6 +17,8 @@ export type PaintCategory =
   | 'other';
 export type Packaging = 'dropper' | 'pot' | 'jar' | 'tinlet' | 'bottle';
 export type PaintState = 'neat' | 'thinned';
+/** 调漆台的两种模式：稀释（原浆 + 稀释剂）/ 调漆（多组分混合） */
+export type MixBatchMode = 'dilute' | 'blend';
 export type Origin = 'seed' | 'custom' | 'import' | 'mixed';
 export type LevelMode = 'baseline' | 'capacity';
 
@@ -80,6 +82,8 @@ export interface Paint {
   source?: string;
   /** 单件规格：辅料按 50/110/250/400 ml 分 SKU，色卡缺省沿用 PaintLine.defaultVolumeMl */
   volumeMl?: number;
+  /** 色值是按色名推定的近似值（未取到厂商官方色卡）：界面用 ≈ 标注，不谎称已核验 */
+  hexEstimated?: boolean;
   verifiedAt?: string;
   origin: Origin;
 }
@@ -123,6 +127,8 @@ export interface Bottle {
   labelCode?: string;
   levelMode: LevelMode;
   updatedAt: number;
+  /** 这一批是「稀释」还是「调漆」产出的（界面标签用） */
+  mode?: MixBatchMode;
 }
 
 export interface BottleComponent {
@@ -136,7 +142,7 @@ export interface BottleComponent {
   paintClass: PaintClass;
 }
 
-export interface Workstation {
+export interface Workbench {
   id: string;
   name: string;
   note?: string;
@@ -145,10 +151,10 @@ export interface Workstation {
   createdAt: number;
 }
 
-/** Dexie 表名 stationItems 存的就是 WorkstationItem */
-export interface WorkstationItem {
+/** Dexie 表名 workbenchItems 存的就是 WorkbenchItem */
+export interface WorkbenchItem {
   id: string;
-  workstationId: string;
+  workbenchId: string;
   refType: 'stock' | 'bottle';
   refId: string;
   plannedUseMl: number;
@@ -164,13 +170,24 @@ export interface MixRecord {
   totalMl: number;
   filledToMl: number;
   at: number;
+  /** 稀释产物 / 调漆产物；缺省视为旧的「调配」记录 */
+  mode?: MixBatchMode;
+  /** 调漆模式下的组分明细 */
+  parts?: MixRecordPart[];
+}
+
+export interface MixRecordPart {
+  stockItemId: string;
+  paintId: string;
+  ml: number;
+  ratioN: number;
 }
 
 export type UsageReason = 'paint' | 'return' | 'spill' | 'evaporate' | 'manual';
 
 export interface UsageRecord {
   id: string;
-  targetType: 'stock' | 'bottle' | 'workstation';
+  targetType: 'stock' | 'bottle' | 'workbench';
   targetId: string;
   amountMl: number;
   reason?: UsageReason;
@@ -179,7 +196,7 @@ export interface UsageRecord {
 
 export interface LedgerEntry {
   id: string;
-  type: 'purchase' | 'mix' | 'use' | 'adjust' | 'group' | 'station' | 'archive';
+  type: 'purchase' | 'mix' | 'use' | 'adjust' | 'group' | 'workbench' | 'archive';
   deltaMl?: number;
   refId: string;
   at: number;
@@ -196,8 +213,8 @@ export type CollectionName =
   | 'stockItems'
   | 'groups'
   | 'bottles'
-  | 'workstations'
-  | 'stationItems'
+  | 'workbenches'
+  | 'workbenchItems'
   | 'mixRecords'
   | 'usageRecords'
   | 'ledger'
@@ -212,7 +229,7 @@ export type Patch =
 export type CommandType =
   | 'purchase'
   | 'group'
-  | 'station'
+  | 'workbench'
   | 'mix'
   | 'use'
   | 'adjust'

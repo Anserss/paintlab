@@ -6,8 +6,8 @@ import { useAppStore } from '@/store';
 export const ROUTE_LABELS: Record<string, string> = {
   '/procure': '采购',
   '/depot': '仓库',
-  '/mix': '调漆',
-  '/station': '工位',
+  '/mix': '调漆台',
+  '/workbench': '工作台',
   '/settings': '设置',
 };
 

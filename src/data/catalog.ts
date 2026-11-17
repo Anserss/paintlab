@@ -86,6 +86,7 @@ const RawPaintSchema = z.object({
   sourceUrl: z.string().nullish(),
   source: z.string().nullish(),
   volumeMl: z.number().nullish(),
+  hexEstimated: z.boolean().nullish(),
   verifiedAt: z.string().nullish(),
   origin: z.string().nullish(),
 });
@@ -232,6 +233,7 @@ export function normalizeBrandBundle(raw: unknown): Result<CatalogBundle> {
     if (verifiedAt) candidate.verifiedAt = verifiedAt;
     // 辅料按容量分 SKU：volumeMl 与来源说明必须带进读模型，否则采购拿不到正确默认规格
     if (typeof rawPaint.volumeMl === 'number') candidate.volumeMl = rawPaint.volumeMl;
+    if (rawPaint.hexEstimated === true) candidate.hexEstimated = true;
     const source = undef(rawPaint.source);
     if (source) candidate.source = source;
 

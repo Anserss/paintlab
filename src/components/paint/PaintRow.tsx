@@ -12,7 +12,7 @@ import { StockBar } from '@/components/paint/StockBar';
 
 export interface PaintRowActions {
   onOpen?: (paint: Paint) => void;
-  onAddToStation?: (paint: Paint) => void;
+  onOpenCoat?: (paint: Paint) => void;
   onUse?: (paint: Paint) => void;
 }
 
@@ -107,8 +107,13 @@ export const PaintRow = memo(function PaintRow({
         <div className="flex flex-col items-end justify-between gap-2">
           <div className="flex items-center gap-1">
             {badges}
+            {paint.hexEstimated && (
+              <Badge tone="warn" title="色值为按色名推定的近似值，尚未按厂商官方色卡核验">
+                ≈ 推定色
+              </Badge>
+            )}
             {typeof registeredCount === 'number' && registeredCount > 0 && (
-              <Badge>已登记×{registeredCount}</Badge>
+              <Badge>已入库×{registeredCount}</Badge>
             )}
             {empty && <Badge>空</Badge>}
           </div>
@@ -131,32 +136,32 @@ export const PaintRow = memo(function PaintRow({
                 详情
               </button>
             )}
-            {actions.onAddToStation && (
+            {actions.onOpenCoat && (
               <button
                 type="button"
-                aria-label="加入工位"
-                title="加入工位"
+                aria-label="开涂"
+                title="开涂"
                 className={ACTION_CLASS}
                 onClick={(e) => {
                   e.stopPropagation();
-                  actions.onAddToStation?.(paint);
+                  actions.onOpenCoat?.(paint);
                 }}
               >
-                入位
+                开涂
               </button>
             )}
             {actions.onUse && (
               <button
                 type="button"
-                aria-label="取用调漆"
-                title="取用调漆"
+                aria-label="调漆"
+                title="调漆"
                 className={ACTION_CLASS}
                 onClick={(e) => {
                   e.stopPropagation();
                   actions.onUse?.(paint);
                 }}
               >
-                取用
+                调漆
               </button>
             )}
           </div>

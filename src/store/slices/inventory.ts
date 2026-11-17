@@ -119,7 +119,7 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
       notifyError(get, result.error);
       return result;
     }
-    // 删除条目会连带移除其工位引用，必须一并重读工位读模型
+    // 删除条目会连带移除其工作台引用，必须一并重读工作台读模型
     await get().refreshAllReadModels();
     notifyUndoable(get, result.data.message);
     return result;

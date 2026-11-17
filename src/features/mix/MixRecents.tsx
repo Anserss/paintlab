@@ -30,7 +30,7 @@ export function MixRecents({ records, onReproduce }: MixRecentsProps) {
         <p className="px-3 py-3 text-[11px] leading-relaxed text-text-3">
           本次会话暂无配方。
           <br />
-          完成一次调配后会出现在这里。
+          完成一次调漆后会出现在这里。
         </p>
       ) : (
         <ul className="min-h-0 flex-1 overflow-auto">

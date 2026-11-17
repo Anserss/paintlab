@@ -4,7 +4,7 @@ import { DepotPage } from '@/features/depot/DepotPage';
 import { MixPage } from '@/features/mix/MixPage';
 import { ProcurePage } from '@/features/procure/ProcurePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
-import { StationPage } from '@/features/station/StationPage';
+import { WorkbenchPage } from '@/features/workbench/WorkbenchPage';
 
 export function App() {
   return (
@@ -13,7 +13,7 @@ export function App() {
         <Route path="/procure" element={<ProcurePage />} />
         <Route path="/depot" element={<DepotPage />} />
         <Route path="/mix" element={<MixPage />} />
-        <Route path="/station" element={<StationPage />} />
+        <Route path="/workbench" element={<WorkbenchPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/procure" replace />} />
       </Route>

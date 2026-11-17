@@ -135,7 +135,7 @@ describe('采购大厅 · 辅料货架（稀释剂 / 缓干剂）', () => {
     expect(row.textContent).toContain('250 ml');
   });
 
-  it('辅料登记弹层的默认容量取该 SKU 规格（250 ml），提交后库存条目初始量即 250', async () => {
+  it('辅料入库弹层的默认容量取该 SKU 规格（250 ml），提交后库存条目初始量即 250', async () => {
     const { container } = render(<ProcurePage />);
     await waitFor(() => expect(rowsOf(container)).toHaveLength(1));
 
@@ -145,7 +145,7 @@ describe('采购大厅 · 辅料货架（稀释剂 / 缓干剂）', () => {
       expect(container.querySelector('[data-paint-row][data-code="T-103"]')).not.toBeNull(),
     );
 
-    // 「+ 登记」是行容器（[data-paint-line]）里的兄弟节点，不在 PaintRow 内部
+    // 「+ 入库」是行容器（[data-paint-line]）里的兄弟节点，不在 PaintRow 内部
     const row = container.querySelector<HTMLElement>('[data-paint-row][data-code="T-103"]') as HTMLElement;
     const register = row.parentElement?.querySelector('button');
     expect(register).not.toBeNull();
@@ -155,7 +155,7 @@ describe('采购大厅 · 辅料货架（稀释剂 / 缓干剂）', () => {
     await waitFor(() => expect(document.body.textContent).toContain('250'));
 
     const confirm = Array.from(document.querySelectorAll('button')).find(
-      (button) => button.textContent === '确认登记',
+      (button) => button.textContent === '确认入库',
     );
     expect(confirm).toBeTruthy();
     fireEvent.click(confirm as HTMLElement);

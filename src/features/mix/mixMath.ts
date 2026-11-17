@@ -1,18 +1,17 @@
-import type { OverflowCheck } from '@/core/math/dilution';
-import {
-  RATIO_MAX,
-  RATIO_MIN,
-  checkOverflow,
-  fromNeat,
-  fromTotal,
-  toFill,
-} from '@/core/math/dilution';
+import { diluteThinned, planBlend } from '@/core/math/blend';
+import type { BlendPlan } from '@/core/math/blend';
+import { fromNeat, fromTotal, RATIO_MAX, RATIO_MIN } from '@/core/math/dilution';
 import { clamp, quantize1, r1 } from '@/core/math/quantity';
 
-export { RATIO_MAX, RATIO_MIN };
-
-/** 稀释计算器三模式（3.4.2）：补满为主推 */
-export type MixMode = 'fill' | 'neat' | 'total';
+/**
+ * 调漆台（2026-11 改版）：
+ * - 稀释模式：不再选调漆瓶容量。原浆 + 稀释剂直接产出「已稀释漆料」批次；
+ *   仓库里的已稀释漆料也能继续再稀释（按取用毫升数）。
+ * - 调漆模式：多组分（原浆 / 已稀释漆料）按 ml 或按目标总容量分摊后混合。
+ */
+export type MixMode = 'dilute' | 'blend';
+/** 稀释模式的输入口径：按原浆量 / 按目标总量 */
+export type DiluteInputMode = 'neat' | 'total';
 
 export interface MixModeOption {
   value: MixMode;
@@ -21,106 +20,126 @@ export interface MixModeOption {
 }
 
 export const MIX_MODES: readonly MixModeOption[] = [
-  { value: 'fill', label: '补满瓶（推荐）', hint: '按剩余空间反推原浆' },
-  { value: 'neat', label: '指定原浆量', hint: '按原浆量正推稀释剂与总量' },
-  { value: 'total', label: '反算目标总量', hint: '按目标总量反推原浆' },
+  { value: 'dilute', label: '稀释', hint: '原浆 + 稀释剂 → 已稀释漆料' },
+  { value: 'blend', label: '调漆', hint: '多组分按 ml 或目标总容量混合' },
 ];
 
-/** 瓶容量预设与自定义范围（3.4.3：5–250 整数） */
-export const CAPACITY_PRESETS = [15, 30, 60, 100] as const;
-export const CAPACITY_MIN = 5;
-export const CAPACITY_MAX = 250;
+export const DILUTE_INPUT_MODES: readonly { value: DiluteInputMode; label: string; hint: string }[] = [
+  { value: 'neat', label: '按原浆量', hint: '填原浆 ml，正推稀释剂' },
+  { value: 'total', label: '按目标总量', hint: '填总容量，反推原浆' },
+];
 
-/** 比例预设（3.4.2） */
+/** 比例预设（0.5 步进，与旧稀释计算器一致） */
 export const RATIO_PRESETS = [0.5, 1, 1.5, 2, 2.5, 3] as const;
 
-export interface MixPlan {
-  mode: MixMode;
+export { RATIO_MAX, RATIO_MIN };
+
+export interface DilutePlan {
+  kind: 'neat' | 'total' | 'thinned';
+  /** 取用来源的体积（thinned 模式为取用量；原浆模式 = 原浆量） */
+  takenMl: number;
   neatMl: number;
   thinnerMl: number;
   totalMl: number;
-  /** 取整前的值，供界面核对（3.4.2 施工口径） */
+  ratioN: number;
+  fromRatioN: number;
+  /** 取整前的值，供界面核对 */
   neatRaw: number;
   thinnerRaw: number;
   totalRaw: number;
-  ratioN: number;
-  capacityMl: number;
-  remainingMl: number;
-  overflow: OverflowCheck;
+  /** thinned 模式下补加的稀释剂（其余稀释剂已在来源里） */
+  addedThinnerMl: number;
 }
 
-export interface PlanInput {
-  mode: MixMode;
-  capacityMl: number;
-  remainingMl: number;
-  ratioN: number;
+export interface DilutePlanInput {
+  sourceState: 'neat' | 'thinned';
+  /** 原浆模式下的输入口径 */
+  inputMode: DiluteInputMode;
+  fromRatioN: number;
+  targetRatioN: number;
   neatMl: number;
   totalMl: number;
+  takenMl: number;
 }
 
-/**
- * 三种模式统一出参：所有取整都由 core 的 toFill / fromTotal / fromNeat 完成，
- * 界面只额外展示取整前的值，绝不另算一份结果。
- */
-export function planFor(input: PlanInput): MixPlan {
-  const { mode, capacityMl, remainingMl, ratioN } = input;
-  const denom = 1 + ratioN;
+/** 稀释模式统一出参：取整全部由 core 完成，界面只展示取整前的值 */
+export function planDilution(input: DilutePlanInput): DilutePlan {
+  const targetRatioN = r1(input.targetRatioN);
 
-  if (mode === 'neat') {
-    const neat = Math.max(0, r1(input.neatMl));
-    const mix = fromNeat(neat, ratioN);
+  if (input.sourceState === 'thinned') {
+    const plan = diluteThinned(input.takenMl, r1(input.fromRatioN), targetRatioN);
     return {
-      mode,
-      neatMl: mix.neatMl,
-      thinnerMl: mix.thinnerMl,
-      totalMl: mix.totalMl,
-      neatRaw: neat,
-      thinnerRaw: neat * ratioN,
-      totalRaw: neat * denom,
-      ratioN,
-      capacityMl,
-      remainingMl,
-      overflow: checkOverflow(capacityMl, remainingMl, neat, ratioN),
+      kind: 'thinned',
+      takenMl: plan.takenMl,
+      neatMl: plan.neatMl,
+      thinnerMl: r1(plan.totalMl - plan.neatMl),
+      totalMl: plan.totalMl,
+      ratioN: targetRatioN,
+      fromRatioN: r1(input.fromRatioN),
+      neatRaw: plan.neatMl,
+      thinnerRaw: r1(plan.neatMl * targetRatioN),
+      totalRaw: r1(plan.neatMl * (1 + targetRatioN)),
+      addedThinnerMl: plan.addedThinnerMl,
     };
   }
 
-  if (mode === 'total') {
+  if (input.inputMode === 'total') {
     const target = Math.max(0, r1(input.totalMl));
-    // 与落库一致：先由目标总量反推原浆，再用原浆正算
-    const neat = fromTotal(target, ratioN).neatMl;
-    const mix = fromNeat(neat, ratioN);
-    const neatRaw = target / denom;
+    const mix = fromTotal(target, targetRatioN);
+    const neatRaw = target / (1 + targetRatioN);
     return {
-      mode,
+      kind: 'total',
+      takenMl: mix.neatMl,
       neatMl: mix.neatMl,
       thinnerMl: mix.thinnerMl,
       totalMl: mix.totalMl,
+      ratioN: targetRatioN,
+      fromRatioN: 0,
       neatRaw,
-      thinnerRaw: neatRaw * ratioN,
+      thinnerRaw: neatRaw * targetRatioN,
       totalRaw: target,
-      ratioN,
-      capacityMl,
-      remainingMl,
-      overflow: checkOverflow(capacityMl, remainingMl, neat, ratioN),
+      addedThinnerMl: mix.thinnerMl,
     };
   }
 
-  const space = Math.max(0, r1(capacityMl - remainingMl));
-  const mix = toFill(capacityMl, remainingMl, ratioN);
-  const neatRaw = space / denom;
+  const neat = Math.max(0, r1(input.neatMl));
+  const mix = fromNeat(neat, targetRatioN);
   return {
-    mode: 'fill',
+    kind: 'neat',
+    takenMl: mix.neatMl,
     neatMl: mix.neatMl,
     thinnerMl: mix.thinnerMl,
     totalMl: mix.totalMl,
-    neatRaw,
-    thinnerRaw: neatRaw * ratioN,
-    totalRaw: neatRaw * denom,
-    ratioN,
-    capacityMl,
-    remainingMl,
-    overflow: checkOverflow(capacityMl, remainingMl, mix.neatMl, ratioN),
+    ratioN: targetRatioN,
+    fromRatioN: 0,
+    neatRaw: neat,
+    thinnerRaw: neat * targetRatioN,
+    totalRaw: neat * (1 + targetRatioN),
+    addedThinnerMl: mix.thinnerMl,
   };
+}
+
+export interface BlendPartRow {
+  id: string;
+  code: string;
+  name: string;
+  /** 份量输入框的原始文本（按目标容量时是相对权重） */
+  mlText: string;
+  ratioN: number;
+  availableMl: number;
+}
+
+/** 调漆模式：按各组分 ml 或按目标总容量分摊 */
+export function planBlendFor(rows: BlendPartRow[], targetMl: number | null): BlendPlan {
+  return planBlend(
+    rows.map((row) => ({
+      id: row.id,
+      weight: parseMl(row.mlText),
+      ratioN: r1(row.ratioN),
+      availableMl: row.availableMl,
+    })),
+    targetMl,
+  );
 }
 
 export interface RatioParse {
@@ -128,7 +147,7 @@ export interface RatioParse {
   clamped: boolean;
 }
 
-/** 比例输入：0–10、0.1 步进；非法范围钳制（3.4.2）。空串/未成数返回 null（继续编辑） */
+/** 比例输入：0–10、0.1 步进；非法范围钳制（空串/未成数返回 null，继续编辑） */
 export function parseRatio(raw: string): RatioParse | null {
   const text = raw.trim().replace(',', '.');
   if (text === '') return null;
@@ -145,19 +164,10 @@ export function parseMl(raw: string): number {
   return Number.isFinite(parsed) ? Math.max(0, r1(parsed)) : 0;
 }
 
-/** 自定义瓶容量：5–250 整数 */
-export function parseCapacity(raw: string): number | null {
-  const parsed = Number(raw.trim());
-  if (!Number.isFinite(parsed)) return null;
-  const rounded = Math.round(parsed);
-  if (rounded < CAPACITY_MIN || rounded > CAPACITY_MAX) return null;
-  return rounded;
-}
-
 /** 取整前的展示值（两位小数） */
 export const formatRaw = (n: number): string => n.toFixed(2);
 
-/** 3.10 库存不足文案 */
+/** 库存不足文案（3.10） */
 export function stockShortText(label: string, volumeMl: number, needMl: number): string {
-  return '原浆不足：' + label + ' 仅剩 ' + volumeMl.toFixed(1) + ' ml，无法取用 ' + needMl.toFixed(1) + ' ml';
+  return '库存不足：' + label + ' 仅剩 ' + volumeMl.toFixed(1) + ' ml，本次需要 ' + needMl.toFixed(1) + ' ml';
 }

@@ -125,13 +125,13 @@ describe('导出 / 导入 / 重置（spec 3.8）', () => {
 });
 
 describe('撤销后的读模型一致性（骨架职责，不下放给特性层）', () => {
-  it('撤销一次「放回仓库」后，stationItems / workstations / 库存读模型同步回到撤销前', async () => {
+  it('撤销一次「入库」后，workbenchItems / workbenches / 库存读模型同步回到撤销前', async () => {
     // beforeEach 已 setStore(createMemoryStore()) 并清空历史
     useAppStore.setState({
       stockItems: [],
       bottles: [],
-      workstations: [],
-      stationItems: [],
+      workbenches: [],
+      workbenchItems: [],
       groups: [],
       tree: [],
       selected: [],
@@ -148,43 +148,43 @@ describe('撤销后的读模型一致性（骨架职责，不下放给特性层�
     if (!purchased.ok) return;
     const stockId = purchased.data.item.id;
 
-    const station = await app().newWorkstation({ name: '工位 A' });
-    expect(station.ok).toBe(true);
-    if (!station.ok) return;
-    const stationId = station.data.id;
+    const workbench = await app().newWorkbench({ name: '工作台 A' });
+    expect(workbench.ok).toBe(true);
+    if (!workbench.ok) return;
+    const workbenchId = workbench.data.id;
 
-    const added = await app().addToStation({
-      workstationId: stationId,
+    const added = await app().openCoat({
+      workbenchId: workbenchId,
       refs: [{ refType: 'stock', refId: stockId }],
     });
     expect(added.ok).toBe(true);
-    expect(app().stationItems).toHaveLength(1);
-    expect(app().workstations).toHaveLength(1);
+    expect(app().workbenchItems).toHaveLength(1);
+    expect(app().workbenches).toHaveLength(1);
 
-    const stationItemId = app().stationItems[0].id;
-    const returned = await app().returnToDepot({
-      workstationId: stationId,
-      entries: [{ itemId: stationItemId, usedMl: 5 }],
+    const workbenchItemId = app().workbenchItems[0].id;
+    const returned = await app().stockIn({
+      workbenchId: workbenchId,
+      entries: [{ itemId: workbenchItemId, usedMl: 5 }],
     });
     expect(returned.ok).toBe(true);
-    expect(app().stationItems).toHaveLength(0);
+    expect(app().workbenchItems).toHaveLength(0);
     expect(app().stockItems.find((item) => item.id === stockId)?.volumeMl).toBe(12);
 
     const undone = await app().undo();
     expect(undone.ok).toBe(true);
 
-    expect(app().stationItems).toHaveLength(1);
-    expect(app().stationItems[0].id).toBe(stationItemId);
-    expect(app().stationItems[0].workstationId).toBe(stationId);
-    expect(app().workstations).toHaveLength(1);
-    expect(app().workstations[0].id).toBe(stationId);
+    expect(app().workbenchItems).toHaveLength(1);
+    expect(app().workbenchItems[0].id).toBe(workbenchItemId);
+    expect(app().workbenchItems[0].workbenchId).toBe(workbenchId);
+    expect(app().workbenches).toHaveLength(1);
+    expect(app().workbenches[0].id).toBe(workbenchId);
     expect(app().stockItems.find((item) => item.id === stockId)?.volumeMl).toBe(17);
     expect(app().undoCount).toBe(2);
     expect(app().redoCount).toBe(1);
 
     const redone = await app().redo();
     expect(redone.ok).toBe(true);
-    expect(app().stationItems).toHaveLength(0);
+    expect(app().workbenchItems).toHaveLength(0);
     expect(app().stockItems.find((item) => item.id === stockId)?.volumeMl).toBe(12);
     expect(app().redoCount).toBe(0);
   });

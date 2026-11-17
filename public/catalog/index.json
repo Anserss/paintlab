@@ -1,23 +1,14 @@
 {
   "format": "pigment-depot/catalog/v1",
-  "generatedAt": "2026-11-16T14:06:44.033Z",
+  "generatedAt": "2026-11-17T11:44:12.285Z",
   "brands": [
-    {
-      "id": "ak",
-      "name": "AK Interactive",
-      "nameZh": "AK",
-      "shortName": "AK",
-      "accentHex": "#2E2E2E",
-      "count": 4,
-      "file": "ak.json"
-    },
     {
       "id": "gsi",
       "name": "GSI Creos",
       "nameZh": "郡士",
       "shortName": "GSI",
       "accentHex": "#1B4FA0",
-      "count": 137,
+      "count": 448,
       "file": "gsi.json"
     },
     {
@@ -26,17 +17,8 @@
       "nameZh": "匠域",
       "shortName": "JW",
       "accentHex": "#C0453A",
-      "count": 107,
+      "count": 169,
       "file": "jy.json"
-    },
-    {
-      "id": "tamiya",
-      "name": "Tamiya",
-      "nameZh": "田宫",
-      "shortName": "TAMIYA",
-      "accentHex": "#1F5C8B",
-      "count": 19,
-      "file": "tamiya.json"
     }
   ]
 }

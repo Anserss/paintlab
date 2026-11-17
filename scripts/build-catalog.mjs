@@ -59,6 +59,7 @@ for (const p of doc.paints) {
     source: p.source ?? null,
     origin: 'seed',
   };
+  if (p.hexEstimated === true) out.hexEstimated = true;
   if (!buckets.has(p.brandId)) buckets.set(p.brandId, []);
   buckets.get(p.brandId).push(out);
 }

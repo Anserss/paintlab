@@ -94,6 +94,7 @@ export const PaintSchema = z.object({
   sourceUrl: z.string().url().optional(),
   source: z.string().optional(),
   volumeMl: z.number().min(0.5).max(2500).optional(),
+  hexEstimated: z.boolean().optional(),
   verifiedAt: z.string().optional(),
   origin: OriginSchema,
 });
@@ -145,7 +146,7 @@ export const BottleSchema = z
   .object({
     id: IdSchema,
     name: nameSchema(16),
-    capacityMl: z.number().int().min(5, '容量至少 5 ml').max(250, '容量最多 250 ml'),
+    capacityMl: z.number().int().min(5, '容量至少 5 ml').max(2500, '容量最多 2500 ml'),
     baselineMl: z.number().min(0),
     remainingMl: z.number().min(0),
     ratioN: RatioNSchema,
@@ -156,6 +157,7 @@ export const BottleSchema = z
     labelCode: z.string().optional(),
     levelMode: LevelModeSchema,
     updatedAt: z.number(),
+    mode: z.enum(['dilute', 'blend']).optional(),
   })
   .refine((v) => v.remainingMl <= v.baselineMl + 1e-6, {
     message: '余量不能超过基准量',
@@ -166,7 +168,7 @@ export const BottleSchema = z
     path: ['baselineMl'],
   });
 
-export const WorkstationSchema = z.object({
+export const WorkbenchSchema = z.object({
   id: IdSchema,
   name: nameSchema(16),
   note: z.string().max(60, '备注最多 60 字').optional(),
@@ -175,9 +177,9 @@ export const WorkstationSchema = z.object({
   createdAt: z.number(),
 });
 
-export const WorkstationItemSchema = z.object({
+export const WorkbenchItemSchema = z.object({
   id: IdSchema,
-  workstationId: IdSchema,
+  workbenchId: IdSchema,
   refType: z.enum(['stock', 'bottle']),
   refId: IdSchema,
   plannedUseMl: z.number().min(0).max(2500),
@@ -193,11 +195,22 @@ export const MixRecordSchema = z.object({
   totalMl: z.number().min(0),
   filledToMl: z.number().min(0),
   at: z.number(),
+  mode: z.enum(['dilute', 'blend']).optional(),
+  parts: z
+    .array(
+      z.object({
+        stockItemId: IdSchema,
+        paintId: IdSchema,
+        ml: z.number().min(0),
+        ratioN: RatioNSchema,
+      }),
+    )
+    .optional(),
 });
 
 export const UsageRecordSchema = z.object({
   id: IdSchema,
-  targetType: z.enum(['stock', 'bottle', 'workstation']),
+  targetType: z.enum(['stock', 'bottle', 'workbench']),
   targetId: IdSchema,
   amountMl: z.number().min(0),
   reason: z.enum(['paint', 'return', 'spill', 'evaporate', 'manual']).optional(),
@@ -206,7 +219,7 @@ export const UsageRecordSchema = z.object({
 
 export const LedgerEntrySchema = z.object({
   id: IdSchema,
-  type: z.enum(['purchase', 'mix', 'use', 'adjust', 'group', 'station', 'archive']),
+  type: z.enum(['purchase', 'mix', 'use', 'adjust', 'group', 'workbench', 'archive']),
   deltaMl: z.number().optional(),
   refId: IdSchema,
   at: z.number(),

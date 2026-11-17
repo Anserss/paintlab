@@ -26,7 +26,7 @@ export function fromTotal(totalMl: number, ratioN: number): MixResult {
 /**
  * 补满：瓶容量 C、当前余量 R、比例 1:N -> 需加入的原浆与稀释剂。
  * 比例优先；原浆向下取整后总量可能比剩余空间少 0.2 ml 以内，
- * 该误差由 baseline 语义吸收（调配后 baseline = remaining，液位恒为满）。
+ * 该误差由 baseline 语义吸收（调漆后 baseline = remaining，液位恒为满）。
  */
 export function toFill(capacityMl: number, remainingMl: number, ratioN: number): MixResult {
   const space = r1(capacityMl - remainingMl);

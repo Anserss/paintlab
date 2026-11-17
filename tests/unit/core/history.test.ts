@@ -174,11 +174,11 @@ describe('history · restore / clear（AC-14）', () => {
 
 describe('command · 命令与补丁构造（spec 5.3:1176-1180）', () => {
   it('createCommand 生成唯一 id 与给定字段', () => {
-    const a = createCommand('mix', '调配', [], [], 1234);
-    const b = createCommand('mix', '调配', [], [], 1234);
+    const a = createCommand('mix', '调漆', [], [], 1234);
+    const b = createCommand('mix', '调漆', [], [], 1234);
     expect(a.id).not.toBe(b.id);
     expect(a.type).toBe('mix');
-    expect(a.label).toBe('调配');
+    expect(a.label).toBe('调漆');
     expect(a.at).toBe(1234);
   });
 

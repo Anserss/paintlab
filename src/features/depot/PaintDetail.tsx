@@ -13,7 +13,7 @@ export interface PaintDetailProps {
   row: DepotRow | null;
   groups: Group[];
   onClose: () => void;
-  onAddToStation: (row: DepotRow) => void;
+  onOpenCoat: (row: DepotRow) => void;
   onUse: (row: DepotRow) => void;
   onAdjust: (row: DepotRow) => void;
   onDelete: (row: DepotRow) => void;
@@ -25,7 +25,7 @@ export function PaintDetail({
   row,
   groups,
   onClose,
-  onAddToStation,
+  onOpenCoat,
   onUse,
   onAdjust,
   onDelete,
@@ -101,17 +101,30 @@ export function PaintDetail({
 
         <p className="text-xs text-text-3">{origin}</p>
 
-        <div className="flex items-center justify-between border-y border-line py-2">
-          <span className="t-label">色值（只读）</span>
-          <span
-            role="textbox"
-            aria-readonly="true"
-            aria-label="色值（只读，不可编辑）"
-            data-paint-hex=""
-            className="t-readout text-sm uppercase text-text-1"
-          >
-            {row.paint.hex.toUpperCase()}
-          </span>
+        <div className="flex flex-col gap-1 border-y border-line py-2">
+          <div className="flex items-center justify-between">
+            <span className="t-label">色值（只读）</span>
+            <span
+              role="textbox"
+              aria-readonly="true"
+              aria-label="色值（只读，不可编辑）"
+              data-paint-hex=""
+              className="t-readout text-sm uppercase text-text-1"
+            >
+              {row.paint.hexEstimated ? '≈ ' : ''}
+              {row.paint.hex.toUpperCase()}
+            </span>
+          </div>
+          <p className="text-[10px] leading-snug text-text-3">
+            {row.paint.hexEstimated
+              ? '该色值按色名推定（未取到厂商官方色卡），仅用于近似辨识；核验后可在目录种子中回填。'
+              : '色值来自目录（厂商色卡或既有核验记录）。'}
+          </p>
+          {row.paint.source && (
+            <p data-paint-source="" className="text-[10px] leading-snug text-text-3">
+              {'来源：' + row.paint.source}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -186,11 +199,11 @@ export function PaintDetail({
       </div>
 
       <footer className="mt-auto flex flex-wrap gap-2 border-t border-line p-3">
-        <Button variant="secondary" size="sm" data-detail-action="station" onClick={() => onAddToStation(row)}>
-          加入工位
+        <Button variant="secondary" size="sm" data-detail-action="workbench" onClick={() => onOpenCoat(row)}>
+          开涂
         </Button>
         <Button variant="secondary" size="sm" data-detail-action="mix" onClick={() => onUse(row)}>
-          取用调漆
+          调漆
         </Button>
         <Button variant="secondary" size="sm" data-detail-action="adjust" onClick={() => onAdjust(row)}>
           调整余量

@@ -197,34 +197,34 @@ describe('采购大厅（spec 3.2 / AC-15 / AC-16）', () => {
     expect(rowsOf(container)[0].getAttribute('data-code')).toBe('JW001');
   });
 
-  it('登记入库：确认后该行出现「已登记 ×1」、按钮变「再登记一份」，并写入 stockItem 与回执', async () => {
+  it('入库：确认后该行出现「已入库 ×1」、按钮变「再入库一份」，并写入 stockItem 与回执', async () => {
     const { container } = render(<ProcurePage />);
     await waitFor(() => expect(rowsOf(container)).toHaveLength(2));
 
     const c80 = container.querySelector<HTMLElement>('[data-paint-row][data-code="C80"]');
     const wrapper = c80?.parentElement as HTMLElement;
     const registerButton = Array.from(wrapper.querySelectorAll('button')).find(
-      (button) => button.textContent === '+ 登记',
+      (button) => button.textContent === '+ 入库',
     );
     expect(registerButton).toBeTruthy();
     fireEvent.click(registerButton as HTMLButtonElement);
 
-    const confirm = await screen.findByRole('button', { name: '确认登记' });
+    const confirm = await screen.findByRole('button', { name: '确认入库' });
     fireEvent.click(confirm);
 
-    await waitFor(() => expect(container.textContent).toContain('已登记 ×1'));
-    expect(container.textContent).toContain('再登记一份');
+    await waitFor(() => expect(container.textContent).toContain('已入库 ×1'));
+    expect(container.textContent).toContain('再入库一份');
 
     const state = useAppStore.getState();
     expect(state.stockItems).toHaveLength(1);
     expect(state.stockItems[0].paintId).toBe('gsi-c80');
     expect(state.stockItems[0].initialMl).toBe(10);
     expect(state.stockItems[0].state).toBe('neat');
-    expect(state.toasts.some((toast) => toast.message.includes('已登记 郡士 C80 Cobalt Blue 10.0 ml'))).toBe(true);
+    expect(state.toasts.some((toast) => toast.message.includes('已入库 郡士 C80 Cobalt Blue 10.0 ml'))).toBe(true);
     expect(state.toasts.some((toast) => toast.actionLabel === '撤销')).toBe(true);
   });
 
-  it('多选批量：Ctrl+点击选中 2 行 → 底部 Toolbar → 一次批量登记', async () => {
+  it('多选批量：Ctrl+点击选中 2 行 → 底部 Toolbar → 一次批量入库', async () => {
     const { container } = render(<ProcurePage />);
     await waitFor(() => expect(rowsOf(container)).toHaveLength(2));
 
@@ -233,18 +233,18 @@ describe('采购大厅（spec 3.2 / AC-15 / AC-16）', () => {
     fireEvent.click(rows[1], { ctrlKey: true });
 
     await waitFor(() => expect(screen.getByText('已选 2 件')).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: '登记入库 (2)' }));
+    fireEvent.click(screen.getByRole('button', { name: '入库 (2)' }));
 
-    fireEvent.click(await screen.findByRole('button', { name: '确认登记' }));
+    fireEvent.click(await screen.findByRole('button', { name: '确认入库' }));
     await waitFor(() => expect(useAppStore.getState().stockItems).toHaveLength(2));
-    await waitFor(() => expect(container.textContent).toContain('已登记 ×1'));
+    await waitFor(() => expect(container.textContent).toContain('已入库 ×1'));
 
-    const registered = rowsOf(container).filter((row) => (row.textContent ?? '').includes('已登记 ×1'));
+    const registered = rowsOf(container).filter((row) => (row.textContent ?? '').includes('已入库 ×1'));
     expect(registered).toHaveLength(2);
-    expect(container.textContent).toContain('再登记一份');
+    expect(container.textContent).toContain('再入库一份');
   });
 
-  it('筛选与排序：仅未入库过滤已登记项，按色相（hueBucket）重排列表', async () => {
+  it('筛选与排序：仅未入库过滤已入库项，按色相（hueBucket）重排列表', async () => {
     // 色号序 C1 < C90，但色相序相反：C90（红，bucket 0）先于 C1（蓝，bucket 7）
     const blue = makePaint({
       id: 'gsi-c1',

@@ -1,85 +1,88 @@
-# PAINTLAB 1.0 · 漆料资产与调漆工作台
+# PAINTLAB 1.1 · 漆料资产与调漆工作台
 
-> 工程代号 **PAINTLAB**（前身：PIGMENT DEPOT 设计包 v1.3）。
-> 交班要点与工程描述：`docs/PAINTLAB-1.0-交班总结与工程描述.md`；分层与脚本速查：`IMPLEMENTATION.md`。
+> 工程代号 **PAINTLAB**。交班与工程描述：`docs/PAINTLAB-1.0-交班总结与工程描述.md`；
+> 本轮改版说明（术语 / 数据 / 调漆台双模式）见 `docs/PAINTLAB-1.1-改版说明.md`；
+> 分层与脚本速查：`IMPLEMENTATION.md`。
 > 单文件启动器：`release/PAINTLAB.exe`（`npm run launcher` 重建）。
 
----
-面向模型涂装玩家的**漆料资产与调漆工作台**：采购登记 → 仓库管理 → 稀释调配 → 工位使用，
+面向模型涂装玩家的**漆料资产与调漆工作台**：采购入库 → 仓库管理 → 调漆台（稀释 / 调漆）→ 工作台开涂，
 本地优先、离线可用，视觉走「明日方舟式工业实用主义 × 包豪斯构成」。
 
-本包 = **一份可执行的设计说明书 + 一份真实的 256 条色卡数据 + 两个跑得通的零依赖脚本**。
-
 ---
 
-## 包内结构
+## 四个动词，全站统一
 
-```
-PIGMENT-DEPOT-v1.3/
-├─ README.md                        # 本文件
-├─ package.json                     # npm scripts（可选，直接 node 也能跑）
-├─ MANIFEST.txt                     # 文件清单 + SHA256
-├─ docs/
-│  ├─ 漆料管理软件-项目设计描述书.md      # 主交付物，v1.3，2000 行
-│  └─ seed/
-│     ├─ paint-catalog.seed.json     # 256 条真实色卡（郡士/匠域/田宫/AK）
-│     └─ README.md                  # 数据字段说明 + MIT 署名
-├─ scripts/
-│  ├─ verify-catalog.mjs            # 目录核验：6 类检查 + 待办 CSV + 退出码
-│  └─ build-catalog.mjs             # seed → 运行时品牌包
-├─ public/catalog/                  # 已构建产物，可直接被前端 fetch
-│  ├─ index.json                    # 品牌索引
-│  ├─ gsi.json / jy.json / tamiya.json / ak.json
-└─ reports/
-   └─ catalog-todo.csv              # 511 行待办（缺中文名 / 未核验）
-```
+| 动线 | 统一叫法 | 说明 |
+|---|---|---|
+| 任何进入仓库的动作 | **入库** | 采购页入库、工作台放回、调漆台批次入库 |
+| 任何进入调漆台的动作 | **调漆** | 仓库行点「调漆」→ 选中该条并进入调漆台 |
+| 任何进入工作台的动作 | **开涂** | 仓库多选开涂、调漆台批次开涂 |
+| 调漆台内的产出 | **稀释 / 调漆** | 两种模式，见下 |
+
+## 调漆台（本轮重做）
+
+- **稀释模式**：原浆 + 稀释剂按 1:N 直接产出「已稀释漆料」批次；**不再选择调漆瓶容量**。
+  也支持取用仓库里的已稀释漆料继续再稀释（填取用 ml + 目标比例）。
+- **调漆模式**：多组分（原浆 / 已稀释漆料）按 ml 或按**目标总容量分摊**混合，
+  每组按自身比例折算原浆，得出等效比例。
+- 批次动作：**入库**（变成仓库条目）/ **开涂**（送到工作台）/ 使用 / 清空；可切换历史批次。
 
 ## 快速开始
 
-需要 Node.js ≥ 18（开发时为 v24）。
+需要 Node.js ≥ 18。
 
 ```bash
-# 核验数据（0 错误 0 警告才算过）
-node scripts/verify-catalog.mjs --file docs/seed/paint-catalog.seed.json --out reports/catalog-todo.csv
-
-# 重新构建品牌包
-node scripts/build-catalog.mjs --file docs/seed/paint-catalog.seed.json --out public/catalog
+npm install --ignore-scripts     # 沙箱里 esbuild 的 postinstall 会被拦，平台包已随可选依赖装好
+npm run dev                      # http://localhost:5175
+npm run typecheck                # tsc --noEmit，期望 0 错
+npm test                         # vitest run，24 文件 / 323 用例
+npm run build                    # tsc --noEmit && vite build（PWA 壳）
+npm run check                    # 目录核验 + 重建 public/catalog
+npm run launcher                 # 重建 release/PAINTLAB.exe
 ```
 
-或：
+## 数据（paintlab 合并表重建）
+
+| 品牌 | 产品线 | 条数 |
+|---|---|---|
+| 郡士 GSI Creos（`gsi`） | 23 条系列 | 448 |
+| 匠域 Jumpwind（`jy`） | 11 条系列 | 169 |
+| **合计** | 34 条 | **617** |
+
+- 漆类：实色 531 / 透明 55 / 辅助 31
+- 色值：121 条按色号复用既有目录已核验色值；465 条按色名推定，界面标 **≈ 推定色**（不谎报）
+- 数据管线（一条命令）：
 
 ```bash
-npm run verify:catalog
-npm run build:catalog
+npm run import:catalog    # paintlab CSV → docs/seed/paint-catalog.seed.json
+npm run check             # 核验 + 拆成 public/catalog/*.json
 ```
 
-## 数据实况
+**数据换代**：数据库版本升到 v2，升级时清空全部旧表（旧目录 4 品牌 267 条 + 旧库存 / 分组 /
+批次 / 工作台 / 记录 / 撤销栈），即「原有数据清除，重新入库」。
 
-| 品牌 | 产品线 | 条数 | 规格 | 溶剂 |
-|---|---|---|---|---|
-| 郡士 GSI Creos | Mr.Color（C 系列） | 130 | 10 ml | 油性 |
-| 匠域 Jumpwind | JW（含 MC 系列） | 106 | 10 ml | 油性 |
-| 田宫 Tamiya | LP 硝基漆 | 17 | 10 ml | 油性 |
-| AK Interactive | Real Colors | 3 | 10 ml | 油性 |
-| **合计** | | **256** | | |
+来源与许可：型号 / 容量 / 来源列来自 paintlab 的《郡士_匠域_油性漆_合并》表；
+色值沿用既有目录（modkit-swatch MIT 等）或由色名推定，逐条记录在 `paint.source`。
 
-- 漆类：实色 251 / 透明 5
-- 光泽：光泽 215、金属 20、消光 12、半光 4、透明 5
-- 中文名：1 / 256（仅匠域 MC97「制空蓝」）
-- 已核验：0 / 256（`verified` 全为 false）
+## 目录结构
 
-**重要结论**：田宫 `X-` / `XF-` 属**水性丙烯**（源数据 `type=acrylic`，94 条已排除），
-田宫油性本批只有 `LP-`。详见设计书 6.3。
-
-## 许可与署名
-
-主数据源 **[afzafri/modkit-swatch](https://github.com/afzafri/modkit-swatch)**，**MIT License**：
-保留其版权声明与许可文本即可用于商业项目。3 条 AK 数据为公开页面观察样本，已在
-`source` 字段单独标注。**不要把 GK-Mixer（PolyForm Noncommercial）的数据集搬进来。**
+```
+src/core/            领域层（types / schemas / math：dilution + blend / render / rules / history）
+src/data/            db（Dexie v2）/ repos / catalog
+src/store/           切片 + hydrateApp（ui / settings / catalog / inventory / mix / workbench / history）
+src/components/      ui / paint / bottle
+src/features/        procure / depot / mix / workbench / settings
+src/app/             Shell / TopBar / SideNav / App
+tests/unit/          core · data · components · features（24 文件 / 323 用例）
+public/catalog/      运行时品牌包（gsi.json / jy.json / index.json）
+scripts/             import-paintlab / verify-catalog / build-catalog / make-launcher
+docs/                设计书 + 交班文档 + 种子数据
+```
 
 ## 已知缺口
 
-1. 中文名 255 条待补 → 影响色卡第二行的「中文优先」显示。
-2. 田宫 LP 仅 17 条、AK 仅 3 条 → 需按设计书 6.7 的 SOP 补齐。
-3. `verified` 全为 false → 色值需抽样校验（每批 10 条，ΔE ≤ 3）。
-4. 应用本体尚未开始：设计书 8.2 有 14 张可直接执行的任务卡，M0–M6 约 23 人日。
+1. 465 条色值为**按色名推定**（`hexEstimated: true`，界面 ≈ 推定色）—— 建议后续按厂商官网色卡回填。
+2. 7 条匠域珍珠色（GC004–GC010）官网不可达，名称待补（`source` 已标注）。
+3. 自动快照（`snapshots`）仍未实现；设置页标注 P1 未实现并提供导出替代。
+4. Playwright E2E 未接入；回归靠 323 条单测 + 人工走查。
+5. 打包单 chunk 约 625 KB（gzip 197 KB），未做 manualChunks 拆分。

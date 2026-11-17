@@ -9,19 +9,19 @@ import {
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useEffect, useState } from 'react';
 import { Button, Empty, Toolbar } from '@/components/ui';
-import { MAX_WORKSTATIONS } from '@/core/rules/invariants';
+import { MAX_WORKBENCHES } from '@/core/rules/invariants';
 import { useAppStore } from '@/store';
-import { DeleteStationDialog, ReturnDialog, StationFormDialog } from './StationDialogs';
-import type { StationFormValues } from './StationDialogs';
-import { STATION_DROP_PREFIX, StationTabs } from './StationTabs';
-import { StationTileGrid } from './StationTileGrid';
+import { DeleteWorkbenchDialog, ReturnDialog, WorkbenchFormDialog } from './WorkbenchDialogs';
+import type { WorkbenchFormValues } from './WorkbenchDialogs';
+import { WORKBENCH_DROP_PREFIX, WorkbenchTabs } from './WorkbenchTabs';
+import { WorkbenchTileGrid } from './WorkbenchTileGrid';
 import { UsagePanel } from './UsagePanel';
-import { formatStationStats, resolveEntries } from './stationModel';
+import { formatWorkbenchStats, resolveEntries } from './workbenchModel';
 
 type DialogKind = 'none' | 'create' | 'edit' | 'delete' | 'return';
 
-/** 工位页（spec 3.5）：Tab + 磁贴网格 + 用量面板 + 批量操作条 + 统计 */
-export function StationPage() {
+/** 工作台页（spec 3.5）：Tab + 磁贴网格 + 用量面板 + 批量操作条 + 统计 */
+export function WorkbenchPage() {
   const state = useAppStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -29,24 +29,24 @@ export function StationPage() {
   const [dialog, setDialog] = useState<DialogKind>('none');
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
 
-  const workstations = state.workstations;
-  const atCap = workstations.length >= MAX_WORKSTATIONS;
-  const active = workstations.find((row) => row.id === activeId) ?? workstations[0] ?? null;
+  const workbenches = state.workbenches;
+  const atCap = workbenches.length >= MAX_WORKBENCHES;
+  const active = workbenches.find((row) => row.id === activeId) ?? workbenches[0] ?? null;
 
-  // 撤销/反撤销只刷新库存，工位读模型需要自行重读（spec 3.6：撤销后 UI 必须一致）
+  // 撤销/反撤销只刷新库存，工作台读模型需要自行重读（spec 3.6：撤销后 UI 必须一致）
   useEffect(() => {
-    void useAppStore.getState().refreshStations();
+    void useAppStore.getState().refreshWorkbenches();
   }, [state.undoCount, state.redoCount]);
 
   useEffect(() => {
-    if (workstations.length === 0) {
+    if (workbenches.length === 0) {
       if (activeId !== null) setActiveId(null);
       return;
     }
-    if (!activeId || !workstations.some((row) => row.id === activeId)) setActiveId(workstations[0].id);
-  }, [workstations, activeId]);
+    if (!activeId || !workbenches.some((row) => row.id === activeId)) setActiveId(workbenches[0].id);
+  }, [workbenches, activeId]);
 
-  const activeItems = active ? state.stationItems.filter((row) => row.workstationId === active.id) : [];
+  const activeItems = active ? state.workbenchItems.filter((row) => row.workbenchId === active.id) : [];
   const entries = resolveEntries(activeItems, {
     stockItems: state.stockItems,
     bottles: state.bottles,
@@ -54,10 +54,10 @@ export function StationPage() {
     linesById: state.linesById,
     brands: state.brands,
   });
-  const stats = active ? state.statsOfStation(active.id) : { count: 0, totalMl: 0, kits: 0 };
+  const stats = active ? state.statsOfWorkbench(active.id) : { count: 0, totalMl: 0, kits: 0 };
   const selectedEntries = entries.filter((entry) => selectedIds.includes(entry.id));
   const panelEntry = entries.find((entry) => entry.id === activeEntryId) ?? selectedEntries[0] ?? entries[0] ?? null;
-  const otherStations = workstations.filter((row) => row.id !== active?.id);
+  const otherWorkbenches = workbenches.filter((row) => row.id !== active?.id);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -76,19 +76,19 @@ export function StationPage() {
     );
   }
 
-  function handleCreate(values: StationFormValues) {
+  function handleCreate(values: WorkbenchFormValues) {
     setDialog('none');
     void state
-      .newWorkstation({ name: values.name, note: values.note || undefined, accent: values.accent })
+      .newWorkbench({ name: values.name, note: values.note || undefined, accent: values.accent })
       .then((result) => {
         if (result.ok) setActiveId(result.data.id);
       });
   }
 
-  function handleEdit(values: StationFormValues) {
+  function handleEdit(values: WorkbenchFormValues) {
     setDialog('none');
     if (!active) return;
-    void state.editWorkstation({
+    void state.editWorkbench({
       id: active.id,
       name: values.name,
       note: values.note,
@@ -99,7 +99,7 @@ export function StationPage() {
   function handleDelete() {
     setDialog('none');
     if (!active) return;
-    void state.removeWorkstation({ id: active.id }).then(() => {
+    void state.removeWorkbench({ id: active.id }).then(() => {
       setSelectedIds([]);
       setActiveId(null);
     });
@@ -108,29 +108,29 @@ export function StationPage() {
   function handleReturn(list: { itemId: string; usedMl: number }[]) {
     setDialog('none');
     if (!active) return;
-    void state.returnToDepot({ workstationId: active.id, entries: list }).then(() => setSelectedIds([]));
+    void state.stockIn({ workbenchId: active.id, entries: list }).then(() => setSelectedIds([]));
   }
 
   function handleRemoveSelected() {
     if (selectedIds.length === 0) return;
-    void state.removeFromStation([...selectedIds]).then(() => setSelectedIds([]));
+    void state.removeFromWorkbench([...selectedIds]).then(() => setSelectedIds([]));
   }
 
-  function handleMove(targetWorkstationId: string) {
+  function handleMove(targetWorkbenchId: string) {
     setMoveMenuOpen(false);
     if (selectedIds.length === 0) return;
     void state
-      .moveInStation({ itemIds: [...selectedIds], targetWorkstationId })
+      .moveInWorkbench({ itemIds: [...selectedIds], targetWorkbenchId })
       .then(() => setSelectedIds([]));
   }
 
   function handleDragEnd(event: DragEndEvent) {
     const overId = event.over?.id;
-    if (typeof overId !== 'string' || !overId.startsWith(STATION_DROP_PREFIX)) return;
-    const targetId = overId.slice(STATION_DROP_PREFIX.length);
+    if (typeof overId !== 'string' || !overId.startsWith(WORKBENCH_DROP_PREFIX)) return;
+    const targetId = overId.slice(WORKBENCH_DROP_PREFIX.length);
     if (!active || targetId === active.id) return;
     void state
-      .moveInStation({ itemIds: [String(event.active.id)], targetWorkstationId: targetId })
+      .moveInWorkbench({ itemIds: [String(event.active.id)], targetWorkbenchId: targetId })
       .then(() => setSelectedIds([]));
   }
 
@@ -143,37 +143,37 @@ export function StationPage() {
   }
 
   return (
-    <section className="p-6" data-page="station">
+    <section className="p-6" data-page="workbench">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="t-display text-2xl">STATION // 工位</h1>
+          <h1 className="t-display text-2xl">WORKBENCH // 工作台</h1>
           {active ? (
-            <p data-slot="station-stats" className="t-readout mt-1 text-[11px] text-text-3">
-              {formatStationStats(stats)}
+            <p data-slot="workbench-stats" className="t-readout mt-1 text-[11px] text-text-3">
+              {formatWorkbenchStats(stats)}
             </p>
           ) : (
-            <p className="mt-1 text-[11px] text-text-3">最多 5 个工位；工位内条目可拖拽到其它工位。</p>
+            <p className="mt-1 text-[11px] text-text-3">最多 5 个工作台；工作台内条目可拖拽到其它工作台。</p>
           )}
           {active?.note && <p className="mt-1 text-[11px] text-text-2">备注：{active.note}</p>}
         </div>
 
         {active && (
           <div className="flex shrink-0 items-center gap-2">
-            <Button data-action="edit-station" onClick={() => setDialog('edit')}>
+            <Button data-action="edit-workbench" onClick={() => setDialog('edit')}>
               重命名
             </Button>
-            <Button variant="danger" data-action="delete-station" onClick={() => setDialog('delete')}>
-              删除工位
+            <Button variant="danger" data-action="delete-workbench" onClick={() => setDialog('delete')}>
+              删除工作台
             </Button>
           </div>
         )}
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <StationTabs
-          stations={workstations.map((workstation) => {
-            const stationStats = state.statsOfStation(workstation.id);
-            return { workstation, count: stationStats.count, totalMl: stationStats.totalMl };
+        <WorkbenchTabs
+          workbenches={workbenches.map((workbench) => {
+            const workbenchStats = state.statsOfWorkbench(workbench.id);
+            return { workbench, count: workbenchStats.count, totalMl: workbenchStats.totalMl };
           })}
           activeId={active?.id ?? null}
           atCap={atCap}
@@ -189,12 +189,12 @@ export function StationPage() {
           <div className="min-w-0 flex-1">
             {!active ? (
               <Empty
-                title="未创建工位"
-                description="先新建一个工位，再从仓库多选漆料加入。"
-                action={<Button data-action="new-station-empty" onClick={openCreate}>＋ 新建工位</Button>}
+                title="未创建工作台"
+                description="先新建一个工作台，再从仓库多选漆料加入。"
+                action={<Button data-action="new-workbench-empty" onClick={openCreate}>＋ 新建工作台</Button>}
               />
             ) : (
-              <StationTileGrid entries={entries} selectedIds={selectedIds} onToggle={handleToggle} />
+              <WorkbenchTileGrid entries={entries} selectedIds={selectedIds} onToggle={handleToggle} />
             )}
           </div>
 
@@ -218,38 +218,38 @@ export function StationPage() {
           记录用量
         </Button>
         <Button size="sm" data-action="return-selected" onClick={() => setDialog('return')}>
-          放回仓库
+          入库
         </Button>
         <Button size="sm" data-action="remove-selected" onClick={handleRemoveSelected}>
-          移出工位
+          移出工作台
         </Button>
         <div className="relative">
           <Button
             size="sm"
             data-action="move-menu"
             aria-expanded={moveMenuOpen}
-            disabled={otherStations.length === 0}
-            title={otherStations.length === 0 ? '没有其它工位' : undefined}
+            disabled={otherWorkbenches.length === 0}
+            title={otherWorkbenches.length === 0 ? '没有其它工作台' : undefined}
             onClick={() => setMoveMenuOpen((open) => !open)}
           >
-            移到工位 ▾
+            移到工作台 ▾
           </Button>
-          {moveMenuOpen && otherStations.length > 0 && (
+          {moveMenuOpen && otherWorkbenches.length > 0 && (
             <div
               role="menu"
-              aria-label="移到工位"
+              aria-label="移到工作台"
               className="absolute bottom-9 right-0 min-w-[140px] border border-line-strong bg-surface p-1"
             >
-              {otherStations.map((workstation) => (
+              {otherWorkbenches.map((workbench) => (
                 <button
-                  key={workstation.id}
+                  key={workbench.id}
                   type="button"
                   role="menuitem"
-                  data-move-target={workstation.id}
-                  onClick={() => handleMove(workstation.id)}
+                  data-move-target={workbench.id}
+                  onClick={() => handleMove(workbench.id)}
                   className="block w-full px-2 py-1 text-left text-xs text-text-2 transition-colors duration-hover hover:bg-surface-2 hover:text-text-1"
                 >
-                  {workstation.name}
+                  {workbench.name}
                 </button>
               ))}
             </div>
@@ -257,16 +257,16 @@ export function StationPage() {
         </div>
       </Toolbar>
 
-      <StationFormDialog
+      <WorkbenchFormDialog
         key={'create-' + dialog}
         open={dialog === 'create'}
         mode="create"
-        takenNames={workstations.map((row) => row.name)}
+        takenNames={workbenches.map((row) => row.name)}
         onOpenChange={(open) => setDialog(open ? 'create' : 'none')}
         onSubmit={handleCreate}
       />
 
-      <StationFormDialog
+      <WorkbenchFormDialog
         key={'edit-' + (active?.id ?? 'none') + '-' + dialog}
         open={dialog === 'edit'}
         mode="edit"
@@ -275,14 +275,14 @@ export function StationPage() {
             ? { name: active.name, note: active.note ?? '', accent: active.accent }
             : undefined
         }
-        takenNames={workstations.filter((row) => row.id !== active?.id).map((row) => row.name)}
+        takenNames={workbenches.filter((row) => row.id !== active?.id).map((row) => row.name)}
         onOpenChange={(open) => setDialog(open ? 'edit' : 'none')}
         onSubmit={handleEdit}
       />
 
-      <DeleteStationDialog
+      <DeleteWorkbenchDialog
         open={dialog === 'delete'}
-        stationName={active?.name ?? ''}
+        workbenchName={active?.name ?? ''}
         itemCount={activeItems.length}
         onOpenChange={(open) => setDialog(open ? 'delete' : 'none')}
         onConfirm={handleDelete}

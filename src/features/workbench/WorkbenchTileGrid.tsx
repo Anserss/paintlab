@@ -3,10 +3,10 @@ import type { MouseEvent } from 'react';
 import { Empty, cn } from '@/components/ui';
 import { PaintTile } from '@/components/paint';
 import { formatMl } from '@/core/math/quantity';
-import type { StationEntry } from './stationModel';
+import type { WorkbenchEntry } from './workbenchModel';
 
-export interface StationTileGridProps {
-  entries: StationEntry[];
+export interface WorkbenchTileGridProps {
+  entries: WorkbenchEntry[];
   selectedIds: string[];
   onToggle: (entryId: string) => void;
 }
@@ -16,7 +16,7 @@ function DraggableTile({
   selected,
   onToggle,
 }: {
-  entry: StationEntry;
+  entry: WorkbenchEntry;
   selected: boolean;
   onToggle: (entryId: string) => void;
 }) {
@@ -28,7 +28,7 @@ function DraggableTile({
   return (
     <div
       ref={setNodeRef}
-      data-station-tile={entry.id}
+      data-workbench-tile={entry.id}
       data-ref-type={entry.refType}
       className={cn('cursor-grab', isDragging && 'opacity-40')}
       {...(listeners ?? {})}
@@ -46,7 +46,7 @@ function DraggableTile({
         />
       ) : (
         <div
-          data-station-tile-fallback=""
+          data-workbench-tile-fallback=""
           className="flex h-[var(--tile-h)] w-tile shrink-0 flex-col justify-between border border-dashed border-line bg-surface p-1.5"
           onClick={() => onToggle(entry.id)}
         >
@@ -59,18 +59,18 @@ function DraggableTile({
   );
 }
 
-/** 主区：该工位条目的 PaintTile 网格（spec 3.5 / 4.5.1） */
-export function StationTileGrid({ entries, selectedIds, onToggle }: StationTileGridProps) {
+/** 主区：该工作台条目的 PaintTile 网格（spec 3.5 / 4.5.1） */
+export function WorkbenchTileGrid({ entries, selectedIds, onToggle }: WorkbenchTileGridProps) {
   if (entries.length === 0) {
-    return <Empty title="工位待命" description="从仓库多选漆料，加入此工位。" />;
+    return <Empty title="工作台待命" description="从仓库多选漆料，加入此工作台。" />;
   }
 
   return (
     <div
       role="listbox"
       aria-multiselectable="true"
-      aria-label="工位条目"
-      data-grid="station"
+      aria-label="工作台条目"
+      data-grid="workbench"
       className="flex flex-wrap content-start gap-3"
     >
       {entries.map((entry) => (

@@ -156,7 +156,7 @@ describe('PaintRow 结构', () => {
     expect(row.getAttribute('aria-selected')).toBe('true');
     expect(row.getAttribute('aria-label')).toContain('钴蓝');
     expect(container.textContent ?? '').toContain('12.4/17.0 ml');
-    expect(container.textContent ?? '').toContain('已登记×1');
+    expect(container.textContent ?? '').toContain('已入库×1');
   });
 
   it('空瓶行整行淡化并出现「空」徽标', () => {

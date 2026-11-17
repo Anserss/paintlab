@@ -16,7 +16,7 @@ export interface HistorySlice {
   canRedo: boolean;
   hydrateHistoryState: () => Promise<void>;
   refreshHistory: () => void;
-  /** 撤销/反撤销后统一重读所有读模型（库存 / 瓶 / 工位 / 历史计数） */
+  /** 撤销/反撤销后统一重读所有读模型（库存 / 瓶 / 工作台 / 历史计数） */
   refreshAllReadModels: () => Promise<void>;
   undo: () => Promise<Result<Command>>;
   redo: () => Promise<Result<Command>>;
@@ -52,7 +52,7 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
     get().refreshHistory();
     await get().refreshInventory();
     await get().refreshBottles();
-    await get().refreshStations();
+    await get().refreshWorkbenches();
     get().refreshHistory();
   },
 

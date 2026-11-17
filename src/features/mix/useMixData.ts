@@ -1,67 +1,66 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MixRecord, Paint, StockItem } from '@/core/model/types';
+import type { MixRecord, Paint, PaintState, StockItem } from '@/core/model/types';
 import { codeOrDash, paintTitle } from '@/core/render/label';
 import { getStore } from '@/data/db';
 import { useAppStore } from '@/store';
 
-export interface NeatRow {
+export interface StockRow {
   item: StockItem;
   paint?: Paint;
   code: string;
   name: string;
   volumeMl: number;
   isAux: boolean;
+  state: PaintState;
+  ratioN: number;
 }
 
 /**
- * 左栏取用列表：stockItems 里 state='neat' 的条目（3.4.1）。
- * 色块 / 色号 / 中文名来自目录包；目录未加载时降级为「目录未加载」并由计算器禁止调配。
+ * 调漆台左栏读模型：库存条目 + 目录解析结果。
+ * 原浆（neat）与已稀释漆料（thinned）都要列出来 —— 后者是「稀释模式再稀释」与「调漆模式组分」的来源。
  */
-export function useNeatRows(): NeatRow[] {
+export function useStockRows(): StockRow[] {
   const stockItems = useAppStore((state) => state.stockItems);
   const paintsById = useAppStore((state) => state.paintsById);
 
   return useMemo(() => {
-    const rows = stockItems
-      .filter((item) => item.state === 'neat')
-      .map((item): NeatRow => {
-        const paint = paintsById[item.paintId];
-        const title = paint ? paintTitle(paint) : null;
-        const row: NeatRow = {
-          item,
-          code: codeOrDash(paint?.code),
-          name: title ? title.primary : '目录未加载',
-          volumeMl: item.volumeMl,
-          isAux: paint?.paintClass === 'aux',
-        };
-        if (paint) row.paint = paint;
-        return row;
-      });
-    return rows.sort((a, b) => Number(a.isAux) - Number(b.isAux) || a.code.localeCompare(b.code));
+    const rows = stockItems.map((item): StockRow => {
+      const paint = paintsById[item.paintId];
+      const title = paint ? paintTitle(paint) : null;
+      const row: StockRow = {
+        item,
+        code: codeOrDash(paint?.code),
+        name: title ? title.primary : '目录未加载',
+        volumeMl: item.volumeMl,
+        isAux: paint?.paintClass === 'aux',
+        state: item.state,
+        ratioN: item.ratioN ?? 0,
+      };
+      if (paint) row.paint = paint;
+      return row;
+    });
+    return rows.sort(
+      (a, b) =>
+        Number(a.isAux) - Number(b.isAux) ||
+        Number(a.state === 'thinned') - Number(b.state === 'thinned') ||
+        a.code.localeCompare(b.code),
+    );
   }, [stockItems, paintsById]);
 }
 
-/**
- * 「取用原浆」候选：state=neat 且**不是辅料**。
- * 稀释剂/缓干剂也在库存里，但它们是配料不是原浆，混进来会让用户拿稀释剂当漆用。
- */
-export function useMixableNeatRows(): NeatRow[] {
-  const rows = useNeatRows();
-  return useMemo(() => rows.filter((row) => !row.isAux), [rows]);
+/** 调漆台取用候选：有余量、且不是辅料（稀释剂走「稀释剂来源」，不能当漆用） */
+export function useMixStockRows(): StockRow[] {
+  const rows = useStockRows();
+  return useMemo(() => rows.filter((row) => !row.isAux && row.volumeMl > 0), [rows]);
 }
 
-/** 稀释剂候选：paintClass='aux' 且有余量的 neat 条目（3.4.2 稀释剂来源） */
-export function useThinnerRows(): NeatRow[] {
-  const rows = useNeatRows();
-  return useMemo(
-    () => rows.filter((row) => row.paint?.paintClass === 'aux' && row.volumeMl > 0),
-    [rows],
-  );
+/** 稀释剂候选：paintClass='aux' 且有余量 */
+export function useThinnerRows(): StockRow[] {
+  const rows = useStockRows();
+  return useMemo(() => rows.filter((row) => row.isAux && row.volumeMl > 0), [rows]);
 }
-/**
- * 最近配方（3.4.2 配方记忆）：mixRecords 未在 store 暴露选择器，且不得改 src/store，
- * 这里只读访问数据层；bottles 变化（每次调配都会 refreshBottles）即重新读取。
- */
+
+/** 最近配方：bottles 变化即重读（每次稀释 / 调漆都会刷新 bottles） */
 export function useMixRecords(limit = 8): MixRecord[] {
   const bottles = useAppStore((state) => state.bottles);
   const [records, setRecords] = useState<MixRecord[]>([]);

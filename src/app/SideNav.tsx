@@ -12,8 +12,8 @@ interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { to: '/procure', code: '//01', label: '采购', glyph: '▤' },
   { to: '/depot', code: '//02', label: '仓库', glyph: '▦' },
-  { to: '/mix', code: '//03', label: '调漆', glyph: '◐' },
-  { to: '/station', code: '//04', label: '工位', glyph: '▣' },
+  { to: '/mix', code: '//03', label: '调漆台', glyph: '◐' },
+  { to: '/workbench', code: '//04', label: '工作台', glyph: '▣' },
   { to: '/settings', code: '//05', label: '设置', glyph: '◇' },
 ];
 

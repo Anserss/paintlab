@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, cn } from '@/components/ui';
 import { formatMl } from '@/core/math/quantity';
-import type { StationEntry } from './stationModel';
+import type { WorkbenchEntry } from './workbenchModel';
 import {
   PLANNED_MAX_ML,
   PLANNED_MIN_ML,
@@ -9,17 +9,17 @@ import {
   PLANNED_STEP_ML,
   defaultPlannedMl,
   quantizePlanned,
-} from './stationModel';
+} from './workbenchModel';
 
 export interface UsagePanelProps {
-  entry: StationEntry | null;
+  entry: WorkbenchEntry | null;
   selectedCount: number;
   onCommit: (itemId: string, plannedUseMl: number) => void;
   onApplyToSelected: (plannedUseMl: number) => void;
   className?: string;
 }
 
-function initialValueOf(entry: StationEntry): number {
+function initialValueOf(entry: WorkbenchEntry): number {
   return entry.plannedUseMl > 0 ? quantizePlanned(entry.plannedUseMl) : defaultPlannedMl(entry.remainingMl);
 }
 
@@ -55,7 +55,7 @@ export function UsagePanel({ entry, selectedCount, onCommit, onApplyToSelected, 
       </div>
 
       {!entry ? (
-        <p className="mt-3 text-[11px] leading-[1.7] text-text-3">选中一个工位条目以记录大概使用量。</p>
+        <p className="mt-3 text-[11px] leading-[1.7] text-text-3">选中一个工作台条目以记录大概使用量。</p>
       ) : (
         <div className="mt-3 flex flex-col gap-3">
           <div className="min-w-0">

@@ -73,7 +73,7 @@ export function BottleView({
   const liquid = swatchAttrs(bottle.hex, bottle.paintClass);
   const bubble = levelBubble(bottle.remainingMl, bottle.baselineMl, fraction);
   const hint = isBelowOneTick(fraction) ? '余量不足 1 格，建议清空' : null;
-  const ariaLabel = [bottle.name, empty ? '空瓶 · 可归档' : reading, hint]
+  const ariaLabel = [bottle.name, empty ? '空瓶 · 可入库' : reading, hint]
     .filter(Boolean)
     .join('，');
 
@@ -230,7 +230,7 @@ export function BottleView({
           <rect x={PLATE_X} y={plateY} width={PLATE_W} height={PLATE_H} rx={2} fill="var(--bg-0)" fillOpacity={0.72} />
           {empty ? (
             <text x={VB.width / 2} y={plateY + PLATE_H / 2 + 4} textAnchor="middle" fontSize={12} fill="var(--text-2)">
-              空瓶 · 可归档
+              空瓶 · 可入库
             </text>
           ) : (
             <>
@@ -276,8 +276,8 @@ export function BottleView({
       {(onUse || onMix) && (
         <div className="absolute inset-x-2 bottom-2 flex justify-center gap-1 opacity-0 transition-opacity duration-hover group-focus-within:opacity-100 group-hover:opacity-100">
           {onMix && (
-            <Button variant="ghost" size="sm" aria-label="调配" onClick={() => onMix(bottle)}>
-              调配
+            <Button variant="ghost" size="sm" aria-label="调漆" onClick={() => onMix(bottle)}>
+              调漆
             </Button>
           )}
           {onUse && (

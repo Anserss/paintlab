@@ -21,7 +21,7 @@ import {
   renameGroup,
   reorderGroups,
 } from '@/data/repos/group';
-import { createBottle, mixBottle, setBottleCapacity } from '@/data/repos/bottle';
+import { diluteIntoBatch, setBottleCapacity } from '@/data/repos/bottle';
 import { clearHistory, makeCommand, recordCommand, redo, snapshotHistory, undo } from '@/data/repos/history';
 import { commitCommand } from '@/data/repos/patch';
 
@@ -47,7 +47,7 @@ beforeEach(async () => {
   await clearHistory(store);
 });
 
-describe('登记入库事务（spec 3.2 / AC-01）', () => {
+describe('入库事务（spec 3.2 / AC-01）', () => {
   it('stockItem + ledger + command 写在同一事务里，未指定分组时落 unassigned', async () => {
     const result = await createStockItem(store, { paint, initialMl: 10, state: 'neat', groupId: null });
     expect(result.ok).toBe(true);
@@ -67,7 +67,7 @@ describe('登记入库事务（spec 3.2 / AC-01）', () => {
     expect(ledger[0].refId).toBe(items[0].id);
     expect(commands).toHaveLength(1);
     expect(commands[0].id).toBe(result.data.command.id);
-    expect(result.data.message).toContain('已登记');
+    expect(result.data.message).toContain('已入库');
   });
 
   it('补丁集任一失败则整批回滚', async () => {
@@ -320,7 +320,7 @@ describe('分组（spec 3.3 / 3.7.2）', () => {
     expect(childRow?.sort).toBe(0);
   });
 
-  it('瓶容量：改大成功、小于余量被拒且数据不变、撤销后回到旧容量（spec 3.4.3）', async () => {
+  it('批次容量：改大成功、小于余量被拒且数据不变、撤销后回到产出容量（稀释产物自动定量）', async () => {
     const source = await createStockItem(store, { paint, initialMl: 30, state: 'neat', groupId: null });
     const thinner = await createStockItem(store, {
       paint: { ...paint, id: 'gsi-thinner', name: 'Thinner' },
@@ -330,41 +330,41 @@ describe('分组（spec 3.3 / 3.7.2）', () => {
     });
     if (!source.ok || !thinner.ok) throw new Error('seed failed');
 
-    const bottle = await createBottle(store, { name: '瓶 1', capacityMl: 60 });
-    if (!bottle.ok) throw new Error(bottle.error);
-    const mixed = await mixBottle(store, {
-      bottleId: bottle.data.id,
-      mode: 'neat',
+    // 稀释 5 ml 原浆 + 1:2 → 产出 15 ml，容量按产出体积自动定量
+    const mixed = await diluteIntoBatch(store, {
       neatMl: 5,
-      ratioN: 2,
+      targetRatioN: 2,
       sourceStockItemId: source.data.item.id,
       thinnerStockItemId: thinner.data.item.id,
       paint,
     });
     if (!mixed.ok) throw new Error(mixed.error);
+    const bottleId = mixed.data.bottle.id;
+    expect(mixed.data.bottle.capacityMl).toBe(15);
+    expect(mixed.data.bottle.remainingMl).toBe(15);
 
-    const shrunk = await setBottleCapacity(store, { bottleId: bottle.data.id, capacityMl: 30 });
-    expect(shrunk.ok).toBe(true);
-    const after = await store.bottles.get(bottle.data.id);
+    const enlarged = await setBottleCapacity(store, { bottleId, capacityMl: 30 });
+    expect(enlarged.ok).toBe(true);
+    const after = await store.bottles.get(bottleId);
     expect(after?.capacityMl).toBe(30);
     expect(after?.remainingMl).toBe(15);
     expect(after?.baselineMl).toBe(15);
     expect((await store.ledger.toArray()).filter((row) => row.type === 'adjust')).toHaveLength(1);
 
-    const tooSmall = await setBottleCapacity(store, { bottleId: bottle.data.id, capacityMl: 10 });
+    const tooSmall = await setBottleCapacity(store, { bottleId, capacityMl: 10 });
     expect(tooSmall.ok).toBe(false);
     if (!tooSmall.ok) {
       expect(tooSmall.error).toContain('瓶内尚有 15 ml');
       expect(tooSmall.error).toContain('≥ 15 ml 的瓶');
     }
-    expect((await store.bottles.get(bottle.data.id))?.capacityMl).toBe(30);
+    expect((await store.bottles.get(bottleId))?.capacityMl).toBe(30);
 
-    const fractional = await setBottleCapacity(store, { bottleId: bottle.data.id, capacityMl: 12.5 });
+    const fractional = await setBottleCapacity(store, { bottleId, capacityMl: 12.5 });
     expect(fractional.ok).toBe(false);
 
     const undone = await undo(store);
     expect(undone.ok).toBe(true);
-    expect((await store.bottles.get(bottle.data.id))?.capacityMl).toBe(60);
+    expect((await store.bottles.get(bottleId))?.capacityMl).toBe(15);
   });
 
   it('批量移动到分组只产生 1 个 Command（spec 3.6 R5）', async () => {

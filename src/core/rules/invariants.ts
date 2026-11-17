@@ -9,7 +9,7 @@ export interface Violation {
   message: string;
 }
 
-export const MAX_WORKSTATIONS = 5;
+export const MAX_WORKBENCHES = 5;
 export const MAX_GROUP_DEPTH = 3;
 
 const ok = (): null => null;
@@ -47,10 +47,10 @@ export function checkGroupDepth(
   return ok();
 }
 
-/** I4: workstations.length <= 5 */
-export function checkWorkstationCount(count: number): Violation | null {
-  if (count > MAX_WORKSTATIONS)
-    return fail('I4', '最多 ' + MAX_WORKSTATIONS + ' 个工位，请先删除或复用现有工位');
+/** I4: workbenches.length <= 5 */
+export function checkWorkbenchCount(count: number): Violation | null {
+  if (count > MAX_WORKBENCHES)
+    return fail('I4', '最多 ' + MAX_WORKBENCHES + ' 个工作台，请先删除或复用现有工作台');
   return ok();
 }
 

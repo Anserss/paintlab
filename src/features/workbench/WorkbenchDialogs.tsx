@@ -1,67 +1,67 @@
 import { useEffect, useState } from 'react';
 import { Button, Dialog, cn } from '@/components/ui';
 import { formatMl, r1 } from '@/core/math/quantity';
-import { STATION_ACCENTS, STATION_NAME_MAX, STATION_NOTE_MAX } from '@/data/repos/station';
-import type { StationEntry } from './stationModel';
+import { WORKBENCH_ACCENTS, WORKBENCH_NAME_MAX, WORKBENCH_NOTE_MAX } from '@/data/repos/workbench';
+import type { WorkbenchEntry } from './workbenchModel';
 
-export interface StationFormValues {
+export interface WorkbenchFormValues {
   name: string;
   note: string;
   accent: string;
 }
 
-export interface StationFormDialogProps {
+export interface WorkbenchFormDialogProps {
   open: boolean;
   mode: 'create' | 'edit';
-  initial?: StationFormValues;
-  /** 其它工位的名称：全局不重名（spec 3.5） */
+  initial?: WorkbenchFormValues;
+  /** 其它工作台的名称：全局不重名（spec 3.5） */
   takenNames: string[];
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: StationFormValues) => void;
+  onSubmit: (values: WorkbenchFormValues) => void;
 }
 
-/** 新建 / 编辑工位：名称 1–16 字、全局唯一、6 个工业色、1 行备注 */
-export function StationFormDialog({
+/** 新建 / 编辑工作台：名称 1–16 字、全局唯一、6 个工业色、1 行备注 */
+export function WorkbenchFormDialog({
   open,
   mode,
   initial,
   takenNames,
   onOpenChange,
   onSubmit,
-}: StationFormDialogProps) {
+}: WorkbenchFormDialogProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
-  const [accent, setAccent] = useState(initial?.accent ?? STATION_ACCENTS[0]);
+  const [accent, setAccent] = useState(initial?.accent ?? WORKBENCH_ACCENTS[0]);
 
   useEffect(() => {
     if (!open) return;
     setName(initial?.name ?? '');
     setNote(initial?.note ?? '');
-    setAccent(initial?.accent ?? STATION_ACCENTS[0]);
+    setAccent(initial?.accent ?? WORKBENCH_ACCENTS[0]);
   }, [open, initial?.name, initial?.note, initial?.accent]);
 
   const trimmed = name.trim();
   const error =
     trimmed.length === 0
-      ? '请输入工位名称'
-      : trimmed.length > STATION_NAME_MAX
-        ? '名称最多 ' + STATION_NAME_MAX + ' 字'
+      ? '请输入工作台名称'
+      : trimmed.length > WORKBENCH_NAME_MAX
+        ? '名称最多 ' + WORKBENCH_NAME_MAX + ' 字'
         : takenNames.includes(trimmed)
-          ? '工位名称已存在「' + trimmed + '」'
+          ? '工作台名称已存在「' + trimmed + '」'
           : null;
 
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={mode === 'create' ? '新建工位' : '编辑工位'}
+      title={mode === 'create' ? '新建工作台' : '编辑工作台'}
       description="名称 1–16 字、全局不重名；可选 1 个工业色与 1 行备注。"
       footer={
         <>
           <Button onClick={() => onOpenChange(false)}>取消</Button>
           <Button
             variant="primary"
-            data-action="submit-station"
+            data-action="submit-workbench"
             disabled={Boolean(error)}
             onClick={() => onSubmit({ name: trimmed, note: note.trim(), accent })}
           >
@@ -70,19 +70,19 @@ export function StationFormDialog({
         </>
       }
     >
-      <div data-dialog="station-form" className="flex flex-col gap-3">
+      <div data-dialog="workbench-form" className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
           <span className="flex items-center justify-between text-[10px] text-text-3">
-            <span>工位名称</span>
+            <span>工作台名称</span>
             <span className="t-readout">
-              {name.length}/{STATION_NAME_MAX}
+              {name.length}/{WORKBENCH_NAME_MAX}
             </span>
           </span>
           <input
-            data-field="station-name"
-            aria-label="工位名称"
+            data-field="workbench-name"
+            aria-label="工作台名称"
             value={name}
-            maxLength={STATION_NAME_MAX}
+            maxLength={WORKBENCH_NAME_MAX}
             onChange={(event) => setName(event.target.value)}
             className="h-8 w-full border border-line bg-bg-1 px-2 text-xs text-text-1"
           />
@@ -91,10 +91,10 @@ export function StationFormDialog({
         <label className="flex flex-col gap-1">
           <span className="text-[10px] text-text-3">备注（1 行）</span>
           <input
-            data-field="station-note"
-            aria-label="工位备注"
+            data-field="workbench-note"
+            aria-label="工作台备注"
             value={note}
-            maxLength={STATION_NOTE_MAX}
+            maxLength={WORKBENCH_NOTE_MAX}
             onChange={(event) => setNote(event.target.value)}
             className="h-8 w-full border border-line bg-bg-1 px-2 text-xs text-text-1"
           />
@@ -102,8 +102,8 @@ export function StationFormDialog({
 
         <div className="flex flex-col gap-1">
           <span className="text-[10px] text-text-3">图标色（6 个工业色）</span>
-          <div role="group" aria-label="工位图标色" className="flex items-center gap-2">
-            {STATION_ACCENTS.map((hex) => (
+          <div role="group" aria-label="工作台图标色" className="flex items-center gap-2">
+            {WORKBENCH_ACCENTS.map((hex) => (
               <button
                 key={hex}
                 type="button"
@@ -122,7 +122,7 @@ export function StationFormDialog({
         </div>
 
         {error && (
-          <p data-slot="station-form-error" className="text-[10px] text-bh-red">
+          <p data-slot="workbench-form-error" className="text-[10px] text-bh-red">
             {error}
           </p>
         )}
@@ -133,17 +133,17 @@ export function StationFormDialog({
 
 export interface ReturnDialogProps {
   open: boolean;
-  entries: StationEntry[];
+  entries: WorkbenchEntry[];
   onOpenChange: (open: boolean) => void;
   onConfirm: (entries: { itemId: string; usedMl: number }[]) => void;
 }
 
-function defaultUsedOf(entry: StationEntry): number {
+function defaultUsedOf(entry: WorkbenchEntry): number {
   if (entry.plannedUseMl <= 0) return 0;
   return r1(Math.min(entry.plannedUseMl, entry.remainingMl));
 }
 
-/** 放回仓库（AC-09）：逐条取记录用量 u；u=0 时二次确认「仅移出、不扣减」 */
+/** 入库（AC-09）：逐条取记录用量 u；u=0 时二次确认「仅移出、不扣减」 */
 export function ReturnDialog({ open, entries, onOpenChange, onConfirm }: ReturnDialogProps) {
   const [used, setUsed] = useState<Record<string, number>>({});
   const [stage, setStage] = useState<'edit' | 'zero'>('edit');
@@ -172,14 +172,14 @@ export function ReturnDialog({ open, entries, onOpenChange, onConfirm }: ReturnD
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="放回仓库"
+      title="入库"
       description="条目回到仓库原分组；扣减量写入使用记录（reason=return），整批为 1 个可撤销操作。"
       footer={
         stage === 'edit' ? (
           <>
             <Button onClick={() => onOpenChange(false)}>取消</Button>
             <Button variant="primary" data-action="confirm-return" onClick={requestConfirm}>
-              确认放回仓库
+              确认入库
             </Button>
           </>
         ) : (
@@ -236,40 +236,40 @@ export function ReturnDialog({ open, entries, onOpenChange, onConfirm }: ReturnD
   );
 }
 
-export interface DeleteStationDialogProps {
+export interface DeleteWorkbenchDialogProps {
   open: boolean;
-  stationName: string;
+  workbenchName: string;
   itemCount: number;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }
 
-/** 删除工位二次确认：条目直接回仓库（spec 3.5 / 3.7.4） */
-export function DeleteStationDialog({
+/** 删除工作台二次确认：条目直接回仓库（spec 3.5 / 3.7.4） */
+export function DeleteWorkbenchDialog({
   open,
-  stationName,
+  workbenchName,
   itemCount,
   onOpenChange,
   onConfirm,
-}: DeleteStationDialogProps) {
+}: DeleteWorkbenchDialogProps) {
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="删除工位"
-      description={'删除「' + stationName + '」后，' + itemCount + ' 件条目直接回到仓库，可撤销。'}
+      title="删除工作台"
+      description={'删除「' + workbenchName + '」后，' + itemCount + ' 件条目直接回到仓库，可撤销。'}
       width={420}
       footer={
         <>
           <Button onClick={() => onOpenChange(false)}>取消</Button>
-          <Button variant="danger" data-action="confirm-delete-station" onClick={onConfirm}>
-            删除工位
+          <Button variant="danger" data-action="confirm-delete-workbench" onClick={onConfirm}>
+            删除工作台
           </Button>
         </>
       }
     >
-      <p data-dialog="delete-station" className="text-xs text-text-2">
-        工位本身与它的条目归属会被移除；漆料不会丢失。
+      <p data-dialog="delete-workbench" className="text-xs text-text-2">
+        工作台本身与它的条目归属会被移除；漆料不会丢失。
       </p>
     </Dialog>
   );

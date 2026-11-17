@@ -25,8 +25,8 @@ function readFileText(file: File): Promise<string> {
 }
 
 const MODE_IMPACT: Record<ImportMode, string> = {
-  replace: '覆盖：先清空全部用户数据表（库存 / 分组 / 工位 / 调漆瓶 / 记录 / 历史），再写入备份内容。',
-  merge: '合并：按 id 去重；库存与调漆瓶冲突时取较大余量，其余记录以备份为准。',
+  replace: '覆盖：先清空全部用户数据表（库存 / 分组 / 工作台 / 批次 / 记录 / 历史），再写入备份内容。',
+  merge: '合并：按 id 去重；库存与批次冲突时取较大余量，其余记录以备份为准。',
   skip: '跳过：已存在的 id 一律保留本地数据，只新增备份里没有的条目。',
 };
 
@@ -78,8 +78,8 @@ export function DataPanel() {
     const rows = buildInventoryCsvRows({
       stockItems: state.stockItems,
       groups: state.groups,
-      workstations: state.workstations,
-      stationItems: state.stationItems,
+      workbenches: state.workbenches,
+      workbenchItems: state.workbenchItems,
       paintOf: (id) => state.paintsById[id],
       brandOf: (id) => state.brands.find((brand) => brand.id === id),
     });
@@ -286,7 +286,7 @@ export function DataPanel() {
       >
         <div className="space-y-3 text-xs">
           <p className="leading-snug text-text-2">
-            影响范围：库存条目、分组、工位与工位条目、调漆瓶、调配 / 用量 / 账本记录、撤销历史，以及全部设置项（恢复默认）。
+            影响范围：库存条目、分组、工作台与工作台条目、调漆台批次、稀释 / 调漆 / 用量 / 账本记录、撤销历史，以及全部设置项（恢复默认）。
             目录数据（catalog）不受影响。
           </p>
           <p className="leading-snug text-text-3">重置不可撤销。如担心误操作，请先执行「导出全量」留档。</p>

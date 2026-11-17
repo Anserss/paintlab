@@ -14,7 +14,7 @@ export const BOTTLE = {
   ticks: 12,
 } as const;
 
-/** 显示比例：默认以"上次调配后总量"为分母（3.4.4） */
+/** 显示比例：默认以"上次调漆后总量"为分母（3.4.4） */
 export function levelFraction(
   remainingMl: number,
   baselineMl: number,

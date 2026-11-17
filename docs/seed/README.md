@@ -1,65 +1,73 @@
-# 首批漆料种子数据 / Seed Paint Catalog
+# 漆料种子数据 / Seed Paint Catalog
 
-`paint-catalog.seed.json` —— 256 条真实色卡，供 PIGMENT-DEPOT 初始化目录。
+`paint-catalog.seed.json` —— **617 条**漆料（郡士 / 匠域），由 paintlab 的厂商合并表重建，
+供应用初始化目录，并拆成运行时品牌包 `public/catalog/{gsi,jy}.json`。
 
 ## 统计
 
-| 品牌 | 产品线 | 条数 | 溶剂 |
+| 品牌 | 产品线 | 条数 | 成分 |
 |---|---|---|---|
-| 郡士 GSI Creos | `gsi-mr-color`（Mr.Color C 系列） | 130 | 油性 |
-| 匠域 Jumpwind | `jy-lacquer`（JW 系列） | 106 | 油性 |
-| 田宫 Tamiya | `tamiya-lp`（LP 硝基漆） | 17 | 油性 |
-| AK Interactive | `ak-real-colors`（Real Colors） | 3 | 油性 |
-| **合计** | | **256** | |
+| 郡士 GSI Creos（`gsi`） | 23 条系列（Mr.COLOR / GX / GGX / SPRAY / WEATHERING / SURFACER / UG…） | 448 | 色卡 + 辅料 |
+| 匠域 Jumpwind（`jy`） | 11 条系列（NEO COLOR / MEKA / CLEAR / GLAZE / EXTRA METAL / CT…） | 169 | 色卡 + 辅料 |
+| **合计** | **34** | **617** | |
 
-漆类：实色 251 / 透明 5 ｜ 光泽：光泽 215、金属 20、消光 12、半光 4、透明 5
-中文名：1 / 256 已填（仅匠域 MC97「制空蓝」，其余待补录）｜ 已核验：0 / 256（`verified` 全为 false）
+漆类：实色 531 ｜ 透明 55 ｜ 辅助 31
+光泽：光泽 163 · 半光 147 · 消光 60 · 金属 90 · 珍珠 23 · 透明 55 · 荧光 8 · 补土 11 · 旧化 23 · 辅助 31 · 其他 6
 
-## 许可与署名（保留本段）
+## 数据来源与色值纪律
 
-主数据源为 **[afzafri/modkit-swatch](https://github.com/afzafri/modkit-swatch)**，采用 **MIT License**。
+- **型号 / 容量 / 类别 / 系列 / 来源**：paintlab《郡士_匠域_油性漆_合并》(617 行)。
+  每条 `source` 记录出处；`verified=true` 表示该行的型号 / 容量有来源页。
+- **色值**（`hex`）：
+  1. 按 `(brandId, 色号)` 命中旧目录中已核验过的色值时直接复用（121 条）；
+  2. 未命中时按色名推定近似色，并写 `hexEstimated: true`（465 条），界面显示 **≈ 推定色**；
+  3. 辅料按项目约定统一 `#ffffff`（色块由 `paintClass='aux'` 渲染成白色 70%）。
+- **不谎报**：推定色值不写 `verified` 之外的任何"已核验"标记；详情页注明「色值按色名推定」。
 
-> Paint colour data derived from ModKit Swatch
-> (https://github.com/afzafri/modkit-swatch), MIT License.
-> Copyright (c) modkit-swatch contributors.
+> 后续若有厂商官网色卡，请按设计书 6.7 的 SOP 抽样核验后回填 `hex`、去掉 `hexEstimated`，
+> 并更新 `source`。
 
-MIT 允许商业使用与修改，但**必须保留上述版权声明与许可文本**。请在应用的"关于"页与
-`THIRD_PARTY_NOTICES.md` 中同步列出。
+## 重新生成
 
-其中 3 条 AK 数据（`RC236` / `RC291` / `RC316`）来自 GK-Mixer 公开页面的观察记录，
-仅作流程样本，`source` 字段已单独标注。**GK-Mixer 采用 PolyForm Noncommercial 1.0.0
-许可，禁止批量搬运其数据集**，请勿用本文件以外的来源替换这 3 条。
+```bash
+# 1) paintlab CSV → seed（可用 --csv / --out 覆盖默认路径）
+node scripts/import-paintlab.mjs
 
-## 色值可信度
+# 2) 核验（0 错误才算过；警告为语义提示）
+node scripts/verify-catalog.mjs --file docs/seed/paint-catalog.seed.json
 
-`hex` 为社区测量值，**不是厂商官方色值**。上线前须按设计书 **6.7 色卡采集与核验 SOP**
-抽样校验（每批随机 10 条，CIEDE2000 ΔE ≤ 3 判合格），通过后回填 `verified: true` 与
-`verifiedAt`。
+# 3) 拆成运行时品牌包
+node scripts/build-catalog.mjs --file docs/seed/paint-catalog.seed.json --out public/catalog
+```
+
+或 `npm run import:catalog && npm run check`。
 
 ## 字段
 
 ```jsonc
 {
-  "id": "gsi-c1",              // brand + code 的 slug
-  "brandId": "gsi",            // 对应 seed.brands[].id
-  "lineId": "gsi-mr-color",    // 对应 seed.lines[].id（唯一键之一）
-  "code": "C1",                // 厂商色号
-  "name": "White",             // 英文/日文名
-  "nameZh": null,              // 中文名，待补录
-  "hex": "#ffffff",            // 色值（社区测量）
-  "paintClass": "solid",       // solid | clear | aux
-  "finish": "gloss",           // gloss | semiGloss | matte | metal | clear | ...
+  "id": "gsi-c1",                 // brandId + 色号 slug
+  "brandId": "gsi",
+  "lineId": "gsi-mr-color",       // 由「系列」生成
+  "code": "C1",                   // 厂商代号
+  "name": "白色",                  // 原名 / 英文名，缺失时回落中文名
+  "nameZh": "白色",                // 名称（中文）
+  "hex": "#f2f2f2",
+  "hexEstimated": true,           // 仅推定色值带此字段
+  "paintClass": "solid",          // solid | clear | aux
+  "finish": "gloss",
   "category": "color",
   "volumeMl": 10,
-  "source": "modkit-swatch (MIT)",
-  "verified": false
+  "sourceUrl": "https://…",
+  "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+  "verified": true,
+  "verifiedAt": "2026-11-17"
 }
 ```
 
-## 重新生成
+## 已知待补
 
-色卡数据由设计书 **6.6 / 6.7** 定义的流程产生；重新生成前请先跑：
-
-```bash
-node scripts/verify-catalog.ts --file docs/seed/paint-catalog.seed.json
-```
+1. 465 条色值为色名推定（`hexEstimated`）。
+2. 7 条匠域珍珠色（GC004–GC010）名称缺失（官网不可达），`source` 已标注「名称待补」。
+3. 郡士 SF/WC/WP 系列共 34 条存在 `finish=primer/wash` 与 `paintClass=solid` 的语义提示
+   （verify 警告，属预期：这些是底漆 / 旧化液，但仍作为漆料显示原色）。

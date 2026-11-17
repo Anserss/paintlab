@@ -1,19 +1,19 @@
 import { useDroppable } from '@dnd-kit/core';
-import type { Workstation } from '@/core/model/types';
+import type { Workbench } from '@/core/model/types';
 import { Badge, Button, cn } from '@/components/ui';
-import { MAX_WORKSTATIONS } from '@/core/rules/invariants';
-import { formatTabBadge } from './stationModel';
+import { MAX_WORKBENCHES } from '@/core/rules/invariants';
+import { formatTabBadge } from './workbenchModel';
 
-export const STATION_DROP_PREFIX = 'station-tab:';
+export const WORKBENCH_DROP_PREFIX = 'workbench-tab:';
 
-export interface StationTabData {
-  workstation: Workstation;
+export interface WorkbenchTabData {
+  workbench: Workbench;
   count: number;
   totalMl: number;
 }
 
-export interface StationTabsProps {
-  stations: StationTabData[];
+export interface WorkbenchTabsProps {
+  workbenches: WorkbenchTabData[];
   activeId: string | null;
   /** 已建满 5 个：新建按钮禁用（AC-08 / 3.7.3） */
   atCap: boolean;
@@ -21,18 +21,18 @@ export interface StationTabsProps {
   onNew: () => void;
 }
 
-function StationTab({
+function WorkbenchTab({
   data,
   active,
   onSelect,
 }: {
-  data: StationTabData;
+  data: WorkbenchTabData;
   active: boolean;
   onSelect: (id: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
-    id: STATION_DROP_PREFIX + data.workstation.id,
-    data: { workstationId: data.workstation.id },
+    id: WORKBENCH_DROP_PREFIX + data.workbench.id,
+    data: { workbenchId: data.workbench.id },
   });
 
   return (
@@ -41,9 +41,9 @@ function StationTab({
       type="button"
       role="tab"
       aria-selected={active}
-      data-station-tab={data.workstation.id}
-      title={data.workstation.note ? data.workstation.note : undefined}
-      onClick={() => onSelect(data.workstation.id)}
+      data-workbench-tab={data.workbench.id}
+      title={data.workbench.note ? data.workbench.note : undefined}
+      onClick={() => onSelect(data.workbench.id)}
       className={cn(
         'flex h-9 shrink-0 items-center gap-2 border px-2.5 text-xs transition-colors duration-hover',
         active
@@ -54,55 +54,55 @@ function StationTab({
     >
       <span
         aria-hidden
-        data-station-accent=""
+        data-workbench-accent=""
         className="h-2 w-2 shrink-0"
-        style={{ backgroundColor: data.workstation.accent }}
+        style={{ backgroundColor: data.workbench.accent }}
       />
-      <span className="max-w-[112px] truncate">{data.workstation.name}</span>
+      <span className="max-w-[112px] truncate">{data.workbench.name}</span>
       <Badge tone={active ? 'accent' : 'neutral'}>{formatTabBadge(data.count, data.totalMl)}</Badge>
     </button>
   );
 }
 
-/** 工位 Tab 条：横向、含件数与总毫升徽标 + 新建工位（spec 3.5） */
-export function StationTabs({ stations, activeId, atCap, onSelect, onNew }: StationTabsProps) {
+/** 工作台 Tab 条：横向、含件数与总毫升徽标 + 新建工作台（spec 3.5） */
+export function WorkbenchTabs({ workbenches, activeId, atCap, onSelect, onNew }: WorkbenchTabsProps) {
   return (
     <div className="flex flex-col gap-2">
-      <div role="tablist" aria-label="工位" className="flex flex-wrap items-stretch gap-2">
-        {stations.length === 0
-          ? Array.from({ length: MAX_WORKSTATIONS }).map((_, index) => (
+      <div role="tablist" aria-label="工作台" className="flex flex-wrap items-stretch gap-2">
+        {workbenches.length === 0
+          ? Array.from({ length: MAX_WORKBENCHES }).map((_, index) => (
               <button
                 key={index}
                 type="button"
-                data-slot="station-placeholder"
+                data-slot="workbench-placeholder"
                 onClick={onNew}
                 className="flex h-9 flex-1 items-center justify-center border border-dashed border-line text-[11px] text-text-3 transition-colors duration-hover hover:border-line-strong hover:text-text-2"
               >
-                ＋ 新建工位
+                ＋ 新建工作台
               </button>
             ))
-          : stations.map((data) => (
-              <StationTab
-                key={data.workstation.id}
+          : workbenches.map((data) => (
+              <WorkbenchTab
+                key={data.workbench.id}
                 data={data}
-                active={data.workstation.id === activeId}
+                active={data.workbench.id === activeId}
                 onSelect={onSelect}
               />
             ))}
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          {atCap && <span className="text-[10px] text-text-3">最多 5 个工位，请先删除或复用现有工位</span>}
+          {atCap && <span className="text-[10px] text-text-3">最多 5 个工作台，请先删除或复用现有工作台</span>}
           <Button
-            data-action="new-station"
+            data-action="new-workbench"
             data-disabled-reason={atCap ? 'cap' : undefined}
             disabled={atCap}
-            title={atCap ? '最多 5 个工位' : undefined}
+            title={atCap ? '最多 5 个工作台' : undefined}
             onClick={() => {
               if (atCap) return;
               onNew();
             }}
           >
-            ＋ 新建工位
+            ＋ 新建工作台
           </Button>
         </div>
       </div>

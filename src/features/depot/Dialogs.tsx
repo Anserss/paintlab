@@ -119,7 +119,7 @@ export function DeleteItemDialog({ row, onClose }: RowDialogProps) {
         if (!open) onClose();
       }}
       title="删除条目"
-      description="条目连同工位引用一起删除，可撤销。"
+      description="条目连同工作台引用一起删除，可撤销。"
       width={420}
       footer={
         <>
@@ -141,19 +141,19 @@ export function DeleteItemDialog({ row, onClose }: RowDialogProps) {
   );
 }
 
-interface StationPickProps {
+interface WorkbenchPickProps {
   rows: DepotRow[];
   onClose: () => void;
 }
 
-/** 「加入工位」选择器：工位 > 1 时选择目标工位 */
-export function StationPickDialog({ rows, onClose }: StationPickProps) {
-  const workstations = useAppStore((state) => state.workstations);
-  const addToStation = useAppStore((state) => state.addToStation);
+/** 「开涂」选择器：工作台 > 1 时选择目标工作台 */
+export function CoatPickDialog({ rows, onClose }: WorkbenchPickProps) {
+  const workbenches = useAppStore((state) => state.workbenches);
+  const openCoat = useAppStore((state) => state.openCoat);
 
-  const pick = async (workstationId: string) => {
-    const result = await addToStation({
-      workstationId,
+  const pick = async (workbenchId: string) => {
+    const result = await openCoat({
+      workbenchId,
       refs: rows.map((row) => ({ refType: 'stock' as const, refId: row.item.id })),
     });
     if (result.ok) onClose();
@@ -165,7 +165,7 @@ export function StationPickDialog({ rows, onClose }: StationPickProps) {
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      title="加入工位"
+      title="开涂"
       description={'共 ' + rows.length + ' 件待加入'}
       width={420}
       footer={
@@ -175,15 +175,15 @@ export function StationPickDialog({ rows, onClose }: StationPickProps) {
       }
     >
       <div className="flex flex-col gap-1">
-        {workstations.map((station) => (
+        {workbenches.map((workbench) => (
           <button
-            key={station.id}
+            key={workbench.id}
             type="button"
-            data-station-pick={station.id}
-            onClick={() => void pick(station.id)}
+            data-workbench-pick={workbench.id}
+            onClick={() => void pick(workbench.id)}
             className="flex h-8 items-center border border-line px-2 text-xs text-text-1 transition-colors duration-hover hover:border-line-strong hover:bg-surface-2"
           >
-            {station.name}
+            {workbench.name}
           </button>
         ))}
       </div>

@@ -83,11 +83,13 @@ export function ProcurePage() {
 
   const lineName = filters.lineId ? linesById[filters.lineId]?.name : undefined;
 
-  /* 面包屑：采购 / 郡士 / Mr.Color */
+  /* 面包屑：采购 / 郡士 / Mr.Color；离开本页时清空，避免顶部栏残留上一页的面包屑 */
   useEffect(() => {
     if (!activeBrandName) return;
     setBreadcrumb(lineName ? ['采购', activeBrandName, lineName] : ['采购', activeBrandName]);
   }, [activeBrandName, lineName, setBreadcrumb]);
+
+  useEffect(() => () => setBreadcrumb(null), [setBreadcrumb]);
 
   const loadedPaints = useMemo(() => {
     const map = new Map<string, Paint>();
@@ -217,7 +219,7 @@ export function ProcurePage() {
       .filter((item) => selectedIds.has(item.paintId))
       .map((item) => item.id);
     if (stockIds.length === 0) {
-      pushToast({ message: '所选漆料尚未登记入库，无法加入分组', tone: 'warn' });
+      pushToast({ message: '所选漆料尚未入库，无法加入分组', tone: 'warn' });
       return;
     }
     state.setSelected(stockIds);
@@ -306,7 +308,7 @@ export function ProcurePage() {
                     onSelect={togglePaint}
                     badges={
                       <>
-                        {registered > 0 && <Badge tone="accent">已登记 ×{registered}</Badge>}
+                        {registered > 0 && <Badge tone="accent">已入库 ×{registered}</Badge>}
                         {!paint.verifiedAt && (
                           <Badge
                             tone="warn"
@@ -333,7 +335,7 @@ export function ProcurePage() {
                         openRegister([paint]);
                       }}
                     >
-                      {registered > 0 ? '再登记一份' : '+ 登记'}
+                      {registered > 0 ? '再入库一份' : '+ 入库'}
                     </Button>
                   </div>
                 </div>
@@ -343,7 +345,7 @@ export function ProcurePage() {
 
         <Toolbar count={selection.length}>
           <Button variant="primary" size="sm" onClick={() => openRegister(selectedPaints)}>
-            登记入库 ({selection.length})
+            入库 ({selection.length})
           </Button>
           <Button
             size="sm"
@@ -381,7 +383,7 @@ export function ProcurePage() {
         open={groupOpen}
         onOpenChange={setGroupOpen}
         title="加入分组"
-        description="把所选漆已登记的条目移入一个分组（可撤销）。"
+        description="把所选漆已入库的条目移入一个分组（可撤销）。"
         width={420}
         footer={
           <>

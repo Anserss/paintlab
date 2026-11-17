@@ -7,7 +7,7 @@ import { Button, Dialog, Segmented, Stepper } from '@/components/ui';
 
 export type CapacityMode = 'whole' | 'half' | 'custom';
 
-/** 弹层提交给页面层的登记参数（容量 / 初始状态 / 分组 / 备注，spec 3.2） */
+/** 弹层提交给页面层的入库参数（容量 / 初始状态 / 分组 / 备注，spec 3.2） */
 export interface RegisterPayload {
   volumeMl: number;
   state: PaintState;
@@ -41,7 +41,7 @@ const STATE_OPTIONS: readonly { value: PaintState; label: string }[] = [
 
 const FIELD_LABEL = 't-label mb-1 block';
 
-/** 登记入库弹层：容量（默认 line.defaultVolumeMl）+ 初始状态 + 分组 + 备注 */
+/** 入库弹层：容量（默认 line.defaultVolumeMl）+ 初始状态 + 分组 + 备注 */
 export function RegisterDialog({
   open,
   onOpenChange,
@@ -111,7 +111,7 @@ export function RegisterDialog({
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="登记入库"
+      title="入库"
       description={description}
       width={520}
       footer={
@@ -120,7 +120,7 @@ export function RegisterDialog({
             取消
           </Button>
           <Button variant="primary" size="sm" chamfer disabled={!canSubmit} onClick={submit}>
-            {busy ? '登记中…' : '确认登记'}
+            {busy ? '入库中…' : '确认入库'}
           </Button>
         </>
       }

@@ -84,11 +84,11 @@ describe('AC-03 液位比例（用户示例）', () => {
 });
 
 describe('空瓶边界（3.4.4）', () => {
-  it('remaining=0 时不渲染液体层，显示「空瓶 · 可归档」', () => {
+  it('remaining=0 时不渲染液体层，显示「空瓶 · 可入库」', () => {
     const { container } = render(<BottleView bottle={emptyBottle} brandName="郡士" />);
     expect(container.querySelector('[data-liquid]')).toBeNull();
     expect(container.querySelector('[data-liquid-layer]')).toBeNull();
-    expect(container.textContent ?? '').toContain('空瓶 · 可归档');
+    expect(container.textContent ?? '').toContain('空瓶 · 可入库');
     expect(container.querySelector('[data-bottle-view]')?.getAttribute('data-empty')).toBe('');
   });
 });

@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "e2e": "playwright test",
+    "import:catalog": "node scripts/import-paintlab.mjs",
     "verify:catalog": "node scripts/verify-catalog.mjs --file docs/seed/paint-catalog.seed.json --out reports/catalog-todo.csv",
     "build:catalog": "node scripts/build-catalog.mjs --file docs/seed/paint-catalog.seed.json --out public/catalog",
     "check": "npm run verify:catalog && npm run build:catalog",

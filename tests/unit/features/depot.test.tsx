@@ -116,8 +116,8 @@ function resetAppState() {
     brandState: {},
     catalogReady: false,
     catalogError: null,
-    workstations: [],
-    stationItems: [],
+    workbenches: [],
+    workbenchItems: [],
     selected: [],
     toasts: [],
     breadcrumb: null,
@@ -341,7 +341,7 @@ describe('AC-13 空仓', () => {
     renderPage();
 
     expect(screen.getByText('DEPOT // 空仓')).toBeInTheDocument();
-    expect(screen.getByText('还没有漆料。前往采购大厅登记你的第一支漆。')).toBeInTheDocument();
+    expect(screen.getByText('还没有漆料。前往采购大厅入库你的第一支漆。')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '去采购' })).toBeInTheDocument();
   });
 });

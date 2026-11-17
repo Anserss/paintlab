@@ -9,8 +9,8 @@ import type {
   Paint,
   StockItem,
   UsageRecord,
-  Workstation,
-  WorkstationItem,
+  Workbench,
+  WorkbenchItem,
 } from '@/core/model/types';
 
 /** settings 表行：key 为主键，value 为白名单设置项的值（spec 3.9） */
@@ -32,8 +32,8 @@ export type TableName =
   | 'stockItems'
   | 'groups'
   | 'bottles'
-  | 'workstations'
-  | 'stationItems'
+  | 'workbenches'
+  | 'workbenchItems'
   | 'mixRecords'
   | 'usageRecords'
   | 'ledger'
@@ -47,8 +47,8 @@ export const TABLE_NAMES: TableName[] = [
   'stockItems',
   'groups',
   'bottles',
-  'workstations',
-  'stationItems',
+  'workbenches',
+  'workbenchItems',
   'mixRecords',
   'usageRecords',
   'ledger',
@@ -62,8 +62,8 @@ export const USER_TABLE_NAMES: TableName[] = [
   'stockItems',
   'groups',
   'bottles',
-  'workstations',
-  'stationItems',
+  'workbenches',
+  'workbenchItems',
   'mixRecords',
   'usageRecords',
   'ledger',
@@ -89,8 +89,8 @@ export interface DepotStore {
   stockItems: TableLike<StockItem>;
   groups: TableLike<Group>;
   bottles: TableLike<Bottle>;
-  workstations: TableLike<Workstation>;
-  stationItems: TableLike<WorkstationItem>;
+  workbenches: TableLike<Workbench>;
+  workbenchItems: TableLike<WorkbenchItem>;
   mixRecords: TableLike<MixRecord>;
   usageRecords: TableLike<UsageRecord>;
   ledger: TableLike<LedgerEntry>;
@@ -107,8 +107,8 @@ export class DepotDB extends Dexie {
   stockItems!: Table<StockItem, string>;
   groups!: Table<Group, string>;
   bottles!: Table<Bottle, string>;
-  workstations!: Table<Workstation, string>;
-  stationItems!: Table<WorkstationItem, string>;
+  workbenches!: Table<Workbench, string>;
+  workbenchItems!: Table<WorkbenchItem, string>;
   mixRecords!: Table<MixRecord, string>;
   usageRecords!: Table<UsageRecord, string>;
   ledger!: Table<LedgerEntry, string>;
@@ -124,8 +124,8 @@ export class DepotDB extends Dexie {
       stockItems: 'id, paintId, groupId, volumeMl, state, origin, openedAt',
       groups: 'id, parentId, depth, sort',
       bottles: 'id, updatedAt',
-      workstations: 'id, sort',
-      stationItems: 'id, workstationId, refType, refId',
+      workbenches: 'id, sort',
+      workbenchItems: 'id, workbenchId, refType, refId',
       mixRecords: 'id, bottleId, at',
       usageRecords: 'id, targetId, at',
       ledger: 'id, at, type',
@@ -133,6 +133,32 @@ export class DepotDB extends Dexie {
       settings: 'key',
       snapshots: 'id, at',
     });
+    /**
+     * v2 · 数据换代（2026-11）：目录换成 paintlab 的郡士 / 匠域合并表（617 条），
+     * 旧目录（4 品牌 267 条）与旧用户数据（库存 / 分组 / 调漆瓶 / 工作台 / 记录 / 撤销栈）
+     * 全部作废，避免新旧 SKU 串号。升级时清空所有表 —— 这就是「原有数据清除」。
+     */
+    this.version(2)
+      .stores({
+        brands: 'id, name',
+        paints: 'id, lineId, brandId, code, paintClass, hex',
+        stockItems: 'id, paintId, groupId, volumeMl, state, origin, openedAt',
+        groups: 'id, parentId, depth, sort',
+        bottles: 'id, updatedAt',
+        workbenches: 'id, sort',
+        workbenchItems: 'id, workbenchId, refType, refId',
+        mixRecords: 'id, bottleId, at',
+        usageRecords: 'id, targetId, at',
+        ledger: 'id, at, type',
+        commands: 'id, at',
+        settings: 'key',
+        snapshots: 'id, at',
+      })
+      .upgrade(async (tx) => {
+        for (const table of TABLE_NAMES) {
+          await tx.table(table).clear();
+        }
+      });
   }
 }
 
@@ -146,8 +172,8 @@ function createDexieStore(): DepotStore {
     stockItems: table<StockItem>('stockItems'),
     groups: table<Group>('groups'),
     bottles: table<Bottle>('bottles'),
-    workstations: table<Workstation>('workstations'),
-    stationItems: table<WorkstationItem>('stationItems'),
+    workbenches: table<Workbench>('workbenches'),
+    workbenchItems: table<WorkbenchItem>('workbenchItems'),
     mixRecords: table<MixRecord>('mixRecords'),
     usageRecords: table<UsageRecord>('usageRecords'),
     ledger: table<LedgerEntry>('ledger'),
@@ -179,8 +205,8 @@ export class MemoryStore implements DepotStore {
   stockItems: TableLike<StockItem>;
   groups: TableLike<Group>;
   bottles: TableLike<Bottle>;
-  workstations: TableLike<Workstation>;
-  stationItems: TableLike<WorkstationItem>;
+  workbenches: TableLike<Workbench>;
+  workbenchItems: TableLike<WorkbenchItem>;
   mixRecords: TableLike<MixRecord>;
   usageRecords: TableLike<UsageRecord>;
   ledger: TableLike<LedgerEntry>;
@@ -198,8 +224,8 @@ export class MemoryStore implements DepotStore {
     this.stockItems = this.makeTable<StockItem>('stockItems');
     this.groups = this.makeTable<Group>('groups');
     this.bottles = this.makeTable<Bottle>('bottles');
-    this.workstations = this.makeTable<Workstation>('workstations');
-    this.stationItems = this.makeTable<WorkstationItem>('stationItems');
+    this.workbenches = this.makeTable<Workbench>('workbenches');
+    this.workbenchItems = this.makeTable<WorkbenchItem>('workbenchItems');
     this.mixRecords = this.makeTable<MixRecord>('mixRecords');
     this.usageRecords = this.makeTable<UsageRecord>('usageRecords');
     this.ledger = this.makeTable<LedgerEntry>('ledger');

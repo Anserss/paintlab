@@ -100,7 +100,7 @@ function zodIssues(failure: { errors: { path: string; message: string }[] }): st
   return failure.errors.map((issue) => (issue.path ? issue.path + '：' : '') + issue.message).join('；');
 }
 
-/** 登记入库：stockItem + ledger + command 在同一事务（spec 3.2 / AC-01） */
+/** 入库：stockItem + ledger + command 在同一事务（spec 3.2 / AC-01） */
 export async function createStockItem(s: DepotStore, input: CreateStockInput): Promise<Result<StockWriteResult>> {
   await ensureSystemGroup(s);
   const at = input.at ?? Date.now();
@@ -137,7 +137,7 @@ export async function createStockItem(s: DepotStore, input: CreateStockInput): P
     at,
     meta: { paintId: item.paintId, initialMl, state: item.state },
   };
-  const label = '登记 ' + describeStockPaint(input.paint) + ' ' + volumeMl.toFixed(1) + ' ml';
+  const label = '入库 ' + describeStockPaint(input.paint) + ' ' + volumeMl.toFixed(1) + ' ml';
   const command = createCommand(
     'purchase',
     label,
@@ -148,7 +148,7 @@ export async function createStockItem(s: DepotStore, input: CreateStockInput): P
 
   const recorded = await recordCommand(s, command);
   if (!recorded.ok) return recorded;
-  return ok({ command, item, message: '已登记 ' + describeStockPaint(input.paint) + ' ' + volumeMl.toFixed(1) + ' ml' });
+  return ok({ command, item, message: '已入库 ' + describeStockPaint(input.paint) + ' ' + volumeMl.toFixed(1) + ' ml' });
 }
 
 export interface AdjustVolumeInput {
@@ -205,12 +205,12 @@ export interface DeleteStockInput {
   at?: number;
 }
 
-/** 删除库存条目（连同其工位引用），可撤销 */
+/** 删除库存条目（连同其工作台引用），可撤销 */
 export async function deleteStockItem(s: DepotStore, input: DeleteStockInput): Promise<Result<StockWriteResult>> {
   const item = await s.stockItems.get(input.itemId);
   if (!item) return fail('库存条目不存在', 'conflict');
   const at = input.at ?? Date.now();
-  const stationItems = (await s.stationItems.toArray()).filter(
+  const workbenchItems = (await s.workbenchItems.toArray()).filter(
     (entry) => entry.refType === 'stock' && entry.refId === item.id,
   );
   const ledgerEntry: LedgerEntry = {
@@ -223,13 +223,13 @@ export async function deleteStockItem(s: DepotStore, input: DeleteStockInput): P
   };
   const label = '删除条目 ' + describeStockPaint({ id: item.paintId }) + ' ' + item.volumeMl.toFixed(1) + ' ml';
   const forward: Patch[] = [
-    ...stationItems.map((entry) => patch.remove('stationItems', entry.id)),
+    ...workbenchItems.map((entry) => patch.remove('workbenchItems', entry.id)),
     patch.remove('stockItems', item.id),
     appendPatch('ledger', ledgerEntry),
   ];
   const inverse: Patch[] = [
     addPatch('stockItems', item),
-    ...stationItems.map((entry) => addPatch('stationItems', entry)),
+    ...workbenchItems.map((entry) => addPatch('workbenchItems', entry)),
     patch.remove('ledger', ledgerEntry.id),
   ];
   const command = createCommand('adjust', label, forward, inverse, at);

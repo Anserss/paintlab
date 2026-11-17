@@ -57,7 +57,7 @@ describe('dilution · 补满 toFill (S=C-R, A=f1(S/(1+N)))', () => {
     expect(toFill(60, 10, 2)).toEqual({ neatMl: 16.6, thinnerMl: 33.2, totalMl: 49.8 });
   });
 
-  it('AC-02 推论：调配后 remaining = baseline = 59.8，液位显示满', () => {
+  it('AC-02 推论：调漆后 remaining = baseline = 59.8，液位显示满', () => {
     const mix = toFill(60, 10, 2);
     const remaining = r1(10 + mix.totalMl);
     const baseline = remaining;

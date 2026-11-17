@@ -1,4 +1,5 @@
 import { render, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Paint } from '@/core/model/types';
 import { DEFAULT_SETTINGS } from '@/core/model/types';
@@ -73,19 +74,19 @@ async function seedBoth(): Promise<void> {
 }
 
 describe('调漆台 · 辅料与原浆的区分（加辅料目录后新增）', () => {
-  it('稀释剂/缓干剂不进「取用原浆」候选，只作为「稀释剂来源」', async () => {
+  it('稀释剂/缓干剂不进「取用漆料」候选，只作为「稀释剂来源」', async () => {
     await seedBoth();
-    render(<MixPage />);
+    render(<MemoryRouter><MixPage /></MemoryRouter>);
 
     await waitFor(() => {
-      const neat = document.querySelector('[data-mix-panel="neat"]');
-      expect(neat).not.toBeNull();
-      expect(neat?.textContent).toContain('C1');
+      const rows = document.querySelector('[data-mix-panel="stock"]');
+      expect(rows).not.toBeNull();
+      expect(rows?.textContent).toContain('C1');
     });
 
-    const neatPanel = document.querySelector('[data-mix-panel="neat"]');
-    // 辅料不能被当成原浆使用
-    expect(neatPanel?.textContent).not.toContain('T-103');
+    const stockPanel = document.querySelector('[data-mix-panel="stock"]');
+    // 辅料不能被当成漆用
+    expect(stockPanel?.textContent).not.toContain('T-103');
 
     // 但它必须出现在稀释剂来源里（含 SKU 与容量）
     await waitFor(() => expect(document.body.textContent).toContain('稀释剂来源'));

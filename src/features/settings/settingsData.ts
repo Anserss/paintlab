@@ -6,8 +6,8 @@ import type {
   PaintClass,
   Settings,
   StockItem,
-  Workstation,
-  WorkstationItem,
+  Workbench,
+  WorkbenchItem,
 } from '@/core/model/types';
 
 /** 撤销深度上限/下限（spec 3.7.3 / 3.9） */
@@ -22,7 +22,7 @@ export const SETTING_LABELS: Record<keyof Settings, string> = {
   showTicks: '瓶身刻度',
   trackThinner: '扣减稀释剂库存',
   defaultRatio: '默认稀释比例',
-  defaultBottleMl: '默认瓶容量',
+  defaultBottleMl: '默认批次容量',
   neatStockWarn: '原浆低量警示',
   mlPerKit: '估算系数',
   undoDepth: '撤销深度',
@@ -82,7 +82,7 @@ export const DATA_PARTITIONS: PartitionRow[] = [
     name: 'user',
     owner: '用户',
     writable: '可写',
-    note: '库存条目、分组、工位、调漆瓶、用量记录、设置',
+    note: '库存条目、分组、工作台、批次、用量记录、设置',
   },
   {
     key: 'custom',
@@ -207,15 +207,15 @@ export const FIELD_PERMISSIONS: FieldPermissionRow[] = [
     note: '不可成环、不可超 3 层',
   },
   {
-    id: 'station-name',
-    field: 'Workstation.name',
+    id: 'workbench-name',
+    field: 'Workbench.name',
     writable: true,
     source: 'user',
     note: '1–16 字，全局不重名',
   },
   {
-    id: 'station-note',
-    field: 'Workstation.note',
+    id: 'workbench-note',
+    field: 'Workbench.note',
     writable: true,
     source: 'user',
     note: '≤ 60 字',
@@ -232,7 +232,7 @@ export const FIELD_PERMISSIONS: FieldPermissionRow[] = [
     field: 'Bottle.ratioN',
     writable: true,
     source: 'user',
-    note: '调配时写入，0–10，步进 0.1',
+    note: '稀释 / 调漆时写入，0–10，步进 0.1',
   },
   {
     id: 'bottle-name',
@@ -246,7 +246,7 @@ export const FIELD_PERMISSIONS: FieldPermissionRow[] = [
     field: 'Bottle.remainingMl / baselineMl',
     writable: false,
     source: 'derived+user',
-    note: '只能通过调配 / 使用 / 清空改变，禁止表单直改',
+    note: '只能通过稀释 / 调漆 / 使用 / 清空改变，禁止表单直改',
   },
   {
     id: 'records',
@@ -286,7 +286,7 @@ export interface QuotaRow {
 }
 
 export const QUOTA_ROWS: QuotaRow[] = [
-  { id: 'station-count', item: '工位数量', limit: '5', atLimit: '按钮禁用 + 说明文案' },
+  { id: 'workbench-count', item: '工作台数量', limit: '5', atLimit: '按钮禁用 + 说明文案' },
   { id: 'group-depth', item: '分组层级', limit: '3', atLimit: '禁止新建 / 拖入子级' },
   { id: 'group-siblings', item: '同层分组数', limit: '20（软限）', atLimit: '提示合并，不阻止' },
   { id: 'custom-paints', item: '自定义漆料', limit: '500 条', atLimit: '提示并跳转清理' },
@@ -312,7 +312,7 @@ export interface ShortcutRow {
 }
 
 export const SHORTCUT_ROWS: ShortcutRow[] = [
-  { id: 'pages', combo: '1 – 5', action: '切换五个一级页面（采购 / 仓库 / 调漆 / 工位 / 设置）' },
+  { id: 'pages', combo: '1 – 5', action: '切换五个一级页面（采购 / 仓库 / 调漆台 / 工作台 / 设置）' },
   { id: 'undo', combo: 'Ctrl / ⌘ + Z', action: '撤销' },
   { id: 'redo', combo: 'Ctrl / ⌘ + Shift + Z', action: '反撤销' },
   { id: 'search', combo: 'Ctrl / ⌘ + K', action: '全局搜索（漆料 / 代号 / 分组）' },
@@ -320,7 +320,7 @@ export const SHORTCUT_ROWS: ShortcutRow[] = [
   { id: 'escape', combo: 'Esc', action: '关闭弹层 / 取消选择' },
   { id: 'space', combo: 'Space', action: '卡片聚焦时打开详情' },
   { id: 'enter', combo: 'Enter', action: '卡片聚焦时打开「移动至…」菜单' },
-  { id: 'switch-station', combo: '[ / ]', action: '切换工位' },
+  { id: 'switch-workbench', combo: '[ / ]', action: '切换工作台' },
   { id: 'help', combo: '?', action: '快捷键帮助' },
 ];
 
@@ -369,7 +369,7 @@ export const ABOUT_NOTICES: AboutNotice[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* 库存 CSV（spec 3.8：品牌/代号/名称/色值/类/剩余/分组/工位）           */
+/* 库存 CSV（spec 3.8：品牌/代号/名称/色值/类/剩余/分组/工作台）           */
 /* ------------------------------------------------------------------ */
 
 const PAINT_CLASS_LABEL: Record<PaintClass, string> = { solid: '实色', clear: '透明', aux: '辅料' };
@@ -387,29 +387,29 @@ const PAINT_CATEGORY_LABEL: Record<PaintCategory, string> = {
   other: '其他',
 };
 
-export const CSV_HEADER = ['品牌', '代号', '名称', '色值', '类', '剩余 ml', '分组', '工位'];
+export const CSV_HEADER = ['品牌', '代号', '名称', '色值', '类', '剩余 ml', '分组', '工作台'];
 
 export interface InventoryCsvSource {
   stockItems: StockItem[];
   groups: Group[];
-  workstations: Workstation[];
-  stationItems: WorkstationItem[];
+  workbenches: Workbench[];
+  workbenchItems: WorkbenchItem[];
   paintOf: (id: string) => Paint | undefined;
   brandOf: (id: string) => Brand | undefined;
 }
 
 export function buildInventoryCsvRows(source: InventoryCsvSource): string[][] {
   const groupName = new Map(source.groups.map((group) => [group.id, group.name]));
-  const stationName = new Map(source.workstations.map((station) => [station.id, station.name]));
+  const workbenchName = new Map(source.workbenches.map((workbench) => [workbench.id, workbench.name]));
 
-  const stationsOf = new Map<string, string[]>();
-  for (const item of source.stationItems) {
+  const workbenchesOf = new Map<string, string[]>();
+  for (const item of source.workbenchItems) {
     if (item.refType !== 'stock') continue;
-    const name = stationName.get(item.workstationId);
+    const name = workbenchName.get(item.workbenchId);
     if (!name) continue;
-    const list = stationsOf.get(item.refId) ?? [];
+    const list = workbenchesOf.get(item.refId) ?? [];
     list.push(name);
-    stationsOf.set(item.refId, list);
+    workbenchesOf.set(item.refId, list);
   }
 
   const rows: string[][] = [CSV_HEADER];
@@ -424,7 +424,7 @@ export function buildInventoryCsvRows(source: InventoryCsvSource): string[][] {
       paint ? PAINT_CLASS_LABEL[paint.paintClass] + ' / ' + PAINT_CATEGORY_LABEL[paint.category] : '',
       item.volumeMl.toFixed(1),
       item.groupId ? groupName.get(item.groupId) ?? '' : '',
-      (stationsOf.get(item.id) ?? []).join('、'),
+      (workbenchesOf.get(item.id) ?? []).join('、'),
     ]);
   }
   return rows;

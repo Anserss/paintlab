@@ -6,8 +6,8 @@ import { Shell } from '@/app/Shell';
 const ROUTES = [
   { path: '/procure', label: '采购' },
   { path: '/depot', label: '仓库' },
-  { path: '/mix', label: '调漆' },
-  { path: '/station', label: '工位' },
+  { path: '/mix', label: '调漆台' },
+  { path: '/workbench', label: '工作台' },
   { path: '/settings', label: '设置' },
 ];
 
@@ -30,7 +30,7 @@ function renderShell(path: string) {
 }
 
 describe('应用外壳（spec 3.1 / AC-16）', () => {
-  it('五条路由可达，导航文字为 采购/仓库/调漆/工位/设置，DOM 中无 <img>', () => {
+  it('五条路由可达，导航文字为 采购/仓库/调漆台/工作台/设置，DOM 中无 <img>', () => {
     const { container } = renderShell('/depot');
     expect(container.querySelector('[data-page="depot"]')).not.toBeNull();
 
@@ -39,10 +39,10 @@ describe('应用外壳（spec 3.1 / AC-16）', () => {
       '/procure',
       '/depot',
       '/mix',
-      '/station',
+      '/workbench',
       '/settings',
     ]);
-    const labels = ['采购', '仓库', '调漆', '工位', '设置'];
+    const labels = ['采购', '仓库', '调漆台', '工作台', '设置'];
     links.forEach((link, index) => {
       expect(link.textContent ?? '').toContain(labels[index]);
     });

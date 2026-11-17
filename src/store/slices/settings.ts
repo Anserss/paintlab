@@ -93,7 +93,7 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     await get().hydrateHistoryState();
     await get().refreshInventory();
     await get().refreshBottles();
-    await get().refreshStations();
+    await get().refreshWorkbenches();
     get().pushToast({
       message:
         '已导入：新增 ' + result.data.added + ' · 更新 ' + result.data.updated + ' · 跳过 ' + result.data.skipped,
@@ -112,7 +112,7 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     await get().hydrateHistoryState();
     await get().refreshInventory();
     await get().refreshBottles();
-    await get().refreshStations();
+    await get().refreshWorkbenches();
     get().pushToast({ message: '已重置全部数据', tone: 'warn' });
     return result;
   },

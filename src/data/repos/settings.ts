@@ -8,8 +8,8 @@ import {
   SettingsSchema,
   StockItemSchema,
   UsageRecordSchema,
-  WorkstationItemSchema,
-  WorkstationSchema,
+  WorkbenchItemSchema,
+  WorkbenchSchema,
 } from '@/core/model/schemas';
 import { DEFAULT_SETTINGS } from '@/core/model/types';
 import type {
@@ -21,8 +21,8 @@ import type {
   Settings,
   StockItem,
   UsageRecord,
-  Workstation,
-  WorkstationItem,
+  Workbench,
+  WorkbenchItem,
 } from '@/core/model/types';
 import type { DepotStore, SettingsRow, TableName } from '../db';
 import { USER_TABLE_NAMES } from '../db';
@@ -135,8 +135,8 @@ export interface PigmentExport {
     stockItems: StockItem[];
     groups: Group[];
     bottles: Bottle[];
-    workstations: Workstation[];
-    stationItems: WorkstationItem[];
+    workbenches: Workbench[];
+    workbenchItems: WorkbenchItem[];
     records: { mix: MixRecord[]; usage: UsageRecord[]; ledger: LedgerEntry[] };
     commands: Command[];
   };
@@ -145,13 +145,13 @@ export interface PigmentExport {
 
 export async function exportAll(s: DepotStore): Promise<Result<PigmentExport>> {
   try {
-    const [stockItems, groups, bottles, workstations, stationItems, mix, usage, ledger, commands] =
+    const [stockItems, groups, bottles, workbenches, workbenchItems, mix, usage, ledger, commands] =
       await Promise.all([
         s.stockItems.toArray(),
         s.groups.toArray(),
         s.bottles.toArray(),
-        s.workstations.toArray(),
-        s.stationItems.toArray(),
+        s.workbenches.toArray(),
+        s.workbenchItems.toArray(),
         s.mixRecords.toArray(),
         s.usageRecords.toArray(),
         s.ledger.toArray(),
@@ -165,8 +165,8 @@ export async function exportAll(s: DepotStore): Promise<Result<PigmentExport>> {
         stockItems,
         groups,
         bottles,
-        workstations,
-        stationItems,
+        workbenches,
+        workbenchItems,
         records: { mix, usage, ledger },
         commands,
       },
@@ -185,8 +185,8 @@ const ImportSchema = z.object({
       stockItems: z.array(z.unknown()).optional(),
       groups: z.array(z.unknown()).optional(),
       bottles: z.array(z.unknown()).optional(),
-      workstations: z.array(z.unknown()).optional(),
-      stationItems: z.array(z.unknown()).optional(),
+      workbenches: z.array(z.unknown()).optional(),
+      workbenchItems: z.array(z.unknown()).optional(),
       records: z
         .object({
           mix: z.array(z.unknown()).optional(),
@@ -232,8 +232,8 @@ export async function importAll(
     { table: 'groups', values: user.groups ?? [], schema: GroupSchema, volumeAware: false },
     { table: 'stockItems', values: user.stockItems ?? [], schema: StockItemSchema, volumeAware: true },
     { table: 'bottles', values: user.bottles ?? [], schema: BottleSchema, volumeAware: true },
-    { table: 'workstations', values: user.workstations ?? [], schema: WorkstationSchema, volumeAware: false },
-    { table: 'stationItems', values: user.stationItems ?? [], schema: WorkstationItemSchema, volumeAware: false },
+    { table: 'workbenches', values: user.workbenches ?? [], schema: WorkbenchSchema, volumeAware: false },
+    { table: 'workbenchItems', values: user.workbenchItems ?? [], schema: WorkbenchItemSchema, volumeAware: false },
     { table: 'mixRecords', values: records.mix ?? [], schema: MixRecordSchema, volumeAware: false },
     { table: 'usageRecords', values: records.usage ?? [], schema: UsageRecordSchema, volumeAware: false },
     { table: 'ledger', values: records.ledger ?? [], schema: LedgerEntrySchema, volumeAware: false },

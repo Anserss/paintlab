@@ -1,4 +1,4 @@
-import type { Brand, Bottle, Paint, PaintClass, PaintLine, StockItem, WorkstationItem } from '@/core/model/types';
+import type { Brand, Bottle, Paint, PaintClass, PaintLine, StockItem, WorkbenchItem } from '@/core/model/types';
 import { formatMl, r1 } from '@/core/math/quantity';
 
 /** 用量面板的取值域（spec 3.5：滑块 0–20 ml、步进 0.5） */
@@ -7,11 +7,11 @@ export const PLANNED_MAX_ML = 20;
 export const PLANNED_STEP_ML = 0.5;
 export const PLANNED_PRESETS = [1, 2, 5, 10] as const;
 
-/** 工位条目（引用 stock 或 bottle）的渲染视图模型 */
-export interface StationEntry {
-  /** WorkstationItem.id */
+/** 工作台条目（引用 stock 或 bottle）的渲染视图模型 */
+export interface WorkbenchEntry {
+  /** WorkbenchItem.id */
   id: string;
-  item: WorkstationItem;
+  item: WorkbenchItem;
   refType: 'stock' | 'bottle';
   paint: Paint | null;
   line: PaintLine | null;
@@ -25,7 +25,7 @@ export interface StationEntry {
   plannedUseMl: number;
 }
 
-export interface StationLookups {
+export interface WorkbenchLookups {
   stockItems: StockItem[];
   bottles: Bottle[];
   paintsById: Record<string, Paint>;
@@ -40,7 +40,7 @@ function bottleLine(bottle: Bottle): PaintLine {
   return {
     id: bottle.id + BOTTLE_LINE_SUFFIX,
     brandId: bottle.labelBrandId ?? '',
-    name: '调漆瓶',
+    name: '批次',
     packaging: 'bottle',
     defaultVolumeMl: bottle.capacityMl,
     kind: 'auxiliary',
@@ -64,12 +64,12 @@ function bottlePaint(bottle: Bottle): Paint {
   };
 }
 
-/** 把工位条目解析成可渲染的视图模型；引用的库存/瓶已不存在时跳过 */
-export function resolveEntries(items: WorkstationItem[], lookups: StationLookups): StationEntry[] {
+/** 把工作台条目解析成可渲染的视图模型；引用的库存/瓶已不存在时跳过 */
+export function resolveEntries(items: WorkbenchItem[], lookups: WorkbenchLookups): WorkbenchEntry[] {
   const stockMap = new Map(lookups.stockItems.map((row) => [row.id, row]));
   const bottleMap = new Map(lookups.bottles.map((row) => [row.id, row]));
   const brandMap = new Map(lookups.brands.map((row) => [row.id, row]));
-  const result: StationEntry[] = [];
+  const result: WorkbenchEntry[] = [];
 
   for (const item of items) {
     if (item.refType === 'stock') {
@@ -127,14 +127,14 @@ export function defaultPlannedMl(remainingMl: number): number {
   return quantizePlanned(Math.min(2, Math.max(0, remainingMl)));
 }
 
-export interface StationStatsView {
+export interface WorkbenchStatsView {
   count: number;
   totalMl: number;
   kits: number;
 }
 
 /** 「条目 n · 合计 x.x ml · 预计可涂 m 个套件」——m 为娱乐性估算，必须标注 */
-export function formatStationStats(stats: StationStatsView): string {
+export function formatWorkbenchStats(stats: WorkbenchStatsView): string {
   return (
     '条目 ' +
     stats.count +
@@ -146,7 +146,7 @@ export function formatStationStats(stats: StationStatsView): string {
   );
 }
 
-/** 工位 Tab 徽标文案 */
+/** 工作台 Tab 徽标文案 */
 export function formatTabBadge(count: number, totalMl: number): string {
   return count + ' 件 · ' + formatMl(totalMl) + ' ml';
 }

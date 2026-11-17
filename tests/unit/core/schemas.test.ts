@@ -9,7 +9,7 @@ import {
   RatioNSchema,
   SettingsSchema,
   StockItemSchema,
-  WorkstationSchema,
+  WorkbenchSchema,
   parseOrErrors,
 } from '@/core/model/schemas';
 import type { ValidationResult } from '@/core/model/schemas';
@@ -154,8 +154,8 @@ describe('schemas · BottleSchema 容量越界', () => {
     expect(parseOrErrors(BottleSchema, bottle).ok).toBe(true);
   });
 
-  it('容量必须为 5–250 的整数', () => {
-    expect(pathsOf(parseOrErrors(BottleSchema, { ...bottle, capacityMl: 300 }))).toContain(
+  it('容量必须为 5–2500 的整数', () => {
+    expect(pathsOf(parseOrErrors(BottleSchema, { ...bottle, capacityMl: 3000 }))).toContain(
       'capacityMl',
     );
     expect(pathsOf(parseOrErrors(BottleSchema, { ...bottle, capacityMl: 4 }))).toContain(
@@ -187,7 +187,7 @@ describe('schemas · BottleSchema 容量越界', () => {
   });
 });
 
-describe('schemas · PaintSchema / WorkstationSchema', () => {
+describe('schemas · PaintSchema / WorkbenchSchema', () => {
   const paint = {
     id: 'p1',
     lineId: 'l1',
@@ -216,10 +216,10 @@ describe('schemas · PaintSchema / WorkstationSchema', () => {
     if (r.ok) expect('evil' in (r.data as Record<string, unknown>)).toBe(false);
   });
 
-  it('工位备注超过 60 字被拒', () => {
-    const ws = { id: 'w1', name: '工位 A', accent: '#336699', sort: 0, createdAt: 1 };
-    expect(parseOrErrors(WorkstationSchema, ws).ok).toBe(true);
-    const r = parseOrErrors(WorkstationSchema, { ...ws, note: '备'.repeat(61) });
+  it('工作台备注超过 60 字被拒', () => {
+    const ws = { id: 'w1', name: '工作台 A', accent: '#336699', sort: 0, createdAt: 1 };
+    expect(parseOrErrors(WorkbenchSchema, ws).ok).toBe(true);
+    const r = parseOrErrors(WorkbenchSchema, { ...ws, note: '备'.repeat(61) });
     expect(pathsOf(r)).toContain('note');
   });
 });

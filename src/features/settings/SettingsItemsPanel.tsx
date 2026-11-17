@@ -17,13 +17,13 @@ const DENSITY_OPTIONS: { value: Density; label: string }[] = [
 ];
 
 const LEVEL_MODE_OPTIONS: { value: LevelMode; label: string }[] = [
-  { value: 'baseline', label: '上次调配量' },
+  { value: 'baseline', label: '上次调漆量' },
   { value: 'capacity', label: '瓶容量' },
 ];
 
 const THEME_LABEL: Record<ThemeMode, string> = { dark: '深色', light: '浅色', auto: '跟随系统' };
 const DENSITY_LABEL: Record<Density, string> = { compact: '紧凑', normal: '标准', comfy: '宽松' };
-const LEVEL_MODE_LABEL: Record<LevelMode, string> = { baseline: '上次调配量', capacity: '瓶容量' };
+const LEVEL_MODE_LABEL: Record<LevelMode, string> = { baseline: '上次调漆量', capacity: '瓶容量' };
 
 /** 设置项白名单（spec 3.9）：改完立即生效并回执，但不进撤销栈 */
 export function SettingsItemsPanel() {
@@ -70,14 +70,14 @@ export function SettingsItemsPanel() {
         setting="levelMode"
         value={settings.levelMode}
         label="液位分母"
-        hint="默认按「上次调配后总量」读数，贴合补满习惯"
+        hint="默认按「本次产出后总量」读数"
         control={<Segmented options={LEVEL_MODE_OPTIONS} value={settings.levelMode} ariaLabel="液位分母" onChange={(value) => void commit('levelMode', value, LEVEL_MODE_LABEL[value])} />}
       />
       <SettingRow
         setting="showTicks"
         value={showTicksLabel(settings.showTicks)}
         label="瓶身刻度"
-        hint="调漆瓶液位旁显示刻度线"
+        hint="批次瓶身液位旁显示刻度线"
         control={<Switch checked={settings.showTicks} label="瓶身刻度" onChange={(checked) => void commit('showTicks', checked, checked ? '显示' : '隐藏')} />}
       />
 
@@ -86,7 +86,7 @@ export function SettingsItemsPanel() {
         setting="trackThinner"
         value={showTicksLabel(settings.trackThinner)}
         label="扣减稀释剂库存"
-        hint="调配时同步扣减稀释剂 SKU 的余量"
+        hint="调漆时同步扣减稀释剂 SKU 的余量"
         control={<Switch checked={settings.trackThinner} label="扣减稀释剂库存" onChange={(checked) => void commit('trackThinner', checked, checked ? '扣减' : '不扣减')} />}
       />
       <SettingRow
@@ -97,13 +97,6 @@ export function SettingsItemsPanel() {
         control={<NumberField label="默认稀释比例" value={settings.defaultRatio} min={0} max={10} step={0.1} precision={1} unit="N" onCommit={(value) => void commit('defaultRatio', value, '1:' + value.toFixed(1))} />}
       />
       <SettingRow
-        setting="defaultBottleMl"
-        value={settings.defaultBottleMl}
-        label="默认瓶容量"
-        hint="新建调漆瓶的容量，5–250 的整数 ml"
-        control={<NumberField label="默认瓶容量" value={settings.defaultBottleMl} min={5} max={250} step={5} precision={0} unit="ml" onCommit={(value) => void commit('defaultBottleMl', value, value + ' ml')} />}
-      />
-      <SettingRow
         setting="neatStockWarn"
         value={showTicksLabel(settings.neatStockWarn)}
         label="原浆低量警示"
@@ -111,7 +104,7 @@ export function SettingsItemsPanel() {
         control={<Switch checked={settings.neatStockWarn} label="原浆低量警示" onChange={(checked) => void commit('neatStockWarn', checked, checked ? '开启' : '关闭')} />}
       />
 
-      <h3 className="t-label mb-1 mt-5">工位</h3>
+      <h3 className="t-label mb-1 mt-5">工作台</h3>
       <SettingRow
         setting="mlPerKit"
         value={settings.mlPerKit}

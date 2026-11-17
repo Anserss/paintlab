@@ -1,5 +1,9 @@
 # PAINTLAB 1.0 · 交班总结与工程描述
 
+> **后续版本**：本轮之后的改版见 `docs/PAINTLAB-1.1-改版说明.md`
+> （统一动线命名 入库 / 调漆 / 开涂、工位更名工作台、漆料数据换代为 paintlab 的 617 条、
+> 调漆台改为「稀释 / 调漆」双模式并取消瓶容量选择）。本文档保留 1.0 当时的现状描述。
+
 > 项目代号：**PAINTLAB**（前身：PIGMENT DEPOT 设计包 v1.3）
 > 版本：1.0.0 ｜ 交付日期：2026-11-16 ｜ 仓库根：`paint-depot/` ｜ 代码提交：见 `git log`
 > 本文件分两部分：**A. 交班总结**（接手需要知道的全部现状）与 **B. 工程描述**（架构、契约、算法、运维）。
@@ -56,15 +60,15 @@ release/PAINTLAB.exe  → HTTP 200（index / bundle / catalog），浏览器实�
 
 ## A5. 本轮修掉的两个真缺陷
 
-1. **辅料被当成原浆**：库存里出现稀释剂后，调漆台「取用原浆」把它列成可选的漆。已改为 `useMixableNeatRows()`（排除 `paintClass='aux'`），辅料只出现在「稀释剂来源」。回归用例：`tests/unit/features/mix-aux.test.tsx`。
-2. **规格显示错位**：辅料按容量分 SKU，但行内规格读的是产品线默认值（110 ml），T-103 会被显示成 110 ml。已改为 `paint.volumeMl ?? line.defaultVolumeMl`，采购/仓库/调漆三处一致；登记弹层默认容量同样取 SKU 规格。
+1. **辅料被当成原浆**：库存里出现稀释剂后，调漆台「调漆原浆」把它列成可选的漆。已改为 `useMixableNeatRows()`（排除 `paintClass='aux'`），辅料只出现在「稀释剂来源」。回归用例：`tests/unit/features/mix-aux.test.tsx`。
+2. **规格显示错位**：辅料按容量分 SKU，但行内规格读的是产品线默认值（110 ml），T-103 会被显示成 110 ml。已改为 `paint.volumeMl ?? line.defaultVolumeMl`，采购/仓库/调漆三处一致；入库弹层默认容量同样取 SKU 规格。
 
 ## A6. 已跑通的端到端链路（本轮实拍留证）
 
 ```
-采购 · 辅料货架 → 郡士 → T-103 250 ml → 登记入库（默认容量自动取 250）
+采购 · 辅料货架 → 郡士 → T-103 250 ml → 入库（默认容量自动取 250）
 调漆台 → 新建/切换 15 ml 瓶 → 补满（C=15,R=0,N=2）→ 原浆 5.0 / 稀释剂 10.0 / 合计 15.0
-      → 调配 → 库存 260.0 → 245.0 ml，稀释剂来源 250.0 → 240.0 ml，瓶 15.0/15.0 ≈ 1（100%）
+      → 调漆 → 库存 260.0 → 245.0 ml，稀释剂来源 250.0 → 240.0 ml，瓶 15.0/15.0 ≈ 1（100%）
 ```
 
 ## A7. 已知缺口（接手先看这里）
@@ -74,7 +78,7 @@ release/PAINTLAB.exe  → HTTP 200（index / bundle / catalog），浏览器实�
 | 1 | 田宫 / 匠域辅料的**型号与容量未获官方页确认** | 用户可能按错规格记账 | 按 6.7 SOP 人工核验后回填 `verifiedAt` 与 `sourceUrl` |
 | 2 | 目录仍是 4 品牌 267 条，M7（郡士 GX/UG、匠域 MEKA、田宫 LP 全量、AK 全量）未做 | 品类覆盖不足 | 按品牌分 2 周一批补齐 |
 | 3 | 自动快照（`snapshots`）未实现（规格 3.8 标 P1） | 无法一键回滚 | 设置页已显式标注「P1 未实现」+ 导出全量替代 |
-| 4 | 跨页面拖拽未做（仓库卡 → 工位 Tab 等） | 交互效率 | 已用行内菜单路径覆盖；移动端本就要求菜单路径（9.6） |
+| 4 | 跨页面拖拽未做（仓库卡 → 工作台 Tab 等） | 交互效率 | 已用行内菜单路径覆盖；移动端本就要求菜单路径（9.6） |
 | 5 | Playwright E2E（7.3 八条）未接入 | 回归保护弱 | 现有 308 条单测 + 人工走查，建议补 e2e |
 | 6 | ESLint 未接入（DoD 提到 lint 全绿） | 风格漂移 | 闸门暂为 tsc + vitest + build |
 | 7 | 打包单 chunk 612 KB（gzip 193 KB，达标但触发 Vite 500 KB 提示） | 加载不并行 | 必要时加 `manualChunks` |
@@ -110,7 +114,7 @@ features → store → data → core      方向不可逆
 
 - `src/core/**`：纯 TS，零 React / 零 Dexie。类型、Zod、稀释与液位算法、三档色块、I1–I8 不变量、分组三级规则、撤销栈。
 - `src/data/**`：Dexie 表 + 仓储 + 目录包加载/归一化；所有写入走「补丁事务」并产出 Command。
-- `src/store/**`：Zustand 切片（ui/settings/catalog/inventory/mix/station/history）+ `hydrateApp()`。
+- `src/store/**`：Zustand 切片（ui/settings/catalog/inventory/mix/workbench/history）+ `hydrateApp()`。
 - `src/features/**`：五页，只消费 store 与展示组件。
 - `src/components/**`：UI 原语、色卡原子（PaintRow/PaintTile/PaintSwatch/PaintMeta/StockBar）、瓶身 SVG。
 - `src/app/**`：Shell / TopBar / SideNav / 路由。
@@ -141,7 +145,7 @@ interface Paint {
 
 ## B5. 状态与不变量
 
-库存条目单归属分组、分组 ≤3 层且 `child.depth = parent.depth + 1`、工位 ≤5、`0 ≤ volumeMl ≤ initialMl`、`0 ≤ remaining ≤ baseline ≤ capacity`、比例 0–10、扣减必须原子写 `UsageRecord`、撤销栈深 3（可配 3–20）。
+库存条目单归属分组、分组 ≤3 层且 `child.depth = parent.depth + 1`、工作台 ≤5、`0 ≤ volumeMl ≤ initialMl`、`0 ≤ remaining ≤ baseline ≤ capacity`、比例 0–10、扣减必须原子写 `UsageRecord`、撤销栈深 3（可配 3–20）。
 
 ## B6. 测试策略
 
@@ -167,6 +171,6 @@ interface Paint {
 | 辅料按容量拆 SKU（T-102/T-103/T-104 各一条） | 用户要"规格"这一层信息；一个产品多容量若合并会丢失库存粒度 |
 | `Paint.volumeMl` 而非改 `PaintLine.defaultVolumeMl` | 产品线默认值仍服务色卡（10 ml），辅料容量是 SKU 级事实 |
 | 采购新增「颜色/辅料」货架 | 辅料混在 267 条色卡里不可发现；分货架后搜索/筛选语义也更干净 |
-| 辅料不进「取用原浆」 | 稀释剂是配料，不是漆；混入会让用户拿稀释剂当漆记账 |
+| 辅料不进「调漆原浆」 | 稀释剂是配料，不是漆；混入会让用户拿稀释剂当漆记账 |
 | 待核验数据如实标注、不虚构官方页 | 项目数据纪律（6.2）明确：不可核验的字段不写猜测值 |
 | 数据库名保持 `pigment-depot` | 改名会让既有 IndexedDB 数据失联；代号变更只动工程侧命名 |

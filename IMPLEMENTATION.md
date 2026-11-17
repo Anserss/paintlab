@@ -1,9 +1,11 @@
-# PAINTLAB 1.0 · 实现说明（Application Implementation）
+# PAINTLAB 1.1 · 实现说明（Application Implementation）
 
-> 交班总结与工程描述见 `docs/PAINTLAB-1.0-交班总结与工程描述.md`；本文件偏目录、脚本与分层的速查。
+> 交班总结与工程描述见 `docs/PAINTLAB-1.0-交班总结与工程描述.md`；
+> 本轮改版（术语统一 / 数据换代 / 调漆台双模式）见 `docs/PAINTLAB-1.1-改版说明.md`。
+> 本文件偏目录、脚本与分层的速查。
 
-设计包 `v1.3` 的可运行实现：Vite 5 + React 18 + TypeScript 5.6(strict) + Tailwind 3.4 + Zustand 4 + Dexie 4 + Zod 3。
-本文件记录「已实现什么 / 怎么跑 / 验收怎么过 / 与规格的已知偏差」，设计依据仍是 `docs/漆料管理软件-项目设计描述书.md`。
+Vite 5 + React 18 + TypeScript 5.6(strict) + Tailwind 3.4 + Zustand 4 + Dexie 4 + Zod 3。
+设计依据仍是 `docs/漆料管理软件-项目设计描述书.md`（3.4 节已按本轮改版加注）。
 
 ## 快速开始
 
@@ -11,10 +13,11 @@
 npm install --ignore-scripts   # 本机沙箱下 esbuild 的 postinstall 会被拦，平台包已随 optionalDependencies 安装
 npm run dev                    # http://localhost:5175
 npm run typecheck              # tsc --noEmit，期望 0 错
-npm test                       # vitest run，21 文件 / 304 用例
+npm test                       # vitest run，24 文件 / 323 用例
 npm run build                  # tsc --noEmit && vite build（PWA 壳）
-npm run preview                # 预览产物
-npm run verify:catalog         # 目录核验（设计包自带脚本）
+npm run import:catalog         # paintlab CSV → docs/seed/paint-catalog.seed.json
+npm run check                  # verify:catalog + build:catalog
+npm run launcher               # 重新产出 release/PAINTLAB.exe
 ```
 
 ## 分层（spec 5.2 铁律）
@@ -25,91 +28,94 @@ features → store → data → core        方向不可逆
 
 | 层 | 目录 | 约束 |
 |---|---|---|
-| core | `src/core/**` | 纯 TS，零 React / 零 Dexie；类型、Zod、稀释与液位算法、三档色块、I1–I8 不变量、分组三级规则、撤销栈 |
-| data | `src/data/**` | Dexie 表 + 仓储 + 目录包加载/归一化；所有写入走「补丁事务」并产出 Command |
-| store | `src/store/**` | Zustand 切片（ui/settings/catalog/inventory/mix/station/history）；读模型 + 回执 |
-| features | `src/features/**` | 五个页面，只消费 store 与展示组件 |
-| components | `src/components/**` | UI 原语 + 色卡原子（PaintRow/PaintTile/PaintSwatch）+ 瓶身 SVG |
-| app | `src/app/**` | Shell / TopBar / SideNav / 路由 |
+| core | `src/core/**` | 纯 TS，零 React / 零 Dexie；类型、Zod、稀释（dilution）与调漆分摊（blend）算法、三档色块、I1–I8 不变量、分组三级规则、撤销栈 |
+| data | `src/data/**` | Dexie 表（v2）+ 仓储 + 目录包加载/归一化；所有写入走「补丁事务」并产出 Command |
+| store | `src/store/**` | Zustand 切片（ui/settings/catalog/inventory/mix/workbench/history）；读模型 + 回执 |
+| features | `src/features/**` | 五个页面（procure / depot / mix / workbench / settings），只消费 store 与展示组件 |
+| components | `src/components/**` | UI 原语 + 色卡原子（PaintRow/PaintTile/PaintSwatch/PaintMeta/StockBar）+ 瓶身 SVG |
+| app | `src/app/**` | Shell / TopBar / SideNav / 路由（`/procure` `/depot` `/mix` `/workbench` `/settings`） |
 
-## 已实现（M0–M6）
+## 术语（v1.1 全站统一）
 
-- **M0** 脚手架、`tokens.css`（4.2 全量令牌 + 浅色主题）、Shell（72px 导航 / 44px 状态栏 / 撤销计数 / 等宽时钟）。
-- **M1** Dexie 表与仓储、目录包懒加载 + 归一化 + 校验、256 条种子数据可读、刷新不丢、撤销栈持久化。
-- **M2** 采购大厅（纯文字品牌列表、搜索/筛选/排序、批量登记、入库弹层）、仓库三视图（品牌/色环 12×30°+5×12 矩阵/分组 ≤3 层）、详情抽屉、盘点调整。
-- **M3** 调漆台：三模式稀释计算器（补满/指定原浆/反算目标）、BottleView（12 刻度、弯月面、空瓶态）、调配/使用/清空/归档事务、最近配方。
-- **M4** 工位：≤5 工位、用量面板（滑块 + 预设 + 数字）、多选批量（记录用量/放回仓库/移出/转移）、产能估算。
-- **M5** 撤销/反撤销 3+3：补丁层、命令持久化、不变量校验失败即回滚、回执带「撤销」。
-- **M6** 设置（数据范围权限矩阵、白名单设置项、导出/导入/重置、存储占用、快捷键、关于与 MIT 署名）、PWA 离线壳、空状态与错误文案统一。
-
-## 骨架级回补（评审与实测发现，已修）
-
-| # | 缺陷 | 处理 |
+| 动线 | 统一叫法 | 代码 |
 |---|---|---|
-| 1 | `undo/redo` 只刷新库存读模型，调漆瓶与工位脏读 | 统一 `refreshAllReadModels()`，undo/redo 成功与回滚两条路径都调用 |
-| 2 | 删除条目、归档瓶后工位出现幽灵条目 | 同上统一入口 |
-| 3 | 无改瓶容量接口（3.4.3 要求可切换） | 新增 `updateBottleCapacity`（校验 + 原文文案 + ledger + 可撤销） |
-| 4 | 分组无排序写入 API（3.3 要求手动拖拽排序） | 新增 `reorderGroups({ parentId, orderedIds })`（同父校验 + 可撤销） |
-| 5 | 深链接直进仓库/工位时品牌包未加载，条目解析不出 | 改为 `hydrateApp()` 在已有库存或工位时统一预热品牌包 |
-| 6 | 浅色主题下顶部状态栏/回执/批量条仍是深底深字 | 新增 `--chrome-bg` 令牌随主题切换 |
+| 进入仓库 | **入库** | `createStockItem` / `stockInBottle` / `recordUsageAndStockIn`（工作台放回） |
+| 进入调漆台 | **调漆** | 仓库行 `sendToMix` → 路由带 `stockItemId`，调漆台自动选中 |
+| 进入工作台 | **开涂** | `openCoat`（store / repo / 按钮 `data-action="coat"`） |
+| 调漆台产出 | **稀释 / 调漆** | `diluteIntoBatch` / `blendIntoBatch` |
 
-## 验收（7.1 AC 与实测方式）
+实体：原「工位」→ **工作台**（`Workbench` / `workbenches` / `workbenchItems` 表）。
 
-| AC | 内容 | 证据 |
-|---|---|---|
-| AC-01/02/03 | 稀释正算 / 补满 / 液位读数 | 单测 + 浏览器实测：1:2 下 A=10 → 合计 30.0、`基准=剩余=30.0`、读数`≈1`；使用 10 ml 后 `≈2/3` |
-| AC-04 | 使用扣减不改 baseline | `tests/unit/features/mix.test.tsx` |
-| AC-05 | 溢出拦截且库存不变 | 单测断言文案含 `45.5`、按钮 disabled、点击无副作用 |
-| AC-06 | 三档透明度 1 / 0.4 / 0.7 | 组件单测 + 仓库/采购实拍 |
-| AC-07 | 分组第 4 层拒绝 | `tests/unit/features/depot.test.tsx` + `tests/unit/core/groups.test.ts` |
-| AC-08 | 5 工位后新建按钮禁用 | `tests/unit/features/station.test.tsx` |
-| AC-09 | 放回仓库扣减用量 | 单测 + 浏览器实测：17.0 类算例等价（10.0 − 5.0 → 5.0/10.0 ml，工位条目清零） |
-| AC-10/11/14 | 撤销 3+3 / 越界保护 / 刷新后仍可撤销 | 单测 + 浏览器实测撤销标签「放回仓库「喷涂台」×1」并成功回滚、重做重回 5.0 |
-| AC-12 | 种子漆料色值只读 | 设置页与抽屉断言：字段为 `aria-readonly` 的 span，面板内 input 数为 0 |
-| AC-13 | 空仓文案 | 实拍：`DEPOT // 空仓` + `[去采购]` |
-| AC-15 | 中文属性行词表 | 组件与页面断言文本严格等于 `油性 · 光泽 · 实色` / `油性 · — · 辅助` |
-| AC-16 | 品牌纯文字、无图标 | DOM 中 `<img>` 计数 0（单测断言） |
-| AC-17 | 非油性拒收 / 同号异线不合并 | 由设计包的 `verify-catalog` 与导入校验覆盖（应用不做厂商数据导入） |
+## 调漆台（v1.1 重做）
 
-## 桌面启动器（单文件 exe）
-
-```bash
-npm run launcher      # = npm run build && node scripts/make-launcher.mjs
+```
+稀释：原浆 A + 稀释剂 A×N            → 已稀释漆料 A(1+N)
+      已稀释漆料 M（1:r0）+ 补加稀释剂 → 目标 1:rN（N > r0）
+调漆：多组分（原浆 / 已稀释漆料）按 ml 或按目标总容量 V 分摊
+      每组按自身比例折算原浆，等效比例 = Σ稀释剂 / Σ原浆
 ```
 
-产物：`release/PIGMENT-DEPOT.exe`（约 1.1 MB，单文件）。双击即用：
+- **不再选择调漆瓶容量**：批次容量 = 产出体积向上取整（最小 5 ml，Schema 上限放宽到 2500）。
+- 每次提交生成一支**批次**（`Bottle.mode = 'dilute' | 'blend'`），可切换历史批次。
+- 批次动作：入库（`stockInBottle`，比例为 0 且非调漆产物时记作原浆，否则记作已稀释）/ 开涂（`refType='bottle'`）/ 使用 / 清空。
+- 算法都在 core，可单测：`src/core/math/dilution.ts`（正算 / 反算 / 补满 / 溢出）与
+  `src/core/math/blend.ts`（`diluteThinned` / `neatShareOf` / `planBlend`）。
 
-1. 进程内起一个只监听 `127.0.0.1` 的静态服务（端口 8787 起，占用则顺延），把 `dist/` 全部文件编译期嵌入 exe；
-2. 自动用默认浏览器打开 `http://127.0.0.1:8787/`；
-3. 关闭那个控制台窗口即停止服务。
+## 数据（paintlab 合并表）
 
-不需要安装 Node、不需要联网、不需要管理员权限（用 TcpListener 手写 HTTP 响应，避开 HttpListener 的 URL ACL 限制）。
-运行前提只有 Windows 自带的 .NET Framework 4.x（Win10/11 默认存在）。
-数据仍存在浏览器的 IndexedDB 里，按 origin（`127.0.0.1:8787`）隔离；换端口等于换一份数据，所以不要随意改端口。
+| 项目 | 值 |
+|---|---|
+| 品牌 | 2（gsi 郡士 448 / jy 匠域 169） |
+| 产品线 | 34（由「系列」生成） |
+| 漆料 | 617（实色 531 / 透明 55 / 辅助 31） |
+| 色值 | 复用既有目录 121 条 + 按色名推定 465 条（`hexEstimated`） |
 
-已知限制：这是「启动器」而不是原生窗口应用——它用系统默认浏览器承载界面（要原生窗口得走 Electron/Tauri，属规格 5.6 的 P1，本包未做）。
+管线：`scripts/import-paintlab.mjs`（CSV → seed）→ `scripts/verify-catalog.mjs`（0 错）→
+`scripts/build-catalog.mjs`（seed → `public/catalog/*.json`，透传 `hexEstimated`）。
 
-## 已知缺口与偏差（均为声明项，不是隐藏缺陷）
+**数据换代**：`DepotDB` 升到 `version(2)`，升级回调清空全部表（含旧目录缓存与撤销栈），
+等于「原有数据清除，重新入库」。旧品牌的 `ak.json` / `tamiya.json` 已删除，索引只剩 gsi/jy。
 
-1. **目录里没有 aux 类稀释剂**（`grep '"paintClass": "aux"' public/catalog` → 0），而默认 `trackThinner=true`。调漆台已给出三段式可行动提示 + 「本次不扣减稀释剂」一键出路，但**真实的稀释剂扣减流程需要先有稀释剂 SKU**（属设计包 M7 数据补齐范围，需有来源的色卡，不虚构）。
-2. **自动快照（`snapshots`）未实现**：规格 3.8 将其列为 P1；数据层无快照仓储，设置页显式标注「P1 未实现」并提供「导出全量」替代。
-3. **跨页面拖拽未实现**（仓库卡→工位 Tab 等）：拖拽只在页面内实现；跨页面用行内「加入工位 / 取用调漆」菜单路径，符合 9.6「移动端默认关闭拖拽、必须提供菜单路径」的要求。
-4. **补满模式 C/R 只读**（取自瓶身），避免界面值与落库值分叉；3.4.2 的三模式公式本身完全按 `floor1` 实现。
-5. **「规格待核验」徽标位置**：3.2 要求显示在规格处，当前由 `PaintRow.badges` 渲染在行尾动作区（信息完整、带 title）。
-6. **ESLint 未接入**：DoD 提到 `lint` 全绿，当前闸门为 `tsc --noEmit` + `vitest` + `vite build`。
-7. **Playwright E2E（7.3）未跑**：浏览器走查由人工驱动完成（截图见交付说明），e2e 目录留空待补。
-8. 打包体积 **193.4 KB gzip**（预算 < 250 KB），单 chunk 612 KB 触发 Vite 的 500 KB 提示，未做 manualChunks 拆分。
+## 测试
+
+`tests/unit/core`：稀释 / 调漆分摊 / 液位 / 色块 / 不变量 / 分组 / 撤销栈；
+`tests/unit/data`：补丁事务、撤销回滚、目录归一化（真实 gsi.json）、数据重置；
+`tests/unit/components`：色卡与瓶身；`tests/unit/features`：五页交互。
+
+本轮新增/重写：
+- `tests/unit/core/blend.test.ts`（13 条）：再稀释、原浆占比、目标容量分摊、缺口。
+- `tests/unit/features/mix.test.tsx`（13 条）：稀释正/反算、再稀释、调漆分摊、稀释剂缺失、
+  使用 / 入库 / 开涂、空状态。
+- 术语与数据断言同步更新：workbench / procure / catalog / schemas 等。
+
+```
+npx tsc --noEmit   → 0 error
+npx vitest run     → 24 files / 323 tests passed
+npx vite build     → ✓ built（JS 625 KB → gzip 197 KB）
+npm run check      → verify 0 error（34 warning：primer/wash 语义提示）
+```
 
 ## 目录
 
 ```
-public/catalog/      目录包（4 个品牌，256 条）
-scripts/             设计包自带：verify-catalog / build-catalog
-src/core/            领域层（types/schemas/math/render/rules/history）
-src/data/            db / repos / catalog
+public/catalog/      运行时目录包（gsi / jy / index）
+scripts/             import-paintlab / verify-catalog / build-catalog / make-launcher
+src/core/            领域层（types / schemas / math / render / rules / history）
+src/data/            db（Dexie v2）/ repos / catalog
 src/store/           切片 + hydrateApp
 src/components/      ui / paint / bottle
-src/features/        procure / depot / mix / station / settings
+src/features/        procure / depot / mix / workbench / settings
 src/app/             Shell / TopBar / SideNav / App
-tests/unit/          core 207 · data 21+ · components 15 · features 58
+docs/                设计书 / 交班文档 / 改版说明 / seed
+tests/unit/          core · data · components · features
 ```
+
+## 已知缺口与偏差（声明项，不是隐藏缺陷）
+
+1. **465 条色值按色名推定**（`hexEstimated`，界面「≈ 推定色」）：未取到厂商官方色卡。
+2. **7 条匠域珍珠色名称待补**（GC004–GC010 官网不可达）。
+3. **自动快照未实现**（P1）：设置页标注，提供导出全量替代。
+4. **Playwright E2E 未接入**：回归靠单测 + 人工走查。
+5. **ESLint 未接入**：闸门为 `tsc --noEmit` + `vitest` + `vite build`。
+6. 打包单 chunk 约 625 KB（gzip 197 KB，预算 250 KB 内），未做 manualChunks。
+7. 品牌代号仍是「PD」：改名会影响启动器与 PWA 缓存，留到后续统一处理。

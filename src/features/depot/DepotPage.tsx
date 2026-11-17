@@ -17,7 +17,7 @@ import { BrandView } from './BrandView';
 import { GroupView } from './GroupView';
 import { HueView } from './HueView';
 import { PaintDetail } from './PaintDetail';
-import { AdjustVolumeDialog, DeleteItemDialog, StationPickDialog } from './Dialogs';
+import { AdjustVolumeDialog, DeleteItemDialog, CoatPickDialog } from './Dialogs';
 import { DEPOT_VIEWS, brandLabel, needsReorder, planGroupDrag, planGroupDrop } from './model';
 import type { BrandSelection, DepotRow, DepotView, DropPayload, DropTarget, HueBin } from './model';
 import { useDepotGroups, useDepotRows } from './useDepotData';
@@ -52,8 +52,8 @@ export function DepotPage() {
   const moveSelectedToGroup = useAppStore((state) => state.moveSelectedToGroup);
   const relocateGroup = useAppStore((state) => state.relocateGroup);
   const reorderGroups = useAppStore((state) => state.reorderGroups);
-  const addToStation = useAppStore((state) => state.addToStation);
-  const workstations = useAppStore((state) => state.workstations);
+  const openCoat = useAppStore((state) => state.openCoat);
+  const workbenches = useAppStore((state) => state.workbenches);
   const pushToast = useAppStore((state) => state.pushToast);
 
   const [view, setView] = useState<DepotView>('brand');
@@ -64,7 +64,7 @@ export function DepotPage() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [adjustRow, setAdjustRow] = useState<DepotRow | null>(null);
   const [deleteRow, setDeleteRow] = useState<DepotRow | null>(null);
-  const [stationRows, setStationRows] = useState<DepotRow[]>([]);
+  const [workbenchRows, setWorkbenchRows] = useState<DepotRow[]>([]);
   const [dragLabel, setDragLabel] = useState<string | null>(null);
   const [rowMenu, setRowMenu] = useState<{ stockItemId: string; x: number; y: number } | null>(null);
 
@@ -165,23 +165,23 @@ export function DepotPage() {
     setDragLabel(row ? codeOrDash(row.paint.code) + ' ' + (row.paint.nameZh ?? row.paint.name) : group ? group.name : null);
   };
 
-  const requestStation = (targets: DepotRow[]) => {
+  const requestWorkbench = (targets: DepotRow[]) => {
     if (targets.length === 0) return;
-    if (workstations.length === 0) {
-      pushToast({ message: '还没有工位，先去工位页新建一个', tone: 'warn' });
+    if (workbenches.length === 0) {
+      pushToast({ message: '还没有工作台，先去工作台页新建一个', tone: 'warn' });
       return;
     }
-    if (workstations.length === 1) {
-      void addToStation({
-        workstationId: workstations[0].id,
+    if (workbenches.length === 1) {
+      void openCoat({
+        workbenchId: workbenches[0].id,
         refs: targets.map((row) => ({ refType: 'stock' as const, refId: row.item.id })),
       });
       return;
     }
-    setStationRows(targets);
+    setWorkbenchRows(targets);
   };
 
-  const useForMixing = (row: DepotRow) => {
+  const sendToMix = (row: DepotRow) => {
     navigate('/mix', { state: { paintId: row.paint.id, stockItemId: row.item.id } });
     pushToast({ message: '已选择 ' + codeOrDash(row.paint.code) + '，前往调漆台', tone: 'neutral' });
   };
@@ -203,8 +203,8 @@ export function DepotPage() {
 
   const rowActions = {
     onOpen: openDetail,
-    onAddToStation: (row: DepotRow) => requestStation([row]),
-    onUse: useForMixing,
+    onOpenCoat: (row: DepotRow) => requestWorkbench([row]),
+    onUse: sendToMix,
   };
 
   const selectRow = (row: DepotRow) => select(row.item.id);
@@ -286,7 +286,7 @@ export function DepotPage() {
           <div className="p-4">
             <Empty
               title="DEPOT // 空仓"
-              description="还没有漆料。前往采购大厅登记你的第一支漆。"
+              description="还没有漆料。前往采购大厅入库你的第一支漆。"
               action={
                 <Button variant="primary" onClick={() => navigate('/procure')}>
                   去采购
@@ -329,8 +329,8 @@ export function DepotPage() {
         )}
 
         <Toolbar count={selected.length}>
-          <Button size="sm" onClick={() => requestStation(selectedRows)}>
-            加入工位
+          <Button size="sm" onClick={() => requestWorkbench(selectedRows)}>
+            开涂
           </Button>
           <Button size="sm" variant="ghost" onClick={clearSelection}>
             取消
@@ -341,8 +341,8 @@ export function DepotPage() {
           row={detailRow}
           groups={groups}
           onClose={() => setDetailId(null)}
-          onAddToStation={(row) => requestStation([row])}
-          onUse={useForMixing}
+          onOpenCoat={(row) => requestWorkbench([row])}
+          onUse={sendToMix}
           onAdjust={(row) => setAdjustRow(row)}
           onDelete={(row) => setDeleteRow(row)}
           onMoveToGroup={(row, groupId) => applyDrop({ kind: 'item', stockItemId: row.item.id }, { kind: 'group', groupId })}
@@ -350,7 +350,7 @@ export function DepotPage() {
 
         <AdjustVolumeDialog row={adjustRow} onClose={() => setAdjustRow(null)} />
         <DeleteItemDialog row={deleteRow} onClose={() => setDeleteRow(null)} />
-        <StationPickDialog rows={stationRows} onClose={() => setStationRows([])} />
+        <CoatPickDialog rows={workbenchRows} onClose={() => setWorkbenchRows([])} />
       </section>
 
       <DragOverlay dropAnimation={null}>
