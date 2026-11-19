@@ -20,7 +20,7 @@ export interface TreeRowProps {
 
 const PREFIX: Record<1 | 2 | 3, string> = { 1: '▸', 2: '·', 3: '∘' };
 
-/** TreeRow：高 28，缩进 16/层；拖拽悬停时整行 --surface-3 + 左侧 2px 竖条（4.5.3） */
+/** TreeRow：高 32，缩进 16/层；当前节点 = 左侧 4px trace + 墨字加粗 */
 export function TreeRow({
   depth,
   label,
@@ -55,10 +55,10 @@ export function TreeRow({
       onDrop={onDropOn}
       onDragOver={onDragOverRow}
       className={cn(
-        'group relative flex h-7 cursor-pointer select-none items-center gap-1.5 pr-2 text-xs transition-colors duration-hover',
-        'border-l-2 border-transparent',
-        selected ? 'bg-surface-2 text-text-1' : 'text-text-2 hover:bg-surface-2 hover:text-text-1',
-        dropActive && 'border-l-accent bg-surface-3',
+        'group relative flex h-8 cursor-pointer select-none items-center gap-1.5 pr-2 text-[13px] transition-colors duration-hover',
+        'border-l-4 border-transparent',
+        selected ? 'border-l-[var(--ef-trace)] bg-transparent font-semibold text-text-1' : 'text-text-2 hover:bg-surface-2 hover:text-text-1',
+        dropActive && 'border-l-[var(--ef-trace)] bg-surface-2',
       )}
       style={{ paddingLeft: (depth - 1) * 16 + 8 }}
     >
@@ -70,10 +70,7 @@ export function TreeRow({
           e.stopPropagation();
           onToggle?.();
         }}
-        className={cn(
-          'w-3 shrink-0 text-center text-[10px] text-text-3',
-          !hasChildren && 'invisible',
-        )}
+        className={cn('w-3 shrink-0 text-center text-[10px] text-text-3', !hasChildren && 'invisible')}
       >
         {expanded ? '▾' : '▸'}
       </button>
@@ -81,7 +78,7 @@ export function TreeRow({
       <span className={cn('truncate', system && 'italic text-text-3')}>{label}</span>
       {meta}
       {typeof count === 'number' && (
-        <span className="t-readout ml-auto pl-2 text-[10px] text-text-3">{count}</span>
+        <span className="ef-field ml-auto pl-2 text-[11px] text-text-2">{count}</span>
       )}
     </div>
   );

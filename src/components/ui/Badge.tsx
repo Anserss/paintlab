@@ -11,20 +11,20 @@ export interface BadgeProps {
 }
 
 const TONE: Record<BadgeTone, string> = {
-  neutral: 'border-line text-text-2',
-  accent: 'border-accent text-accent',
-  ok: 'border-ok text-ok',
-  warn: 'border-warn text-warn',
-  danger: 'border-danger text-danger',
+  neutral: 'text-ink-2',
+  accent: 'bg-ink text-panel px-1.5',
+  ok: 'bg-ink text-panel px-1.5',
+  warn: 'bg-chip text-ink px-1.5',
+  danger: 'text-danger',
 };
 
-/** Badge：高 18，padding 0 6px，10px 字，1px 描边，无底色（4.5.3） */
+/** 字段式徽标（替代旧带框 Badge）：13px 宽体数字，可点击但不是按钮 */
 export function Badge({ children, tone = 'neutral', title, className }: BadgeProps) {
   return (
     <span
       title={title}
       className={cn(
-        'inline-flex h-[18px] items-center border px-1.5 text-[10px] uppercase tracking-[0.08em]',
+        'ef-field inline-flex h-[22px] items-center whitespace-nowrap text-[11px] uppercase tracking-[0.06em]',
         TONE[tone],
         className,
       )}

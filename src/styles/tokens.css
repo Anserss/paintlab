@@ -1,105 +1,218 @@
 /* ==========================================================================
-   PIGMENT DEPOT · design tokens (spec 4.2 / 4.4 / 10.3)
-   唯一真相：任何组件不得硬编码色值、字号、间距。
+   PAINTLAB 2.0 · 终末地风味 design tokens
+   唯一真相：颜色 / 字体 / 尺寸 / 动效都在这里；组件只引用 var(--ef-*)。
+   浅色为默认主题；深色是一套完整主题（data-theme="dark"），不是反色。
    ========================================================================== */
 
 :root {
-  /* 基底：7 级无彩灰 */
-  --bg-0: #0b0c0d;
-  --bg-1: #111314;
-  --surface: #17191b;
-  --surface-2: #1e2124;
-  --surface-3: #262a2e;
-  --surface-4: #31363b;
-  --swatch-bed: #0e1011;
+  color-scheme: light;
 
-  /* 描边 */
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.22);
-  --accent: #e8a33d;
-  --line-hot: var(--accent);
+  /* 纸面与墨 */
+  --ef-paper: #f4f4f2;
+  --ef-panel: #ffffff;
+  --ef-ink: #161616;
+  --ef-ink-2: #5c5c5c;
+  --ef-rule: #d9d9d6;
+  --ef-chip: #e4e4e0;
 
-  /* 文字 */
-  --text-1: #ecedee;
-  --text-2: #a6abb0;
-  --text-3: #6e7479;
-  --text-inv: #0b0c0d;
+  /* 唯一强调色：只做填充，上面的字用墨色 */
+  --ef-signal: #fffa00;
+  --ef-on-signal: #161616;
+  --ef-mark: rgba(255, 250, 0, 0.55);
+  --ef-trace: var(--ef-ink);
 
-  /* 主强调：工业琥珀 */
-  --accent-dim: #8a6224;
-  --accent-ink: #100c05;
+  /* 编号标签 */
+  --ef-tag-bg: #161616;
+  --ef-tag-fg: #ffffff;
 
-  /* 包豪斯三原色（语义化使用） */
-  --bh-red: #e2554b;
-  --bh-blue: #3e7fc1;
-  --bh-yellow: #f0c24b;
+  /* 稀释漆料的灰底白字小牌（2.1） */
+  --ef-tag-grey-bg: #5c5c5c;
+  --ef-tag-grey-fg: #ffffff;
 
-  /* 状态 */
-  --ok: var(--bh-blue);
-  --warn: var(--accent);
-  --danger: var(--bh-red);
-  --ghost: rgba(255, 255, 255, 0.06);
+  /* 删除专用（全站唯一允许红色的地方） */
+  --ef-danger: #b3261e;
+  /* 2.2「容量偏低」小牌：用户明确要求红底白字（唯一允许红色填充的状态牌） */
+  --ef-low-volume-bg: #b3261e;
+  --ef-low-volume-fg: #ffffff;
 
-  /* 色块描边（2.3 渲染约束 2） */
-  --swatch-ring: rgba(255, 255, 255, 0.16);
+  /* 固定深色命令栏（窗口标题栏） */
+  --ef-command-bar: #161616;
+  --ef-command-bar-fg: #ededed;
+  --ef-tri-a: #ff00f0;
+  --ef-tri-b: var(--ef-signal);
+  --ef-tri-c: #00ffa2;
+  --ef-scrim: rgba(22, 22, 22, 0.5);
 
-  /* 浮动 chrome（顶部状态栏 / 回执 / 批量条）：随主题切换底与字，避免深底配深字 */
-  --chrome-bg: rgba(12, 13, 14, 0.94);
-  /* 固定深色吊牌上的反白文字（3.10 拖拽吊牌、4.5.3 批量条恒为深底） */
-  --chrome-fg-inv: #ecedee;
-
-  /* 尺寸 */
-  --side-nav: 72px;
-  --top-bar: 44px;
-  --row: 72px;
-  --row-compact: 56px;
-  --tile-w: 120px;
-  --tile-h: 148px;
-  --toolbar-h: 48px;
-  --radius-card: 2px;
-  --radius-button: 0px;
-  --radius-tag: 0px;
-  --radius-dot: 999px;
-
-  /* 间距阶梯 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 由 tailwind 默认刻度提供 */
-
-  /* 动效 */
-  --dur-hover: 120ms;
-  --dur-panel: 180ms;
-  --dur-liquid: 220ms;
-
-  /* 层级 */
-  --z-topbar: 30;
-  --z-toolbar: 40;
-  --z-overlay: 50;
-  --z-toast: 60;
+  /* 色样与底纹 */
+  --ef-swatch-ring: rgba(22, 22, 22, 0.18);
+  --ef-swatch-bed: #ffffff;
+  --ef-undefined: #ffffff;
+  --ef-level: rgba(22, 22, 22, 0.12);
+  --ef-contour: rgba(22, 22, 22, 0.09);
+  --ef-hatch-ink: rgba(22, 22, 22, 0.22);
 
   /* 字体 */
-  --font-display: Rajdhani, "Barlow Condensed", "Noto Sans SC", system-ui, sans-serif;
-  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", Consolas, monospace;
+  --ef-font-ui: 'Saira', 'Microsoft YaHei UI', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
+  --ef-font-text: 'Noto Sans SC', 'Microsoft YaHei UI', 'PingFang SC', system-ui, sans-serif;
+  --ef-font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
-  /* 斜切角（4.4） */
-  --chamfer: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  /* 字号 */
+  --ef-t-h1: 40px;
+  --ef-t-title: 30px;
+  --ef-t-h2: 22px;
+  --ef-t-body: 17px;
+  --ef-t-ui: 15px;
+  --ef-t-field: 13px;
+  --ef-t-eyebrow: 11px;
+
+  /* 间距 */
+  --ef-sp-1: 4px;
+  --ef-sp-2: 8px;
+  --ef-sp-3: 12px;
+  --ef-sp-4: 16px;
+  --ef-sp-5: 20px;
+  --ef-sp-6: 24px;
+  --ef-sp-7: 32px;
+  --ef-sp-8: 40px;
+  --ef-sp-9: 48px;
+  --ef-sp-10: 64px;
+  --ef-pad: clamp(24px, 2.5vw, 40px);
+  --ef-gap: 20px;
+  --ef-measure: 640px;
+
+  /* 线宽与切角 */
+  --ef-line-hair: 1px;
+  --ef-line-tab: 5px;
+  --ef-line-trace: 4px;
+  --ef-line-strip: 3px;
+  --ef-radius: 0px;
+  --ef-cut: 7px;
+  --ef-cut-btn: 8px;
+  --ef-cut-board: 26px;
+  --ef-cut-frame: 52px;
+  --ef-cut-k: 1;
+
+  /* 尺寸 */
+  --ef-touch: 44px;
+  --ef-cmd-h: 40px;
+  --ef-status-h: 36px;
+  --ef-row-h: 68px;
+  --ef-row-h-compact: 56px;
+  --ef-tile-w: 148px;
+  --ef-tile-h: 176px;
+  --ef-dock-h: 52px;
+  --ef-drawer-w: 420px;
+  --ef-density: 1;
+
+  /* 动效 */
+  --ef-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  --ef-mech: cubic-bezier(0.7, 0, 0.2, 1);
+  --ef-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --ef-dur-press: 100ms;
+  --ef-dur-row: 200ms;
+  --ef-dur-wipe: 280ms;
+  --ef-dur-panel: 360ms;
+  --ef-dur-liquid: 450ms;
+
+  /* 层级 */
+  --ef-z-command: 30;
+  --ef-z-status: 31;
+  --ef-z-dock: 40;
+  --ef-z-drawer: 50;
+  --ef-z-modal: 60;
+  --ef-z-toast: 70;
+
+  /* 旧 token 别名（Tailwind 类名继续可用，值全部指向新体系） */
+  --bg-0: var(--ef-paper);
+  --bg-1: var(--ef-paper);
+  --surface: var(--ef-panel);
+  --surface-2: var(--ef-chip);
+  --surface-3: var(--ef-chip);
+  --surface-4: var(--ef-rule);
+  --swatch-bed: var(--ef-panel);
+  --line: var(--ef-rule);
+  --line-strong: var(--ef-ink-2);
+  --accent: var(--ef-signal);
+  --accent-dim: var(--ef-signal);
+  --accent-ink: var(--ef-on-signal);
+  --text-1: var(--ef-ink);
+  --text-2: var(--ef-ink-2);
+  --text-3: var(--ef-ink-2);
+  --text-inv: var(--ef-panel);
+  --ok: var(--ef-ink);
+  --warn: var(--ef-ink);
+  --danger: var(--ef-danger);
+  --ghost: rgba(22, 22, 22, 0.04);
+  --chrome-bg: var(--ef-command-bar);
+  --chrome-fg-inv: var(--ef-command-bar-fg);
+  --swatch-ring: var(--ef-swatch-ring);
+  --side-nav: 0px;
+  --top-bar: var(--ef-status-h);
+  --row: calc(var(--ef-row-h) * var(--ef-density));
+  --row-compact: calc(var(--ef-row-h-compact) * var(--ef-density));
+  --tile-w: var(--ef-tile-w);
+  --tile-h: var(--ef-tile-h);
+  --toolbar-h: var(--ef-dock-h);
+  --radius-card: 0px;
+  --radius-button: 0px;
+  --radius-tag: 0px;
+  --radius-dot: 0px;
+  --dur-hover: var(--ef-dur-row);
+  --dur-panel: var(--ef-dur-wipe);
+  --dur-liquid: var(--ef-dur-liquid);
+  --z-topbar: var(--ef-z-command);
+  --z-toolbar: var(--ef-z-dock);
+  --z-overlay: var(--ef-z-modal);
+  --z-toast: var(--ef-z-toast);
+  --font-display: var(--ef-font-ui);
+  --font-body: var(--ef-font-text);
+  --font-mono: var(--ef-font-mono);
+  --chamfer: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
 }
 
-/* 浅色主题：只替换基底与文字层（4.2 末段） */
-:root[data-theme="light"] {
-  --bg-0: #f2f1ee;
-  --bg-1: #eae8e3;
-  --surface: #ffffff;
-  --surface-2: #f4f2ee;
-  --surface-3: #e7e4de;
-  --surface-4: #dad6ce;
-  --swatch-bed: #fbfaf7;
+/* 深色：另一套完整主题 */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ef-paper: #191919;
+  --ef-panel: #222222;
+  --ef-ink: #ededed;
+  --ef-ink-2: #a3a3a3;
+  --ef-rule: #353535;
+  --ef-chip: #2e2e2e;
+  --ef-signal: #fffa00;
+  --ef-on-signal: #161616;
+  --ef-mark: rgba(255, 250, 0, 0.45);
+  --ef-trace: var(--ef-signal);
+  --ef-tag-bg: #3a3a3a;
+  --ef-tag-fg: #ededed;
+  --ef-tag-grey-bg: #3f3f3f;
+  --ef-tag-grey-fg: #f4f4f2;
+  --ef-danger: #ff8a7a;
+  --ef-scrim: rgba(0, 0, 0, 0.63);
+  --ef-swatch-ring: rgba(255, 255, 255, 0.22);
+  --ef-swatch-bed: #222222;
+  --ef-undefined: #ffffff;
+  --ef-level: rgba(255, 255, 255, 0.12);
+  --ef-contour: rgba(255, 255, 255, 0.09);
+  --ef-hatch-ink: rgba(229, 229, 229, 0.24);
+  --ghost: rgba(255, 255, 255, 0.05);
+  --swatch-bed: var(--ef-panel);
+}
 
-  --line: rgba(0, 0, 0, 0.12);
-  --line-strong: rgba(0, 0, 0, 0.28);
-  --text-1: #14161a;
-  --text-2: #4c5257;
-  --text-3: #7a8085;
-  --text-inv: #f2f1ee;
-  --ghost: rgba(0, 0, 0, 0.05);
-  --swatch-ring: rgba(0, 0, 0, 0.18);
-  --chrome-bg: rgba(255, 255, 255, 0.94);
+:root[data-density='compact'] {
+  --ef-density: 0.9375;
+}
+
+:root[data-density='comfy'] {
+  --ef-density: 1.0625;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ef-dur-press: 0ms;
+    --ef-dur-row: 0ms;
+    --ef-dur-wipe: 0ms;
+    --ef-dur-panel: 0ms;
+    --ef-dur-liquid: 0ms;
+  }
 }

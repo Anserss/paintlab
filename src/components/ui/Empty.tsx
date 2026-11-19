@@ -9,17 +9,18 @@ export interface EmptyProps {
   className?: string;
 }
 
-/** 空状态（3.10 文案表）：主文案 + 副文案 + 单个动作 */
+/** 空状态：45° 细斜线框 + 一句完整的话 + 一个主按钮 */
 export function Empty({ title, description, action, className }: EmptyProps) {
   return (
     <div
       className={cn(
-        'tex-grid flex min-h-[240px] flex-col items-center justify-center gap-3 border border-dashed border-line p-8 text-center',
+        'tex-hatch flex min-h-[240px] flex-col items-center justify-center gap-4 border p-8 text-center',
         className,
       )}
+      style={{ borderColor: 'var(--ef-rule)' }}
     >
-      <p className="t-display text-lg text-text-2">{title}</p>
-      {description && <p className="max-w-sm text-xs text-text-3">{description}</p>}
+      <p className="ef-title !text-[22px]">{title}</p>
+      {description && <p className="max-w-md text-[13px] leading-relaxed text-text-2">{description}</p>}
       {action}
     </div>
   );

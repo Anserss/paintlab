@@ -1,4 +1,5 @@
 import { BOTTLE } from '@/core/render/bottle';
+import { estimateTextWidth } from '@/core/render/label';
 import { formatMl } from '@/core/math/quantity';
 import { cn } from '@/components/ui';
 
@@ -8,6 +9,8 @@ export interface BottleLabelProps {
   colorName: string;
   remainingMl: number;
   baselineMl: number;
+  /** 稀释漆料：名称前的灰底白字小牌「(1:N)稀释」 */
+  prefix?: string;
   className?: string;
 }
 
@@ -17,6 +20,7 @@ const RIGHT = BOTTLE.viewBox.width - 8;
 /**
  * 顶部信息牌 L-1（4.5.2）：无底色、上下 1px 描边。
  * 品牌 / 色号 / 颜色名 / 剩余量全部位于瓶身之上，液体上不压文字。
+ * 2.1：稀释漆料在颜色名前加一块灰底白字小牌（宽度按字数估算）。
  */
 export function BottleLabel({
   brandName,
@@ -24,8 +28,12 @@ export function BottleLabel({
   colorName,
   remainingMl,
   baselineMl,
+  prefix,
   className,
 }: BottleLabelProps) {
+  const prefixWidth = prefix ? Math.ceil(estimateTextWidth(prefix, 10)) + 8 : 0;
+  const nameX = LEFT + (prefix ? prefixWidth + 6 : 0);
+
   return (
     <g data-bottle-label="" className={cn(className)}>
       <line x1={0} y1={0.5} x2={BOTTLE.viewBox.width} y2={0.5} stroke="var(--line)" strokeWidth={1} />
@@ -43,7 +51,15 @@ export function BottleLabel({
       <text x={RIGHT} y={19} textAnchor="end" fontSize={13} fill="var(--text-1)" className="t-readout">
         {code}
       </text>
-      <text x={LEFT} y={41} fontSize={14} fill="var(--text-1)">
+      {prefix && prefixWidth > 0 && (
+        <g data-bottle-dilution="">
+          <rect x={LEFT} y={27} width={prefixWidth} height={16} fill="var(--ef-tag-grey-bg)" />
+          <text x={LEFT + 4} y={39} fontSize={10} fill="var(--ef-tag-grey-fg)">
+            {prefix}
+          </text>
+        </g>
+      )}
+      <text x={nameX} y={41} fontSize={14} fill="var(--text-1)">
         {colorName}
       </text>
       <text x={RIGHT} y={41} textAnchor="end" fontSize={13} fill="var(--text-2)" className="t-readout">

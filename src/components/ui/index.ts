@@ -14,6 +14,4 @@ export { TreeRow } from './TreeRow';
 export type { TreeRowProps } from './TreeRow';
 export { Dialog } from './Dialog';
 export type { DialogProps } from './Dialog';
-export { ToastStack } from './Toast';
-export type { ToastItem, ToastStackProps } from './Toast';
 export { cn } from './cn';

@@ -8,7 +8,7 @@ export interface ToolbarProps {
   className?: string;
 }
 
-/** Toolbar：高 48，贴底浮层，rgba(10,11,12,.94) + 上描边，左侧"已选 n 件"（4.5.3） */
+/** 批量条：52 高，纸底 + 上 1px 墨线；贴内容底部，不遮提示 */
 export function Toolbar({ count, children, className }: ToolbarProps) {
   if (count <= 0) return null;
   return (
@@ -16,12 +16,12 @@ export function Toolbar({ count, children, className }: ToolbarProps) {
       role="region"
       aria-label="批量操作"
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[var(--z-toolbar)] mx-auto flex h-12 max-w-[1600px] items-center justify-between gap-4 border-t border-line-strong px-6',
-        'bg-[var(--chrome-bg)] backdrop-blur-[2px]',
+        'fixed inset-x-0 bottom-0 z-[var(--ef-z-dock)] mx-auto flex h-[52px] max-w-[1600px] items-center justify-between gap-4 border-t bg-paper px-6',
         className,
       )}
+      style={{ borderColor: 'var(--ef-ink)' }}
     >
-      <span className="t-readout text-xs text-text-2">已选 {count} 件</span>
+      <span className="ef-field text-[13px] text-ink-2">已选 {count} 件</span>
       <div className="flex items-center gap-2">{children}</div>
     </div>
   );

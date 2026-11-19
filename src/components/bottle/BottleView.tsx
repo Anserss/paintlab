@@ -12,6 +12,7 @@ import {
   liquidHeight,
   quantizeLevel,
 } from '@/core/render/bottle';
+import { bottleLook, dilutionTagText } from '@/core/render/batch';
 import { swatchAttrs } from '@/core/render/swatch';
 import { clamp, formatRatio } from '@/core/math/quantity';
 import { Button, cn } from '@/components/ui';
@@ -70,10 +71,19 @@ export function BottleView({
   const reading = levelReading(fraction);
   const quantized = quantizeLevel(shown);
   const pct = Math.round(clamp(fraction, 0, 1) * 100);
-  const liquid = swatchAttrs(bottle.hex, bottle.paintClass);
+  const look = bottleLook(bottle);
+  const liquid = swatchAttrs(look.hex, bottle.paintClass, look.alpha);
+  const undefinedColor = look.undefinedColor;
+  const dilutionPrefix = look.dilutionRatioN === null ? undefined : dilutionTagText(look.dilutionRatioN);
   const bubble = levelBubble(bottle.remainingMl, bottle.baselineMl, fraction);
   const hint = isBelowOneTick(fraction) ? '余量不足 1 格，建议清空' : null;
-  const ariaLabel = [bottle.name, empty ? '空瓶 · 可入库' : reading, hint]
+  const ariaLabel = [
+    dilutionPrefix,
+    bottle.name,
+    undefinedColor ? '未定色' : null,
+    empty ? '空瓶 · 可入库' : reading,
+    hint,
+  ]
     .filter(Boolean)
     .join('，');
 
@@ -113,12 +123,15 @@ export function BottleView({
 
         <defs>
           <clipPath id={clipId}>
-            <rect x={CAVITY.x} y={CAVITY.y} width={CAVITY.w} height={CAVITY.h} rx={4} />
+            <rect x={CAVITY.x} y={CAVITY.y} width={CAVITY.w} height={CAVITY.h} rx={0} />
           </clipPath>
           <linearGradient id={meniscusId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="white" stopOpacity={0.18} />
             <stop offset="100%" stopColor="white" stopOpacity={0} />
           </linearGradient>
+          <pattern id={'bottle-hatch-' + rawId} width={7} height={7} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="7" stroke="var(--ef-hatch-ink)" strokeWidth={1.5} />
+          </pattern>
         </defs>
 
         <BottleLabel
@@ -127,6 +140,7 @@ export function BottleView({
           colorName={bottle.name}
           remainingMl={bottle.remainingMl}
           baselineMl={bottle.baselineMl}
+          prefix={dilutionPrefix}
         />
 
         {/* L0 瓶体轮廓 */}
@@ -197,7 +211,7 @@ export function BottleView({
           />
         </g>
 
-        {/* L2 液体（颜色与透明度全部来自 core） */}
+        {/* L2 液体（颜色与透明度全部来自 core；未定色用 45° 斜线） */}
         {!empty && (
           <g clipPath={'url(#' + clipId + ')'} data-liquid-layer="">
             <rect
@@ -209,6 +223,16 @@ export function BottleView({
               fill={liquid.fill}
               opacity={liquid.opacity}
             />
+            {undefinedColor && (
+              <rect
+                data-liquid-undefined=""
+                x={CAVITY.x}
+                y={surfaceY}
+                width={CAVITY.w}
+                height={height}
+                fill={'url(#bottle-hatch-' + rawId + ')'}
+              />
+            )}
             {height > 0 && (
               <rect
                 data-meniscus=""

@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { cn } from './cn';
 
 export interface SegmentedOption<T extends string> {
@@ -14,7 +15,7 @@ export interface SegmentedProps<T extends string> {
   className?: string;
 }
 
-/** 视图切换：高 32，无圆角，选中项底 --surface-3 + 底部 2px --accent（4.5.3） */
+/** 分段选择：40 高，当前段墨底反白（不用黄，黄留给主要操作） */
 export function Segmented<T extends string>({
   options,
   value,
@@ -22,11 +23,22 @@ export function Segmented<T extends string>({
   ariaLabel,
   className,
 }: SegmentedProps<T>) {
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const current = options.findIndex((opt) => opt.value === value);
+    const delta = event.key === 'ArrowRight' ? 1 : -1;
+    const next = options[(current + delta + options.length) % options.length];
+    if (next) onChange(next.value);
+  };
+
   return (
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={cn('inline-flex h-8 items-stretch border border-line bg-bg-1', className)}
+      onKeyDown={onKeyDown}
+      className={cn('inline-flex h-10 items-stretch border border-ink bg-panel', className)}
+      style={{ borderColor: 'var(--ef-ink)' }}
     >
       {options.map((opt) => {
         const active = opt.value === value;
@@ -36,18 +48,17 @@ export function Segmented<T extends string>({
             role="tab"
             aria-selected={active}
             type="button"
+            tabIndex={active ? 0 : -1}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'relative px-3 text-xs tracking-[0.02em] transition-colors duration-hover',
-              active
-                ? 'bg-surface-3 text-text-1'
-                : 'text-text-3 hover:bg-surface-2 hover:text-text-2',
-              active && 'after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-accent',
+              'ef-btn !h-10 !border-0 !px-4 !text-[13px] transition-none',
+              active ? '!bg-ink !text-panel' : '!bg-transparent !text-ink-2 hover:!text-ink',
             )}
+            style={{ clipPath: 'none' }}
           >
             {opt.label}
             {typeof opt.count === 'number' && (
-              <span className="t-readout ml-1.5 text-text-3">{opt.count}</span>
+              <span className="ef-field ml-1.5 opacity-70">{opt.count}</span>
             )}
           </button>
         );

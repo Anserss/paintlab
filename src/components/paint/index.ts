@@ -1,5 +1,8 @@
 export { PaintSwatch } from '@/components/paint/PaintSwatch';
 export type { PaintSwatchProps, SvgSize } from '@/components/paint/PaintSwatch';
+export { DilutionTag } from '@/components/paint/DilutionTag';
+export type { DilutionTagProps } from '@/components/paint/DilutionTag';
+export { LowVolumeTag } from '@/components/paint/LowVolumeTag';
 export { StockBar } from '@/components/paint/StockBar';
 export type { StockBarProps } from '@/components/paint/StockBar';
 export { PaintMeta, brandNameOf } from '@/components/paint/PaintMeta';

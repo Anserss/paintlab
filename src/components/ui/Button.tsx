@@ -2,34 +2,34 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from './cn';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export type ButtonSize = 'sm' | 'md';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** 主按钮右端斜切角（4.4） */
+  /** 兼容旧 API：切角现在由 .ef-btn 统一处理 */
   chamfer?: boolean;
   children?: ReactNode;
 }
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary:
-    'bg-accent text-[var(--accent-ink)] border border-accent hover:bg-[color-mix(in_srgb,var(--accent)_88%,white)]',
-  secondary: 'bg-surface-2 text-text-1 border border-line hover:border-line-strong',
-  ghost: 'bg-transparent text-text-2 border border-transparent hover:bg-surface-2 hover:text-text-1',
-  danger: 'bg-transparent text-danger border border-danger hover:bg-[color-mix(in_srgb,var(--danger)_14%,transparent)]',
+  primary: 'ef-btn--go',
+  secondary: 'ef-btn--default',
+  ghost: 'ef-btn--quiet',
+  danger: 'ef-btn--danger',
 };
 
 const SIZE: Record<ButtonSize, string> = {
-  sm: 'h-7 px-2 text-[11px]',
-  md: 'h-8 px-3 text-xs',
+  sm: 'ef-btn--sm',
+  md: 'ef-btn--md',
+  lg: 'ef-btn--lg',
 };
 
-/** 按钮：工业硬边，圆角 0；主按钮恒为琥珀（4.2 使用规则） */
+/** 按钮：切角 = 可点击；主要按钮墨底，悬停黄从左侧擦入；44/40/32 三档 */
 export function Button({
   variant = 'secondary',
   size = 'md',
-  chamfer = false,
+  chamfer: _chamfer = false,
   className,
   type = 'button',
   children,
@@ -38,14 +38,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={cn(
-        'inline-flex select-none items-center justify-center gap-1.5 rounded-none font-medium tracking-[0.02em]',
-        'transition-colors duration-hover disabled:cursor-not-allowed disabled:opacity-40',
-        SIZE[size],
-        VARIANT[variant],
-        chamfer && 'u-chamfer pr-4',
-        className,
-      )}
+      className={cn('ef-btn', SIZE[size], VARIANT[variant], className)}
       {...rest}
     >
       {children}

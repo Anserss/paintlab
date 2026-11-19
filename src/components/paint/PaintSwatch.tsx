@@ -14,59 +14,64 @@ export type SvgSize = number | 'fill';
 export interface PaintSwatchProps {
   hex: string;
   paintClass: PaintClass;
-  /** 24 / 36（4.5.1）/ 'fill'；< 24 自动降级为实心圆点（2.3 约束 4） */
+  /** 24 / 40 / 'fill'；< 24 用直角小色块（实心 + ring，不使用半透明） */
   size?: SvgSize;
+  /** 自定义透明度（0–100），优先于 paintClass 的默认档 */
+  alpha?: number;
+  /** "未定色"：叠 45° 细斜线，表示还没调出颜色 */
+  undefinedColor?: boolean;
   className?: string;
 }
 
-const DOT_BELOW = 24;
+const SMALL_BELOW = 24;
 
 /**
- * 全站唯一色块：三档透明度只来自 core/render/swatch.ts（2.3），
- * 半透明块落在 tex-grid 网点底板上，并叠 1px var(--swatch-ring) 描边。
+ * 全站唯一色块：三档透明度只来自 core/render/swatch.ts，
+ * 半透明块落在 tex-grid 网点底板上，并叠 1px ring 描边。
  */
 export const PaintSwatch = memo(function PaintSwatch({
   hex,
   paintClass,
-  size = 36,
+  size = 40,
+  alpha,
+  undefinedColor = false,
   className,
 }: PaintSwatchProps) {
-  const isDot = typeof size === 'number' && size < DOT_BELOW;
-  const style = swatchStyle(hex, paintClass);
+  const small = typeof size === 'number' && size < SMALL_BELOW;
+  const style = small
+    ? { background: swatchDotColor(hex, paintClass), opacity: 1 }
+    : swatchStyle(hex, paintClass, alpha);
   const box = typeof size === 'number' ? { width: size, height: size } : undefined;
 
   return (
     <div
       aria-hidden="true"
-      data-swatch={isDot ? 'dot' : 'block'}
+      data-swatch={small ? 'dot' : undefinedColor ? 'undefined' : 'block'}
       style={box}
       className={cn(
         'relative shrink-0 overflow-hidden',
-        isDot ? 'rounded-dot' : ['rounded-card', SWATCH_BED_CLASS],
+        SWATCH_BED_CLASS,
         size === 'fill' && 'h-full w-full',
         className,
       )}
     >
       <span
         data-swatch-fill=""
-        className={cn('absolute inset-0', isDot && 'rounded-dot')}
-        style={
-          isDot
-            ? {
-                background: swatchDotColor(hex, paintClass),
-                opacity: 1,
-                boxShadow: SWATCH_RING_STYLE.boxShadow,
-              }
-            : { background: style.background, opacity: style.opacity }
-        }
+        className="absolute inset-0"
+        style={{ background: style.background, opacity: style.opacity }}
       />
-      {!isDot && (
+      {undefinedColor && (
         <span
-          data-swatch-ring=""
-          className="pointer-events-none absolute inset-0"
-          style={SWATCH_RING_STYLE}
+          data-swatch-undefined=""
+          className="tex-hatch absolute inset-0"
+          style={{ opacity: 0.55 }}
         />
       )}
+      <span
+        data-swatch-ring=""
+        className="pointer-events-none absolute inset-0"
+        style={SWATCH_RING_STYLE}
+      />
     </div>
   );
 });

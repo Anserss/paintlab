@@ -20,7 +20,7 @@ const roundTo = (n: number, precision: number) => {
   return Math.round(n * f) / f;
 };
 
-/** NumericStepper：32px 高，[-] 值 [+]，输入非法时红描边 + 60ms 抖动（4.5.3） */
+/** NumberStepper：40 高，± 32×40，值宽 64；非法输入用 trace 粗边并抖动一次 */
 export function Stepper({
   value,
   min,
@@ -61,18 +61,18 @@ export function Stepper({
   return (
     <div
       className={cn(
-        'inline-flex h-8 items-stretch border bg-bg-1',
-        invalid ? 'border-danger' : 'border-line',
+        'inline-flex h-10 items-stretch border bg-transparent',
         invalid && 'animate-[shake_60ms_ease-in-out_2]',
         className,
       )}
+      style={{ borderColor: invalid ? 'var(--ef-trace)' : 'var(--ef-rule)' }}
     >
       <button
         type="button"
         aria-label={'减少' + ariaLabel}
         disabled={disabled || value <= min}
         onClick={() => nudge(-1)}
-        className="w-7 text-text-2 transition-colors duration-hover hover:bg-surface-2 hover:text-text-1 disabled:opacity-40"
+        className="w-8 text-text-2 transition-colors duration-hover hover:bg-surface-2 hover:text-text-1 disabled:opacity-40"
       >
         −
       </button>
@@ -86,15 +86,16 @@ export function Stepper({
         onKeyDown={(e) => {
           if (e.key === 'Enter') commit((e.target as HTMLInputElement).value);
         }}
-        className="t-readout w-14 border-x border-line bg-transparent px-1 text-center text-xs text-text-1 disabled:opacity-40"
+        className="ef-field w-16 border-x bg-transparent px-1 text-center text-[13px] text-text-1 disabled:opacity-40"
+        style={{ borderColor: 'var(--ef-rule)' }}
       />
-      {unit && <span className="flex items-center pr-1 text-[10px] text-text-3">{unit}</span>}
+      {unit && <span className="flex items-center pr-2 text-[11px] text-text-3">{unit}</span>}
       <button
         type="button"
         aria-label={'增加' + ariaLabel}
         disabled={disabled || value >= max}
         onClick={() => nudge(1)}
-        className="w-7 text-text-2 transition-colors duration-hover hover:bg-surface-2 hover:text-text-1 disabled:opacity-40"
+        className="w-8 text-text-2 transition-colors duration-hover hover:bg-surface-2 hover:text-text-1 disabled:opacity-40"
       >
         +
       </button>

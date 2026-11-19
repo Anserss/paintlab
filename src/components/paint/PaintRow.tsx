@@ -2,8 +2,10 @@ import { memo } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import type { Brand, Paint, PaintLine } from '@/core/model/types';
 import { isEmptyBottle } from '@/core/render/bottle';
+import { isLowVolume } from '@/core/rules/low-volume';
 import { formatMl } from '@/core/math/quantity';
 import { codeOrDash, paintDescription, paintTitle } from '@/core/render/label';
+import { dilutionTagText } from '@/core/render/batch';
 import { Badge, cn } from '@/components/ui';
 import { PaintSwatch } from '@/components/paint/PaintSwatch';
 import { PaintMeta } from '@/components/paint/PaintMeta';
@@ -25,19 +27,25 @@ export interface PaintRowProps {
   badges?: ReactNode;
   selected?: boolean;
   compact?: boolean;
+  /** 自定义混合批次的色样透明度（0–100） */
+  swatchAlpha?: number;
+  /** 自定义混合批次的"未定色"态 */
+  swatchUndefined?: boolean;
+  /** 稀释漆料：名称前的「(1:N)稀释」小牌 */
+  dilutionRatioN?: number | null;
   actions?: PaintRowActions;
   onSelect?: (paint: Paint, e?: MouseEvent<HTMLElement>) => void;
-  /** Space / 单击行的"详情"出口（4.5.1 键盘：Space 详情） */
+  /** Space / 单击行的"详情"出口 */
   onDetail?: (paint: Paint) => void;
   className?: string;
 }
 
 const ACTION_CLASS =
-  'h-6 border border-line px-1.5 text-[11px] text-text-2 transition-colors duration-hover hover:border-line-strong hover:text-text-1';
+  'flex h-8 items-center border px-2 text-[12px] text-text-2 transition-colors duration-hover hover:border-text-1 hover:text-text-1';
 
 /**
- * PaintRow：全站默认信息原子（4.5.1）。纯展示，数据进、回调出。
- * 72px（compact 56px）/ 36×36 色块 / 三段式文字 / 悬停浮出 3 个动作。
+ * PaintRow：全站默认信息原子。纯展示，数据进、回调出。
+ * 68px（compact 56px）/ 40×40 色块 / 三段式文字 / 悬停浮出 3 个 32 高动作。
  */
 export const PaintRow = memo(function PaintRow({
   paint,
@@ -48,6 +56,9 @@ export const PaintRow = memo(function PaintRow({
   badges,
   selected = false,
   compact = false,
+  swatchAlpha,
+  swatchUndefined,
+  dilutionRatioN,
   actions,
   onSelect,
   onDetail,
@@ -55,7 +66,10 @@ export const PaintRow = memo(function PaintRow({
 }: PaintRowProps) {
   const title = paintTitle(paint);
   const empty = stock ? isEmptyBottle(stock.volumeMl) : false;
+  const low = stock ? isLowVolume(stock.volumeMl, stock.initialMl) : false;
   const label = [
+    low ? '容量偏低' : null,
+    dilutionRatioN ? dilutionTagText(dilutionRatioN) : null,
     title.primary,
     title.secondary,
     codeOrDash(paint.code),
@@ -89,23 +103,39 @@ export const PaintRow = memo(function PaintRow({
       tabIndex={0}
       data-paint-row=""
       data-empty={empty ? '' : undefined}
+      data-low-volume={low ? '' : undefined}
       data-code={codeOrDash(paint.code)}
       onClick={(e) => onSelect?.(paint, e)}
       onKeyDown={handleKeyDown}
       className={cn(
-        'group relative flex w-full cursor-pointer select-none items-center gap-3 border-l-2 pl-2 pr-2 transition-colors duration-hover',
-        compact ? 'h-row-compact' : 'h-row',
-        selected ? 'border-l-accent bg-surface-2' : 'border-l-transparent hover:bg-surface-2',
-        empty && 'opacity-50',
+        'group relative flex w-full cursor-pointer select-none items-center gap-3 border-l-4 pl-3 pr-2 transition-colors duration-hover',
+        compact ? 'min-h-row-compact' : 'min-h-row',
+        selected
+          ? 'border-l-[var(--ef-trace)] bg-surface-2'
+          : 'border-l-transparent hover:border-l-[var(--ef-trace)] hover:bg-surface-2',
         className,
       )}
     >
-      <PaintSwatch hex={paint.hex} paintClass={paint.paintClass} size={compact ? 24 : 36} />
-      <PaintMeta paint={paint} line={line} brand={brand} stock={stock} compact={compact} className="flex-1" />
+      <PaintSwatch
+        hex={paint.hex}
+        paintClass={paint.paintClass}
+        size={compact ? 28 : 40}
+        alpha={swatchAlpha}
+        undefinedColor={swatchUndefined}
+      />
+      <PaintMeta
+        paint={paint}
+        line={line}
+        brand={brand}
+        stock={stock}
+        compact={compact}
+        dilutionRatioN={dilutionRatioN}
+        className="flex-1"
+      />
 
       <div className="ml-auto flex shrink-0 items-center gap-2 self-stretch py-2">
         <div className="flex flex-col items-end justify-between gap-2">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {badges}
             {paint.hexEstimated && (
               <Badge tone="warn" title="色值为按色名推定的近似值，尚未按厂商官方色卡核验">
@@ -117,7 +147,7 @@ export const PaintRow = memo(function PaintRow({
             )}
             {empty && <Badge>空</Badge>}
           </div>
-          {stock && !compact && <StockBar volumeMl={stock.volumeMl} initialMl={stock.initialMl} className="w-16" />}
+          {stock && !compact && <StockBar volumeMl={stock.volumeMl} initialMl={stock.initialMl} className="w-20" />}
         </div>
 
         {actions && (
@@ -128,6 +158,7 @@ export const PaintRow = memo(function PaintRow({
                 aria-label="详情"
                 title="详情"
                 className={ACTION_CLASS}
+                style={{ borderColor: 'var(--ef-rule)' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   actions.onOpen?.(paint);
@@ -142,6 +173,7 @@ export const PaintRow = memo(function PaintRow({
                 aria-label="开涂"
                 title="开涂"
                 className={ACTION_CLASS}
+                style={{ borderColor: 'var(--ef-rule)' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   actions.onOpenCoat?.(paint);
@@ -156,6 +188,7 @@ export const PaintRow = memo(function PaintRow({
                 aria-label="调漆"
                 title="调漆"
                 className={ACTION_CLASS}
+                style={{ borderColor: 'var(--ef-rule)' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   actions.onUse?.(paint);
