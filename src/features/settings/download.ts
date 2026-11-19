@@ -1,4 +1,5 @@
 /** 文件下载与 CSV 序列化（spec 3.8：导出文件名带日期） */
+import { platform } from '@/platform';
 
 export function dateStamp(date = new Date()): string {
   const pad = (value: number): string => String(value).padStart(2, '0');
@@ -35,4 +36,27 @@ export function saveBlob(blob: Blob, filename: string): boolean {
   document.body.removeChild(anchor);
   if (url && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(url);
   return true;
+}
+
+/**
+ * 保存文本文件：桌面壳走原生保存框（取消不报错），浏览器退回 a[download]。
+ * 返回 'saved' | 'canceled' | 'failed'。
+ */
+export async function saveTextFile(
+  filename: string,
+  text: string,
+  mime: string,
+): Promise<'saved' | 'canceled' | 'failed'> {
+  const bridge = platform();
+  if (bridge) {
+    return bridge.saveFile({ name: filename, mime, data: new TextEncoder().encode(text) });
+  }
+  return saveBlob(new Blob([text], { type: mime }), filename) ? 'saved' : 'failed';
+}
+
+/** 读取导入文件：桌面壳走原生打开框；浏览器返回 null（由 <input type=file> 兜底） */
+export async function pickTextFile(accept: string[]): Promise<{ name: string; text: string } | null> {
+  const bridge = platform();
+  if (!bridge) return null;
+  return bridge.openFile({ accept });
 }

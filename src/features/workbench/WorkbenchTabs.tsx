@@ -45,12 +45,18 @@ function WorkbenchTab({
       title={data.workbench.note ? data.workbench.note : undefined}
       onClick={() => onSelect(data.workbench.id)}
       className={cn(
-        'flex h-9 shrink-0 items-center gap-2 border px-2.5 text-xs transition-colors duration-hover',
+        'flex h-10 shrink-0 items-center gap-2 border px-3 text-[13px] transition-colors duration-hover',
         active
-          ? 'border-accent bg-surface-3 text-text-1'
-          : 'border-line bg-bg-1 text-text-3 hover:border-line-strong hover:text-text-2',
-        isOver && 'border-accent',
+          ? 'border-transparent bg-signal font-bold text-[var(--ef-on-signal)]'
+          : 'bg-surface text-text-2 hover:border-text-1 hover:text-text-1',
+        isOver && 'border-[var(--ef-trace)]',
       )}
+      style={{
+        borderColor: active ? 'var(--ef-ink)' : 'var(--ef-rule)',
+        clipPath: active
+          ? 'polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%)'
+          : undefined,
+      }}
     >
       <span
         aria-hidden
@@ -59,12 +65,14 @@ function WorkbenchTab({
         style={{ backgroundColor: data.workbench.accent }}
       />
       <span className="max-w-[112px] truncate">{data.workbench.name}</span>
-      <Badge tone={active ? 'accent' : 'neutral'}>{formatTabBadge(data.count, data.totalMl)}</Badge>
+      <span className={cn('ef-field text-[11px]', active ? 'text-[var(--ef-on-signal)]' : 'text-text-2')}>
+        {formatTabBadge(data.count, data.totalMl)}
+      </span>
     </button>
   );
 }
 
-/** 工作台 Tab 条：横向、含件数与总毫升徽标 + 新建工作台（spec 3.5） */
+/** 工作台 Tab 条：横向、含件数与总毫升字段 + 新建工作台 */
 export function WorkbenchTabs({ workbenches, activeId, atCap, onSelect, onNew }: WorkbenchTabsProps) {
   return (
     <div className="flex flex-col gap-2">
@@ -76,7 +84,8 @@ export function WorkbenchTabs({ workbenches, activeId, atCap, onSelect, onNew }:
                 type="button"
                 data-slot="workbench-placeholder"
                 onClick={onNew}
-                className="flex h-9 flex-1 items-center justify-center border border-dashed border-line text-[11px] text-text-3 transition-colors duration-hover hover:border-line-strong hover:text-text-2"
+                className="tex-hatch flex h-10 flex-1 items-center justify-center border text-[12px] text-text-2 transition-colors duration-hover hover:text-text-1"
+                style={{ borderColor: 'var(--ef-rule)' }}
               >
                 ＋ 新建工作台
               </button>
@@ -91,7 +100,7 @@ export function WorkbenchTabs({ workbenches, activeId, atCap, onSelect, onNew }:
             ))}
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          {atCap && <span className="text-[10px] text-text-3">最多 5 个工作台，请先删除或复用现有工作台</span>}
+          {atCap && <span className="text-[11px] text-text-2">最多 5 个工作台，请先删除或复用现有工作台</span>}
           <Button
             data-action="new-workbench"
             data-disabled-reason={atCap ? 'cap' : undefined}

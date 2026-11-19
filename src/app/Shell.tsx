@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { ToastStack } from '@/components/ui';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { hydrateApp, useAppStore } from '@/store';
-import { SideNav } from './SideNav';
-import { TopBar } from './TopBar';
+import { CommandBar } from './CommandBar';
+import { LowVolumeDialog } from './LowVolumeDialog';
+import { NAV_ITEMS } from './nav';
+import { StatusBar } from './StatusBar';
 
-/** 应用外壳（spec 3.1 / 4.4）：左导航 72px + 顶部状态栏 44px + 内容区 Outlet */
+/** 应用外壳（2.1）：命令栏 40 + 三色条 3 + 状态条 36 + 内容区；右下角浮动提示已删除 */
 export function Shell() {
-  const toasts = useAppStore((state) => state.toasts);
-  const dismissToast = useAppStore((state) => state.dismissToast);
+  const navigate = useNavigate();
 
   useEffect(() => {
     void hydrateApp();
@@ -16,27 +16,47 @@ export function Shell() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        Boolean(target?.isContentEditable);
+      if (typing) return;
+
       const withMeta = event.ctrlKey || event.metaKey;
-      if (!withMeta || event.key.toLowerCase() !== 'z') return;
-      event.preventDefault();
-      const state = useAppStore.getState();
-      if (event.shiftKey) void state.redo();
-      else void state.undo();
+      if (withMeta && event.key.toLowerCase() === 'z') {
+        event.preventDefault();
+        const state = useAppStore.getState();
+        if (event.shiftKey) void state.redo();
+        else void state.undo();
+        return;
+      }
+
+      if (!withMeta && !event.altKey) {
+        const index = Number(event.key) - 1;
+        if (Number.isInteger(index) && index >= 0 && index < NAV_ITEMS.length) {
+          navigate(NAV_ITEMS[index].to);
+        }
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [navigate]);
 
   return (
-    <div className="flex min-h-screen bg-bg-0 text-text-1">
-      <SideNav />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
-        <main className="min-w-0 flex-1 pb-16">
-          <Outlet />
-        </main>
+    <div className="flex h-screen flex-col overflow-hidden bg-bg-0 text-text-1">
+      <CommandBar />
+      <div className="ef-tristrip" aria-hidden="true">
+        <span style={{ background: 'var(--ef-tri-a)' }} />
+        <span style={{ background: 'var(--ef-tri-b)' }} />
+        <span style={{ background: 'var(--ef-tri-c)' }} />
       </div>
-      <ToastStack items={toasts} onDismiss={dismissToast} />
+      <StatusBar />
+      <main className="min-h-0 flex-1 overflow-auto">
+        <Outlet />
+      </main>
+      <LowVolumeDialog />
     </div>
   );
 }

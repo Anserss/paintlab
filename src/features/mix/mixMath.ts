@@ -2,16 +2,22 @@ import { diluteThinned, planBlend } from '@/core/math/blend';
 import type { BlendPlan } from '@/core/math/blend';
 import { fromNeat, fromTotal, RATIO_MAX, RATIO_MIN } from '@/core/math/dilution';
 import { clamp, quantize1, r1 } from '@/core/math/quantity';
+import type { PaintState } from '@/core/model/types';
 
 /**
- * 调漆台（2026-11 改版）：
- * - 稀释模式：不再选调漆瓶容量。原浆 + 稀释剂直接产出「已稀释漆料」批次；
- *   仓库里的已稀释漆料也能继续再稀释（按取用毫升数）。
- * - 调漆模式：多组分（原浆 / 已稀释漆料）按 ml 或按目标总容量分摊后混合。
+ * 调漆台（2.2 改版）：
+ * - 稀释模式：原浆 / 已稀释漆料 + 稀释剂 → 已稀释漆料，确认后自动入库；
+ * - 调漆模式：两种口径二选一 ——
+ *   ① 按总量 + 配比：填目标总容量 V 与各组分配比权重，自动算各组分 ml；
+ *   ② 按各组分用量：填各组分 ml，自动算占比与合计；
+ *   确认后扣减组分库存、产物自动入库，同配方自动合并容量。
+ * - 不再有「调漆台批次」与「使用 / 清空」动作。
  */
 export type MixMode = 'dilute' | 'blend';
 /** 稀释模式的输入口径：按原浆量 / 按目标总量 */
 export type DiluteInputMode = 'neat' | 'total';
+/** 调漆模式的输入口径：按总量配比 / 按各组分用量 */
+export type BlendLogic = 'ratio' | 'amount';
 
 export interface MixModeOption {
   value: MixMode;
@@ -21,12 +27,17 @@ export interface MixModeOption {
 
 export const MIX_MODES: readonly MixModeOption[] = [
   { value: 'dilute', label: '稀释', hint: '原浆 + 稀释剂 → 已稀释漆料' },
-  { value: 'blend', label: '调漆', hint: '多组分按 ml 或目标总容量混合' },
+  { value: 'blend', label: '调漆', hint: '多组分按配比或用量混合' },
 ];
 
 export const DILUTE_INPUT_MODES: readonly { value: DiluteInputMode; label: string; hint: string }[] = [
   { value: 'neat', label: '按原浆量', hint: '填原浆 ml，正推稀释剂' },
   { value: 'total', label: '按目标总量', hint: '填总容量，反推原浆' },
+];
+
+export const BLEND_LOGIC_MODES: readonly { value: BlendLogic; label: string; hint: string }[] = [
+  { value: 'ratio', label: '按总量 ÷ 配比', hint: '给总容量 V 和各组分配比，自动算各组分 ml' },
+  { value: 'amount', label: '按各组分用量', hint: '给各组分 ml，自动算占比与总容量' },
 ];
 
 /** 比例预设（0.5 步进，与旧稀释计算器一致） */
@@ -123,23 +134,36 @@ export interface BlendPartRow {
   id: string;
   code: string;
   name: string;
-  /** 份量输入框的原始文本（按目标容量时是相对权重） */
-  mlText: string;
+  /** 展示色（调漆产物 = 自定义色；稀释漆料 = 原浆色） */
+  hex: string;
+  /** 份量输入框的原始文本（按配比时是权重，按用量时是 ml） */
+  weightText: string;
   ratioN: number;
   availableMl: number;
+  state: PaintState;
+  /** 稀释漆料的「(1:N)稀释」比例（2.1） */
+  dilutionRatioN: number | null;
+  /** 调漆产物（自定义名称/颜色） */
+  mixed: boolean;
 }
 
-/** 调漆模式：按各组分 ml 或按目标总容量分摊 */
+/** 调漆模式：按各组分权重 / 目标总容量分摊 */
 export function planBlendFor(rows: BlendPartRow[], targetMl: number | null): BlendPlan {
   return planBlend(
     rows.map((row) => ({
       id: row.id,
-      weight: parseMl(row.mlText),
+      weight: parseMl(row.weightText),
       ratioN: r1(row.ratioN),
       availableMl: row.availableMl,
     })),
     targetMl,
   );
+}
+
+/** 组分占比（0–1），用于配方条与结果表 */
+export function shareOf(ml: number, totalMl: number): number {
+  if (!(totalMl > 0)) return 0;
+  return clamp(ml / totalMl, 0, 1);
 }
 
 export interface RatioParse {

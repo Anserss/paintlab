@@ -28,6 +28,8 @@ export const SETTING_LABELS: Record<keyof Settings, string> = {
   undoDepth: '撤销深度',
   confirmDestructive: '破坏性操作二次确认',
   catalogMirror: '目录来源',
+  mixSeq: '调漆序号',
+  recentBottleColors: '最近使用色',
 };
 
 export function formatNumber(value: number, precision: number): string {

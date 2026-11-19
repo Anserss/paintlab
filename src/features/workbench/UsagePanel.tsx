@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, cn } from '@/components/ui';
+import { DilutionTag } from '@/components/paint';
 import { formatMl } from '@/core/math/quantity';
 import type { WorkbenchEntry } from './workbenchModel';
 import {
@@ -59,8 +60,9 @@ export function UsagePanel({ entry, selectedCount, onCommit, onApplyToSelected, 
       ) : (
         <div className="mt-3 flex flex-col gap-3">
           <div className="min-w-0">
-            <div className="truncate text-xs font-medium text-text-1" data-slot="usage-title">
-              {entry.title}
+            <div className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-text-1" data-slot="usage-title">
+              {entry.dilutionRatioN !== null && <DilutionTag ratioN={entry.dilutionRatioN} />}
+              <span className="truncate">{entry.title}</span>
             </div>
             <div className="t-readout mt-0.5 flex items-center justify-between text-[10px] text-text-3">
               <span>{entry.code}</span>

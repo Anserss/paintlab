@@ -8,6 +8,7 @@ import {
 } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Empty, Toolbar } from '@/components/ui';
 import { MAX_WORKBENCHES } from '@/core/rules/invariants';
 import { useAppStore } from '@/store';
@@ -15,14 +16,17 @@ import { DeleteWorkbenchDialog, ReturnDialog, WorkbenchFormDialog } from './Work
 import type { WorkbenchFormValues } from './WorkbenchDialogs';
 import { WORKBENCH_DROP_PREFIX, WorkbenchTabs } from './WorkbenchTabs';
 import { WorkbenchTileGrid } from './WorkbenchTileGrid';
+import { StockLane } from './StockLane';
 import { UsagePanel } from './UsagePanel';
+import { useWorkbenchStockLane } from './useWorkbenchData';
 import { formatWorkbenchStats, resolveEntries } from './workbenchModel';
 
 type DialogKind = 'none' | 'create' | 'edit' | 'delete' | 'return';
 
-/** 工作台页（spec 3.5）：Tab + 磁贴网格 + 用量面板 + 批量操作条 + 统计 */
+/** 工作台页（spec 3.5）：左侧从仓库调取 + Tab + 磁贴网格 + 用量面板 + 批量操作条 + 统计 */
 export function WorkbenchPage() {
   const state = useAppStore();
+  const navigate = useNavigate();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
@@ -55,6 +59,7 @@ export function WorkbenchPage() {
     brands: state.brands,
   });
   const stats = active ? state.statsOfWorkbench(active.id) : { count: 0, totalMl: 0, kits: 0 };
+  const stockLane = useWorkbenchStockLane(active?.id ?? null);
   const selectedEntries = entries.filter((entry) => selectedIds.includes(entry.id));
   const panelEntry = entries.find((entry) => entry.id === activeEntryId) ?? selectedEntries[0] ?? entries[0] ?? null;
   const otherWorkbenches = workbenches.filter((row) => row.id !== active?.id);
@@ -142,19 +147,40 @@ export function WorkbenchPage() {
     for (const itemId of selectedIds) void state.changePlannedUse({ itemId, plannedUseMl });
   }
 
+  /** 侧栏调取：仓库里的稀释 / 调漆产物直接加入当前工作台（2.1） */
+  function handlePickStock(stockItemId: string) {
+    if (!active) return;
+    void state.openCoat({
+      workbenchId: active.id,
+      refs: [{ refType: 'stock', refId: stockItemId }],
+    });
+  }
+
+  /** 工作台 → 调漆台：稀释漆料在三边互通，可直接带过去继续稀释 / 调漆 */
+  function handleSendToMix() {
+    const entry = entries.find((row) => selectedIds.includes(row.id));
+    if (!entry) return;
+    if (entry.refType === 'bottle') {
+      navigate('/mix', { state: { bottleId: entry.item.refId } });
+      return;
+    }
+    navigate('/mix', { state: { stockItemId: entry.item.refId } });
+  }
+
   return (
-    <section className="p-6" data-page="workbench">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <section className="flex min-h-full flex-col gap-5 p-6" data-page="workbench">
+      <div className="ef-page-head">
         <div className="min-w-0">
-          <h1 className="t-display text-2xl">WORKBENCH // 工作台</h1>
+          <p className="ef-eyebrow">// BENCH</p>
+          <h1 className="ef-title">工作台</h1>
           {active ? (
-            <p data-slot="workbench-stats" className="t-readout mt-1 text-[11px] text-text-3">
+            <p data-slot="workbench-stats" className="ef-field mt-1 text-[12px] text-text-2">
               {formatWorkbenchStats(stats)}
             </p>
           ) : (
-            <p className="mt-1 text-[11px] text-text-3">最多 5 个工作台；工作台内条目可拖拽到其它工作台。</p>
+            <p className="mt-1 text-[12px] text-text-2">最多 5 个工作台；工作台内条目可拖拽到其它工作台。</p>
           )}
-          {active?.note && <p className="mt-1 text-[11px] text-text-2">备注：{active.note}</p>}
+          {active?.note && <p className="mt-1 text-[12px] text-text-2">备注：{active.note}</p>}
         </div>
 
         {active && (
@@ -185,12 +211,20 @@ export function WorkbenchPage() {
           onNew={openCreate}
         />
 
-        <div className="mt-4 flex items-start gap-4">
+        <div className="mt-2 flex items-start gap-5">
+          <StockLane
+            className="max-h-[calc(100vh-300px)] w-[264px] shrink-0"
+            rows={stockLane.rows}
+            neatBlocked={stockLane.neatBlocked}
+            canAdd={Boolean(active)}
+            onPick={handlePickStock}
+          />
+
           <div className="min-w-0 flex-1">
             {!active ? (
               <Empty
                 title="未创建工作台"
-                description="先新建一个工作台，再从仓库多选漆料加入。"
+                description="先新建一个工作台，再从左侧「从仓库调取」加入稀释漆料。"
                 action={<Button data-action="new-workbench-empty" onClick={openCreate}>＋ 新建工作台</Button>}
               />
             ) : (
@@ -219,6 +253,9 @@ export function WorkbenchPage() {
         </Button>
         <Button size="sm" data-action="return-selected" onClick={() => setDialog('return')}>
           入库
+        </Button>
+        <Button size="sm" data-action="send-to-mix" onClick={handleSendToMix}>
+          去调漆台
         </Button>
         <Button size="sm" data-action="remove-selected" onClick={handleRemoveSelected}>
           移出工作台

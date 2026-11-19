@@ -2,6 +2,7 @@ import type { Brand, Group, Paint, PaintClass, PaintLine, StockItem } from '@/co
 import { canCreateChild, canMoveGroup, UNGROUPED_ID } from '@/core/rules/groups';
 import { hueBucket, isAchromatic, lightnessBucket } from '@/core/math/color';
 import { r1 } from '@/core/math/quantity';
+import { stockDilutionRatio } from '@/core/render/batch';
 
 /** 仓库三视图（spec 3.3:384-390） */
 export type DepotView = 'brand' | 'hue' | 'group';
@@ -18,6 +19,12 @@ export interface DepotRow {
   paint: Paint;
   line: PaintLine;
   brand?: Brand;
+  /** 调漆产物入库时保留的自定义透明度（0–100） */
+  displayAlpha?: number;
+  /** 是否为调漆产物（自定义名称/颜色） */
+  customMixed?: boolean;
+  /** 稀释漆料：名称前的「(1:N)稀释」小牌（2.1） */
+  dilutionRatioN?: number;
 }
 
 export interface CatalogLookup {
@@ -47,12 +54,27 @@ export function buildRows(stockItems: StockItem[], lookup: CatalogLookup): Depot
   const brandsById = new Map(lookup.brands.map((brand) => [brand.id, brand]));
   const rows: DepotRow[] = [];
   for (const item of stockItems) {
-    const paint = lookup.paintsById[item.paintId];
-    if (!paint) continue;
-    const line = lookup.linesById[paint.lineId];
+    const basePaint = lookup.paintsById[item.paintId];
+    if (!basePaint) continue;
+    const line = lookup.linesById[basePaint.lineId];
     if (!line) continue;
-    const brand = brandsById.get(paint.brandId);
-    rows.push(brand ? { item, paint, line, brand } : { item, paint, line });
+    const brand = brandsById.get(basePaint.brandId);
+    // 稀释漆料：名称与色值沿用原浆，只加「(1:N)稀释」小牌（2.1）
+    const dilutionRatioN = stockDilutionRatio(item);
+    // 调漆产物入库：仓库行优先显示调漆台上的自定义名称与颜色
+    const customMixed = Boolean(item.customName || item.customHex);
+    const paint: Paint = customMixed
+      ? {
+          ...basePaint,
+          ...(item.customName ? { name: item.customName, nameZh: item.customName } : {}),
+          ...(item.customHex ? { hex: item.customHex } : {}),
+        }
+      : basePaint;
+    const row: DepotRow = { item, paint, line, customMixed };
+    if (brand) row.brand = brand;
+    if (dilutionRatioN !== null) row.dilutionRatioN = dilutionRatioN;
+    if (typeof item.customAlpha === 'number' && dilutionRatioN === null) row.displayAlpha = item.customAlpha;
+    rows.push(row);
   }
   return rows;
 }

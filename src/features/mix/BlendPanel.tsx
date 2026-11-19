@@ -1,176 +1,266 @@
 import { formatMl, formatRatio } from '@/core/math/quantity';
 import type { BlendPlan } from '@/core/math/blend';
 import { Button, cn } from '@/components/ui';
-import type { BlendPartRow } from './mixMath';
+import { DilutionTag } from '@/components/paint';
+import type { BlendLogic, BlendPartRow } from './mixMath';
+import { BLEND_LOGIC_MODES, shareOf } from './mixMath';
 
 export interface BlendPanelProps {
   rows: BlendPartRow[];
-  onChangeMl: (itemId: string, raw: string) => void;
+  logic: BlendLogic;
+  onLogicChange: (logic: BlendLogic) => void;
+  onChangeWeight: (itemId: string, raw: string) => void;
   onRemove: (itemId: string) => void;
   onEqualize: () => void;
-  onClear: () => void;
-  /** 是否按目标总容量分摊 */
-  useTarget: boolean;
-  onUseTargetChange: (value: boolean) => void;
+  /** 目标总容量（仅「按总量 ÷ 配比」口径） */
   targetText: string;
   onTargetChange: (raw: string) => void;
   plan: BlendPlan | null;
   blockers: string[];
   canCommit: boolean;
   onCommit: () => void;
+  busy?: boolean;
 }
 
-/** 右栏 · 调漆模式：多组分份量 / 目标总容量分摊，等效比例由 core 折算 */
+function sharePercent(ml: number, totalMl: number): string {
+  return Math.round(shareOf(ml, totalMl) * 100) + '%';
+}
+
+/** 中栏 · 调漆：左「算法 + 组分」，右「结果卡」；两种口径共用一套表单 */
 export function BlendPanel({
   rows,
-  onChangeMl,
+  logic,
+  onLogicChange,
+  onChangeWeight,
   onRemove,
   onEqualize,
-  onClear,
-  useTarget,
-  onUseTargetChange,
   targetText,
   onTargetChange,
   plan,
   blockers,
   canCommit,
   onCommit,
+  busy = false,
 }: BlendPanelProps) {
-  const shareOf = (id: string) => plan?.parts.find((part) => part.id === id)?.ml;
+  const shareOfId = (id: string) => plan?.parts.find((part) => part.id === id);
+  const ratioMode = logic === 'ratio';
 
   return (
     <aside
       aria-label="调漆面板"
       data-mix-panel="blend"
-      className="flex shrink-0 flex-col border border-line bg-bg-1"
+      className="flex min-h-0 flex-1 flex-col border bg-surface"
+      style={{ borderColor: 'var(--ef-rule)' }}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
-        <h2 className="t-display text-[11px] tracking-[0.1em] text-text-2">调漆</h2>
-        <span className="t-readout text-[10px] text-text-3">{rows.length + ' 组分'}</span>
+      <div
+        className="flex shrink-0 items-center justify-between gap-3 border-b px-4"
+        style={{ height: 52, borderColor: 'var(--ef-rule)' }}
+      >
+        <div className="flex min-w-0 items-baseline gap-3">
+          <h2 className="text-[16px] font-bold">调漆</h2>
+          <span className="ef-field text-[12px] text-text-2">{rows.length + ' 组分'}</span>
+        </div>
+        <span className="ef-field shrink-0 text-[11px] text-text-2" data-sop="">
+          ① 选组分 → ② 选算法填数据 → ③ 确认入库
+        </span>
       </div>
 
-      <div className="flex min-h-0 flex-col gap-3 p-3">
-        <div className="flex flex-col gap-1">
-          <label className="flex items-center gap-2 text-[11px] text-text-2">
-            <input
-              type="checkbox"
-              aria-label="按目标总容量分摊"
-              checked={useTarget}
-              onChange={(event) => onUseTargetChange(event.target.checked)}
-              className="h-3 w-3 accent-accent"
-            />
-            按目标总容量 V 分摊
-          </label>
-          {useTarget ? (
-            <span className="flex items-center gap-1">
-              <input
-                aria-label="目标总容量 V"
-                data-target-input=""
-                inputMode="decimal"
-                value={targetText}
-                onChange={(event) => onTargetChange(event.target.value)}
-                className="t-readout h-7 w-full border border-line bg-bg-1 px-1.5 text-xs text-text-1"
-              />
-              <span className="shrink-0 text-[10px] text-text-3">ml</span>
-            </span>
-          ) : (
-            <p className="text-[10px] leading-snug text-text-3">按各组分填写的 ml 直接混合，合计自动累加。</p>
-          )}
-        </div>
-
-        <div className="flex flex-wrap gap-1">
-          <Button size="sm" variant="ghost" data-action="blend-equalize" disabled={rows.length === 0} onClick={onEqualize}>
-            等分
-          </Button>
-          <Button size="sm" variant="ghost" data-action="blend-clear" disabled={rows.length === 0} onClick={onClear}>
-            清空组分
-          </Button>
-        </div>
-
-        {rows.length === 0 ? (
-          <p className="border border-line px-2 py-3 text-center text-[11px] text-text-3">
-            左侧勾选漆料组分
-          </p>
-        ) : (
-          <ul data-blend-parts="" className="flex max-h-60 min-h-0 flex-col gap-1 overflow-auto">
-            {rows.map((row) => (
-              <li key={row.id} className="flex items-center gap-1.5 border border-line px-1.5 py-1">
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[11px] text-text-1">
-                    {row.code} {row.name}
-                  </span>
-                  <span className="t-readout block text-[9px] text-text-3">
-                    {'可用 ' + formatMl(row.availableMl) + ' ml' + (row.ratioN > 0 ? ' · ' + formatRatio(row.ratioN) : '')}
-                  </span>
+      <div className="grid min-h-0 flex-1 gap-5 overflow-auto p-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <div role="radiogroup" aria-label="调漆算法" className="grid shrink-0 gap-2 sm:grid-cols-2">
+            {BLEND_LOGIC_MODES.map((option) => (
+              <label
+                key={option.value}
+                className={cn(
+                  'flex cursor-pointer flex-col gap-1 border px-3 py-2 transition-colors duration-hover',
+                  logic === option.value ? 'bg-chip' : 'border-transparent hover:bg-surface-2',
+                )}
+                style={{ borderColor: logic === option.value ? 'var(--ef-ink)' : 'var(--ef-rule)' }}
+              >
+                <span className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="blend-logic"
+                    value={option.value}
+                    aria-label={option.label}
+                    checked={logic === option.value}
+                    onChange={() => onLogicChange(option.value)}
+                    className="h-4 w-4"
+                    style={{ accentColor: 'var(--ef-ink)' }}
+                  />
+                  <span className="text-[13px] font-semibold text-text-1">{option.label}</span>
                 </span>
-                <input
-                  aria-label={'份量 ' + row.code}
-                  data-part-ml={row.id}
-                  inputMode="decimal"
-                  value={row.mlText}
-                  onChange={(event) => onChangeMl(row.id, event.target.value)}
-                  className={cn(
-                    't-readout h-6 w-14 border bg-bg-1 px-1 text-center text-[11px] text-text-1',
-                    (shareOf(row.id) ?? 0) > row.availableMl + 1e-6 ? 'border-danger' : 'border-line',
-                  )}
-                />
-                <span className="w-9 shrink-0 text-right text-[9px] text-text-3">
-                  {shareOf(row.id) === undefined ? 'ml' : '→' + formatMl(shareOf(row.id) as number)}
-                </span>
-                <button
-                  type="button"
-                  aria-label={'移除组分 ' + row.code}
-                  data-part-remove={row.id}
-                  onClick={() => onRemove(row.id)}
-                  className="h-6 w-5 shrink-0 border border-line text-[10px] text-text-3 hover:text-danger"
-                >
-                  ×
-                </button>
-              </li>
+                <span className="text-[11px] leading-snug text-text-2">{option.hint}</span>
+              </label>
             ))}
-          </ul>
-        )}
+          </div>
 
-        <div className="flex flex-col gap-1 border-t border-line pt-2" data-blend-results="">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] text-text-2">合计</span>
-            <span data-result="total" className="t-readout text-sm text-text-1">
-              {(plan?.totalMl ?? 0).toFixed(1) + ' ml'}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] text-text-2">其中原浆</span>
-            <span data-result="neat" className="t-readout text-xs text-text-1">
-              {(plan?.neatMl ?? 0).toFixed(1) + ' ml'}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] text-text-2">其中稀释剂</span>
-            <span data-result="thinner" className="t-readout text-xs text-text-1">
-              {(plan?.thinnerMl ?? 0).toFixed(1) + ' ml'}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] text-text-2">等效比例</span>
-            <span data-result="ratio" className="t-readout text-xs text-text-1">
-              {formatRatio(plan?.ratioN ?? 0)}
-            </span>
-          </div>
+          {ratioMode && (
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex flex-col gap-1.5">
+                <span className="ef-eyebrow">目标总容量 V</span>
+                <span className="flex items-center gap-2">
+                  <input
+                    aria-label="目标总容量 V"
+                    data-target-input=""
+                    inputMode="decimal"
+                    value={targetText}
+                    onChange={(event) => onTargetChange(event.target.value)}
+                    className="ef-input ef-input--lg"
+                    style={{ height: 48, width: 140 }}
+                  />
+                  <span className="ef-field shrink-0 text-[12px] text-text-2">ml</span>
+                </span>
+              </label>
+              <Button
+                size="sm"
+                variant="ghost"
+                data-action="blend-equalize"
+                disabled={rows.length === 0}
+                onClick={onEqualize}
+              >
+                配比全部等分
+              </Button>
+            </div>
+          )}
+
+          {rows.length === 0 ? (
+            <p className="border px-3 py-8 text-center text-[13px] text-text-2" style={{ borderColor: 'var(--ef-rule)' }}>
+              左侧勾选漆料组分（可以是原浆、已稀释漆料或库里的调漆产物）
+            </p>
+          ) : (
+            <ul data-blend-parts="" className="flex shrink-0 flex-col gap-1.5">
+              {rows.map((row) => {
+                const share = shareOfId(row.id);
+                const over = (share?.ml ?? 0) > row.availableMl + 1e-6;
+                return (
+                  <li
+                    key={row.id}
+                    className="flex items-center gap-3 border px-3 py-2"
+                    style={{ borderColor: over ? 'var(--ef-danger)' : 'var(--ef-rule)' }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="h-8 w-8 shrink-0 border"
+                      style={{ background: row.hex, borderColor: 'var(--ef-swatch-ring)' }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        {row.dilutionRatioN !== null && <DilutionTag ratioN={row.dilutionRatioN} />}
+                        <span className="truncate text-[13px] font-medium text-text-1">
+                          {row.code} {row.name}
+                        </span>
+                        {row.mixed && (
+                          <span className="ef-tag shrink-0" title="库里的调漆产物">
+                            调漆
+                          </span>
+                        )}
+                      </span>
+                      <span className="ef-field block text-[11px] text-text-2">
+                        {'可用 ' +
+                          formatMl(row.availableMl) +
+                          ' ml' +
+                          (row.ratioN > 0 ? ' · ' + formatRatio(row.ratioN) : '') +
+                          (share ? ' · 占 ' + sharePercent(share.ml, plan?.totalMl ?? 0) : '')}
+                      </span>
+                    </span>
+                    <label className="flex shrink-0 items-center gap-1.5">
+                      <span className="ef-eyebrow">{ratioMode ? '配比' : '用量'}</span>
+                      <input
+                        aria-label={(ratioMode ? '配比 ' : '用量 ') + row.code}
+                        data-part-ml={row.id}
+                        data-part-mode={logic}
+                        inputMode="decimal"
+                        value={row.weightText}
+                        onChange={(event) => onChangeWeight(row.id, event.target.value)}
+                        className="ef-field w-20 border bg-transparent px-1 text-center text-[14px] text-text-1"
+                        style={{
+                          height: 36,
+                          borderColor: over ? 'var(--ef-danger)' : 'var(--ef-rule)',
+                        }}
+                      />
+                    </label>
+                    <span className="ef-field w-24 shrink-0 text-right text-[12px] text-text-1" data-part-share={row.id}>
+                      {share ? '→ ' + formatMl(share.ml) + ' ml' : ratioMode ? '→ —' : 'ml'}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={'移除组分 ' + row.code}
+                      data-part-remove={row.id}
+                      onClick={() => onRemove(row.id)}
+                      className="h-9 w-9 shrink-0 border text-[14px] text-text-2 hover:text-danger"
+                      style={{ borderColor: 'var(--ef-rule)' }}
+                    >
+                      ×
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {blockers.map((message) => (
+            <p key={message} role="alert" data-blocker="" className="ef-flag shrink-0 text-[12px] leading-relaxed">
+              {message}
+            </p>
+          ))}
         </div>
 
-        {blockers.map((message) => (
-          <p
-            key={message}
-            role="alert"
-            data-blocker=""
-            className="border border-danger px-2 py-1 text-[10px] leading-relaxed text-danger"
+        <div className="flex min-w-0 flex-col gap-3">
+          <div
+            className="grid shrink-0 gap-3 border p-4 sm:grid-cols-2 lg:grid-cols-1"
+            style={{ borderColor: 'var(--ef-rule)' }}
+            data-blend-results=""
           >
-            {message}
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[13px] text-text-2">合计</span>
+              <span data-result="total" className="ef-field text-[20px] font-bold text-text-1">
+                {(plan?.totalMl ?? 0).toFixed(1) + ' ml'}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[13px] text-text-2">等效比例</span>
+              <span data-result="ratio" className="ef-field text-[15px] font-semibold text-text-1">
+                {formatRatio(plan?.ratioN ?? 0)}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[13px] text-text-2">其中原浆</span>
+              <span data-result="neat" className="ef-field text-[13px] text-text-1">
+                {(plan?.neatMl ?? 0).toFixed(1) + ' ml'}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[13px] text-text-2">其中稀释剂</span>
+              <span data-result="thinner" className="ef-field text-[13px] text-text-1">
+                {(plan?.thinnerMl ?? 0).toFixed(1) + ' ml'}
+              </span>
+            </div>
+          </div>
+          <p className="text-[11px] leading-relaxed text-text-2">
+            {ratioMode
+              ? '按配比权重把目标总容量分摊到各组分；合计严格等于 V。'
+              : '按各组分填写的 ml 直接混合；合计与占比自动累加。'}
           </p>
-        ))}
+        </div>
+      </div>
 
-        <Button data-action="blend-commit" variant="primary" chamfer disabled={!canCommit} onClick={onCommit}>
-          调漆
+      <div
+        className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t px-4 py-3"
+        style={{ borderColor: 'var(--ef-rule)' }}
+      >
+        <p className="text-[12px] leading-snug text-text-2">
+          确认后自动扣减各组分库存并入库；库中已有同配方会自动合并容量。
+        </p>
+        <Button
+          data-action="blend-commit"
+          variant="primary"
+          size="lg"
+          className="min-w-[180px]"
+          disabled={!canCommit || busy}
+          onClick={onCommit}
+        >
+          调漆并入库
         </Button>
       </div>
     </aside>

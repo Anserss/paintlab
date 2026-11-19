@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { Group } from '@/core/model/types';
-import { formatMl } from '@/core/math/quantity';
+import { formatMl, formatRatio } from '@/core/math/quantity';
 import { codeOrDash, paintDescription, paintOriginLine, paintTitle } from '@/core/render/label';
+import { canEnterWorkbench, WORKBENCH_NEAT_BLOCK } from '@/core/render/batch';
 import { UNGROUPED_ID } from '@/core/rules/groups';
-import { PaintSwatch, StockBar } from '@/components/paint';
+import { isLowVolume } from '@/core/rules/low-volume';
+import { DilutionTag, LowVolumeTag, PaintSwatch, StockBar } from '@/components/paint';
 import { Badge, Button, cn } from '@/components/ui';
 import { brandLabel, groupPath } from './model';
 import type { DepotRow } from './model';
@@ -60,68 +62,95 @@ export function PaintDetail({
       aria-modal="true"
       aria-label="漆料详情"
       data-paint-detail=""
-      className="fixed bottom-0 right-0 top-[var(--top-bar)] z-[var(--z-overlay)] flex w-[420px] max-w-[92vw] flex-col overflow-y-auto border-l border-line-strong bg-surface"
+      className="fixed bottom-0 right-0 z-[var(--ef-z-drawer)] flex w-[420px] max-w-[92vw] flex-col overflow-y-auto border-l bg-surface"
+      style={{
+        top: 'calc(var(--ef-cmd-h) + 3px + var(--ef-status-h))',
+        borderColor: 'var(--ef-ink)',
+      }}
     >
-      <header className="flex h-9 shrink-0 items-center justify-between border-b border-line px-3">
-        <span className="t-display text-xs uppercase tracking-[0.06em] text-text-1">漆料详情</span>
+      <header
+        className="flex shrink-0 items-center justify-between border-b px-4"
+        style={{ height: 56, borderColor: 'var(--ef-rule)' }}
+      >
+        <span className="text-[15px] font-bold">漆料详情</span>
         <button
           type="button"
           aria-label="关闭详情"
           onClick={onClose}
-          className="h-6 w-6 border border-line text-text-3 transition-colors duration-hover hover:border-line-strong hover:text-text-1"
+          className="flex h-10 w-10 items-center justify-center border text-text-2 hover:border-text-1 hover:text-text-1"
+          style={{ borderColor: 'var(--ef-rule)' }}
         >
           ×
         </button>
       </header>
 
-      <div className="flex flex-col gap-3 p-3">
+      <div className="flex flex-col gap-4 p-4">
         <div className="h-24 w-full">
-          <PaintSwatch hex={row.paint.hex} paintClass={row.paint.paintClass} size="fill" />
+          <PaintSwatch
+            hex={row.item.customHex ?? row.paint.hex}
+            paintClass={row.paint.paintClass}
+            size="fill"
+            alpha={row.displayAlpha}
+            undefinedColor={row.item.customHex === '#FFFFFF' && row.item.customAlpha === 70}
+          />
         </div>
 
-        <div className="flex items-baseline gap-2">
-          <span className="truncate text-lg font-medium text-text-1">{title.primary}</span>
+        <div className="flex items-center gap-2">
+          {isLowVolume(row.item.volumeMl, row.item.initialMl) && <LowVolumeTag />}
+          {row.dilutionRatioN ? <DilutionTag ratioN={row.dilutionRatioN} /> : null}
+          <span className="truncate text-[22px] font-bold text-text-1">{title.primary}</span>
           {title.secondary && (
-            <span className="truncate text-xs text-text-3" data-paint-name-secondary="">
+            <span className="truncate text-[13px] text-text-2" data-paint-name-secondary="">
               {title.secondary}
             </span>
           )}
         </div>
 
         <div className="flex items-baseline justify-between gap-2">
-          <span className="t-readout text-2xl text-text-1" data-paint-code="">
+          <span className="ef-field text-[28px] font-bold text-text-1" data-paint-code="">
             {codeOrDash(row.paint.code)}
           </span>
-          <span className="t-readout text-[11px] text-text-3">{row.line.name}</span>
+          <span className="ef-field text-[11px] text-text-2">{row.line.name}</span>
         </div>
 
-        <p data-paint-desc="" className="text-xs text-text-2">
+        {row.dilutionRatioN ? (
+          <p className="ef-field text-[11px] text-text-2" data-dilution-note="">
+            {'稀释漆料 · ' + formatRatio(row.dilutionRatioN) + ' 稀释（名称与色值沿用原浆 ' + codeOrDash(row.paint.code) + '）'}
+          </p>
+        ) : row.customMixed ? (
+          <p className="ef-field text-[11px] text-text-2" data-custom-mixed="">
+            调漆产物 · 自定义名称与颜色（来自原漆 {row.paint.code ?? '—'}）
+          </p>
+        ) : null}
+
+        <p data-paint-desc="" className="text-[13px] text-text-2">
           {desc}
         </p>
 
-        <p className="text-xs text-text-3">{origin}</p>
+        <p className="text-[12px] text-text-2">{origin}</p>
 
-        <div className="flex flex-col gap-1 border-y border-line py-2">
+        <div className="flex flex-col gap-1 border-y py-3" style={{ borderColor: 'var(--ef-rule)' }}>
           <div className="flex items-center justify-between">
-            <span className="t-label">色值（只读）</span>
+            <span className="ef-eyebrow">色值（只读）</span>
             <span
               role="textbox"
               aria-readonly="true"
               aria-label="色值（只读，不可编辑）"
               data-paint-hex=""
-              className="t-readout text-sm uppercase text-text-1"
+              className="ef-field text-[15px] uppercase text-text-1"
             >
               {row.paint.hexEstimated ? '≈ ' : ''}
-              {row.paint.hex.toUpperCase()}
+              {(row.item.customHex ?? row.paint.hex).toUpperCase()}
+              {typeof row.item.customAlpha === 'number' ? ' · ' + row.item.customAlpha + '%' : ''}
             </span>
           </div>
-          <p className="text-[10px] leading-snug text-text-3">
+          <p className="text-[11px] leading-snug text-text-2">
             {row.paint.hexEstimated
               ? '该色值按色名推定（未取到厂商官方色卡），仅用于近似辨识；核验后可在目录种子中回填。'
               : '色值来自目录（厂商色卡或既有核验记录）。'}
           </p>
           {row.paint.source && (
-            <p data-paint-source="" className="text-[10px] leading-snug text-text-3">
+            <p data-paint-source="" className="text-[11px] leading-snug text-text-2">
               {'来源：' + row.paint.source}
             </p>
           )}
@@ -199,7 +228,14 @@ export function PaintDetail({
       </div>
 
       <footer className="mt-auto flex flex-wrap gap-2 border-t border-line p-3">
-        <Button variant="secondary" size="sm" data-detail-action="workbench" onClick={() => onOpenCoat(row)}>
+        <Button
+          variant="secondary"
+          size="sm"
+          data-detail-action="workbench"
+          disabled={!canEnterWorkbench(row.item.state)}
+          title={canEnterWorkbench(row.item.state) ? undefined : WORKBENCH_NEAT_BLOCK}
+          onClick={() => onOpenCoat(row)}
+        >
           开涂
         </Button>
         <Button variant="secondary" size="sm" data-detail-action="mix" onClick={() => onUse(row)}>

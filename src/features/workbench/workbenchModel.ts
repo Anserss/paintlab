@@ -1,5 +1,7 @@
 import type { Brand, Bottle, Paint, PaintClass, PaintLine, StockItem, WorkbenchItem } from '@/core/model/types';
 import { formatMl, r1 } from '@/core/math/quantity';
+import { bottleLook, canEnterWorkbench, stockLook, stockOriginNote } from '@/core/render/batch';
+import { codeOrDash } from '@/core/render/label';
 
 /** 用量面板的取值域（spec 3.5：滑块 0–20 ml、步进 0.5） */
 export const PLANNED_MIN_ML = 0;
@@ -23,6 +25,11 @@ export interface WorkbenchEntry {
   /** 已用量 = 初始量/基准量 − 当前余量 */
   usedMl: number;
   plannedUseMl: number;
+  /** 调漆瓶自定义色的透明度 / 未定色态 */
+  swatchAlpha?: number;
+  swatchUndefined?: boolean;
+  /** 稀释漆料：名称前的「(1:N)稀释」小牌（2.1） */
+  dilutionRatioN: number | null;
 }
 
 export interface WorkbenchLookups {
@@ -50,18 +57,26 @@ function bottleLine(bottle: Bottle): PaintLine {
   };
 }
 
+/** 批次合成成 Paint：2.1 稀释按原浆色值，调漆按自定义色 */
 function bottlePaint(bottle: Bottle): Paint {
+  const look = bottleLook(bottle);
   return {
     id: bottle.id,
     lineId: bottle.id + BOTTLE_LINE_SUFFIX,
     brandId: bottle.labelBrandId ?? '',
-    name: bottle.name,
+    name: look.name,
     code: bottle.labelCode,
-    hex: bottle.hex,
+    hex: look.hex,
     paintClass: bottle.paintClass as PaintClass,
     category: 'other',
     origin: 'mixed',
   };
+}
+
+/** 库存条目合成成 Paint：稀释沿用原浆名称，调漆沿用自定义名称 */
+function stockPaint(stock: StockItem, paint: Paint): Paint {
+  const look = stockLook(stock, paint);
+  return { ...paint, name: look.name, nameZh: look.name, hex: look.hex };
 }
 
 /** 把工作台条目解析成可渲染的视图模型；引用的库存/瓶已不存在时跳过 */
@@ -75,44 +90,127 @@ export function resolveEntries(items: WorkbenchItem[], lookups: WorkbenchLookups
     if (item.refType === 'stock') {
       const stock = stockMap.get(item.refId);
       if (!stock) continue;
-      const paint = lookups.paintsById[stock.paintId] ?? null;
-      const line = paint ? lookups.linesById[paint.lineId] ?? null : null;
+      const basePaint = lookups.paintsById[stock.paintId] ?? null;
+      const paint = basePaint ? stockPaint(stock, basePaint) : null;
+      const line = basePaint ? lookups.linesById[basePaint.lineId] ?? null : null;
+      const look = basePaint ? stockLook(stock, basePaint) : null;
       result.push({
         id: item.id,
         item,
         refType: 'stock',
         paint,
         line,
-        brand: paint ? brandMap.get(paint.brandId) : undefined,
-        title: paint ? paint.nameZh || paint.name : stock.paintId,
-        code: paint?.code ?? '—',
+        brand: basePaint ? brandMap.get(basePaint.brandId) : undefined,
+        title: look?.name ?? stock.paintId,
+        code: codeOrDash(basePaint?.code),
         remainingMl: stock.volumeMl,
         initialMl: stock.initialMl,
         usedMl: r1(Math.max(0, stock.initialMl - stock.volumeMl)),
         plannedUseMl: item.plannedUseMl,
+        ...(typeof look?.alpha === 'number' ? { swatchAlpha: look.alpha } : {}),
+        ...(look?.undefinedColor ? { swatchUndefined: true } : {}),
+        dilutionRatioN: look?.dilutionRatioN ?? null,
       });
       continue;
     }
 
     const bottle = bottleMap.get(item.refId);
     if (!bottle) continue;
-    const paint = bottlePaint(bottle);
+    const look = bottleLook(bottle);
     result.push({
       id: item.id,
       item,
       refType: 'bottle',
-      paint,
+      paint: bottlePaint(bottle),
       line: bottleLine(bottle),
       brand: bottle.labelBrandId ? brandMap.get(bottle.labelBrandId) : undefined,
-      title: bottle.name,
+      title: look.name,
       code: bottle.labelCode ?? '—',
       remainingMl: bottle.remainingMl,
       initialMl: bottle.baselineMl,
       usedMl: r1(Math.max(0, bottle.baselineMl - bottle.remainingMl)),
       plannedUseMl: item.plannedUseMl,
+      ...(typeof look.alpha === 'number' ? { swatchAlpha: look.alpha } : {}),
+      ...(look.undefinedColor ? { swatchUndefined: true } : {}),
+      dilutionRatioN: look.dilutionRatioN,
     });
   }
   return result;
+}
+
+/* ------------------------------------------------------------------ */
+/* 侧栏「从仓库调取」：只列稀释/调漆产物，原浆不上工作台（2.1）          */
+/* ------------------------------------------------------------------ */
+
+export interface WorkbenchStockRow {
+  item: StockItem;
+  paint: Paint;
+  code: string;
+  name: string;
+  hex: string;
+  alpha?: number;
+  undefinedColor: boolean;
+  dilutionRatioN: number | null;
+  /** 稀释 / 调漆产物：用来说明为什么可以上工作台 */
+  originNote: string | null;
+  /** 已在当前工作台内（禁用重复加入） */
+  alreadyIn: boolean;
+}
+
+export function buildStockLane(
+  stockItems: StockItem[],
+  paintsById: Record<string, Paint>,
+  workbenchItems: WorkbenchItem[],
+  workbenchId: string | null,
+): WorkbenchStockRow[] {
+  const rows: WorkbenchStockRow[] = [];
+  for (const item of stockItems) {
+    if (item.volumeMl <= 0) continue;
+    if (!canEnterWorkbench(item.state)) continue;
+    const paint = paintsById[item.paintId];
+    if (!paint || paint.paintClass === 'aux') continue;
+    const look = stockLook(item, paint);
+    const row: WorkbenchStockRow = {
+      item,
+      paint,
+      code: codeOrDash(paint.code),
+      name: look.name,
+      hex: look.hex,
+      undefinedColor: look.undefinedColor,
+      dilutionRatioN: look.dilutionRatioN,
+      originNote: stockOriginNote(item),
+      alreadyIn:
+        workbenchId !== null &&
+        workbenchItems.some(
+          (entry) => entry.workbenchId === workbenchId && entry.refType === 'stock' && entry.refId === item.id,
+        ),
+    };
+    if (typeof look.alpha === 'number') row.alpha = look.alpha;
+    rows.push(row);
+  }
+  return rows.sort(
+    (a, b) =>
+      Number(b.dilutionRatioN !== null) - Number(a.dilutionRatioN !== null) ||
+      a.name.localeCompare(b.name) ||
+      b.item.volumeMl - a.item.volumeMl,
+  );
+}
+
+/** 侧栏统计数据：可调取的条数 + 被拦下的原浆条数 */
+export function stockLaneSummary(
+  stockItems: StockItem[],
+  paintsById: Record<string, Paint>,
+): { available: number; neatBlocked: number } {
+  let available = 0;
+  let neatBlocked = 0;
+  for (const item of stockItems) {
+    if (item.volumeMl <= 0) continue;
+    const paint = paintsById[item.paintId];
+    if (!paint || paint.paintClass === 'aux') continue;
+    if (canEnterWorkbench(item.state)) available += 1;
+    else neatBlocked += 1;
+  }
+  return { available, neatBlocked };
 }
 
 /** 量化到 0.5 步进并夹在 0–20（spec 3.5） */

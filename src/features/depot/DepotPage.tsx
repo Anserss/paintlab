@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { codeOrDash } from '@/core/render/label';
+import { canEnterWorkbench, WORKBENCH_NEAT_BLOCK } from '@/core/render/batch';
 import { UNGROUPED_ID } from '@/core/rules/groups';
 import { useAppStore } from '@/store';
 import { Button, Empty, Segmented, Toolbar } from '@/components/ui';
@@ -167,6 +168,16 @@ export function DepotPage() {
 
   const requestWorkbench = (targets: DepotRow[]) => {
     if (targets.length === 0) return;
+    // 2.1 平台流转：稀释漆料可进出工作台；原浆只能在仓库与调漆台之间流转
+    const allowed = targets.filter((row) => canEnterWorkbench(row.item.state));
+    const blocked = targets.length - allowed.length;
+    if (allowed.length === 0) {
+      pushToast({ message: WORKBENCH_NEAT_BLOCK, tone: 'warn' });
+      return;
+    }
+    if (blocked > 0) {
+      pushToast({ message: '已跳过 ' + blocked + ' 件原浆：' + WORKBENCH_NEAT_BLOCK, tone: 'warn' });
+    }
     if (workbenches.length === 0) {
       pushToast({ message: '还没有工作台，先去工作台页新建一个', tone: 'warn' });
       return;
@@ -174,11 +185,11 @@ export function DepotPage() {
     if (workbenches.length === 1) {
       void openCoat({
         workbenchId: workbenches[0].id,
-        refs: targets.map((row) => ({ refType: 'stock' as const, refId: row.item.id })),
+        refs: allowed.map((row) => ({ refType: 'stock' as const, refId: row.item.id })),
       });
       return;
     }
-    setWorkbenchRows(targets);
+    setWorkbenchRows(allowed);
   };
 
   const sendToMix = (row: DepotRow) => {
@@ -257,9 +268,15 @@ export function DepotPage() {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setDragLabel(null)}
     >
-      <section data-page="depot" className="flex h-[calc(100vh-var(--top-bar))] min-h-0 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-bg-1 px-3">
-          <h1 className="t-display text-base text-text-1">DEPOT // 仓库</h1>
+      <section data-page="depot" className="flex h-full min-h-0 flex-col">
+        <header
+          className="flex min-h-14 shrink-0 flex-wrap items-center gap-3 border-b bg-surface px-4 py-2"
+          style={{ borderColor: 'var(--ef-rule)' }}
+        >
+          <div className="flex flex-col">
+            <p className="ef-eyebrow">// DEPOT</p>
+            <h1 className="text-[22px] font-bold leading-tight">仓库</h1>
+          </div>
           <Segmented
             ariaLabel="仓库视图"
             options={DEPOT_VIEWS}
@@ -271,9 +288,9 @@ export function DepotPage() {
             placeholder="搜索颜色名 / 色号 / 品牌"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className="h-8 w-56 border border-line bg-bg-0 px-2 text-xs text-text-1 placeholder:text-text-3"
+            className="ef-input h-10 w-72"
           />
-          <span className="t-readout ml-auto text-[11px] text-text-2" data-selected-count="">
+          <span className="ef-field ml-auto text-[12px] text-text-2" data-selected-count="">
             {'已选 ' + selected.length + ' 件'}
           </span>
         </header>

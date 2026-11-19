@@ -4,7 +4,7 @@ import { Badge, Button, Dialog, Segmented } from '@/components/ui';
 import type { ImportCounts, ImportMode, StorageEstimate } from '@/data/repos/settings';
 import { useAppStore } from '@/store';
 import { Panel } from './controls';
-import { inventoryCsvName, pigmentExportName, saveBlob, toCsv } from './download';
+import { inventoryCsvName, pigmentExportName, pickTextFile, saveTextFile, toCsv } from './download';
 import { buildInventoryCsvRows, formatBytes } from './settingsData';
 
 const MODE_OPTIONS: { value: ImportMode; label: string }[] = [
@@ -69,11 +69,14 @@ export function DataPanel() {
     const result = await exportAll();
     if (!result.ok) return;
     const filename = pigmentExportName();
-    saveBlob(new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' }), filename);
-    setLastExport(filename);
+    const status = await saveTextFile(filename, JSON.stringify(result.data, null, 2), 'application/json');
+    if (status === 'saved') {
+      setLastExport(filename);
+      pushToast({ message: '已导出全量备份：' + filename, tone: 'ok' });
+    }
   };
 
-  const onExportCsv = (): void => {
+  const onExportCsv = async (): Promise<void> => {
     const state = useAppStore.getState();
     const rows = buildInventoryCsvRows({
       stockItems: state.stockItems,
@@ -84,9 +87,11 @@ export function DataPanel() {
       brandOf: (id) => state.brands.find((brand) => brand.id === id),
     });
     const filename = inventoryCsvName();
-    saveBlob(new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }), filename);
-    setLastExport(filename);
-    pushToast({ message: '已导出库存报表（' + (rows.length - 1) + ' 条）', tone: 'ok' });
+    const status = await saveTextFile(filename, toCsv(rows), 'text/csv;charset=utf-8');
+    if (status === 'saved') {
+      setLastExport(filename);
+      pushToast({ message: '已导出库存报表（' + (rows.length - 1) + ' 条）', tone: 'ok' });
+    }
   };
 
   const onPickFile = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -99,6 +104,20 @@ export function DataPanel() {
       setMode('replace');
       setCounts(null);
       setPending({ name: file.name, size: file.size, raw });
+    } catch {
+      pushToast({ message: '导入失败：文件不是合法 JSON，请确认是 .pigment.json 备份', tone: 'danger' });
+    }
+  };
+
+  /** 桌面壳：走原生打开框（浏览器里没有平台桥，退回上面的 <input type=file>） */
+  const onPickDesktopFile = async (): Promise<void> => {
+    const picked = await pickTextFile(['json']);
+    if (!picked) return;
+    try {
+      const raw = JSON.parse(picked.text) as unknown;
+      setMode('replace');
+      setCounts(null);
+      setPending({ name: picked.name, size: new TextEncoder().encode(picked.text).length, raw });
     } catch {
       pushToast({ message: '导入失败：文件不是合法 JSON，请确认是 .pigment.json 备份', tone: 'danger' });
     }
@@ -146,7 +165,7 @@ export function DataPanel() {
         <Button variant="secondary" onClick={() => void onExportJson()}>
           导出全量 .pigment.json
         </Button>
-        <Button variant="secondary" onClick={onExportCsv}>
+        <Button variant="secondary" onClick={() => void onExportCsv()}>
           导出库存 CSV
         </Button>
         <span className="text-[11px] text-text-3">全量备份含 catalog 版本号、user 数据与 settings；不含二进制。库存 {stockCount} 条。</span>
@@ -164,8 +183,14 @@ export function DataPanel() {
           accept=".json,application/json"
           aria-label="选择 .pigment.json 备份文件"
           onChange={(event) => void onPickFile(event)}
-          className="h-8 max-w-[280px] border border-line bg-bg-1 px-2 text-xs text-text-2 file:mr-2 file:border-0 file:bg-surface-2 file:px-2 file:py-1 file:text-text-1"
+          className="h-10 max-w-[280px] border bg-transparent px-2 text-[12px] text-text-2 file:mr-2 file:border-0 file:bg-surface-2 file:px-2 file:py-1 file:text-text-1"
+          style={{ borderColor: 'var(--ef-rule)' }}
         />
+        {window.platform?.isDesktop && (
+          <Button variant="secondary" onClick={() => void onPickDesktopFile()}>
+            从文件选择…
+          </Button>
+        )}
         <span className="text-[11px] text-text-3">三种模式：覆盖 / 合并 / 跳过；导入前必须先确认影响范围。</span>
       </div>
       {counts && (

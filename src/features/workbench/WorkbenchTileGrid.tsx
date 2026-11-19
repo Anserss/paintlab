@@ -42,6 +42,9 @@ function DraggableTile({
           plannedUseMl={entry.plannedUseMl}
           usedMl={entry.usedMl}
           selected={selected}
+          swatchAlpha={entry.swatchAlpha}
+          swatchUndefined={entry.swatchUndefined}
+          dilutionRatioN={entry.dilutionRatioN}
           onSelect={(_paint: unknown, _event?: MouseEvent<HTMLElement>) => onToggle(entry.id)}
         />
       ) : (
@@ -62,7 +65,7 @@ function DraggableTile({
 /** 主区：该工作台条目的 PaintTile 网格（spec 3.5 / 4.5.1） */
 export function WorkbenchTileGrid({ entries, selectedIds, onToggle }: WorkbenchTileGridProps) {
   if (entries.length === 0) {
-    return <Empty title="工作台待命" description="从仓库多选漆料，加入此工作台。" />;
+    return <Empty title="工作台待命" description="从左侧「从仓库调取」加入稀释漆料。" />;
   }
 
   return (

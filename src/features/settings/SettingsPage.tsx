@@ -14,13 +14,13 @@ export function SettingsPage() {
   }, [applyAppearance]);
 
   return (
-    <section className="mx-auto flex max-w-[1024px] flex-col gap-5 p-6" data-page="settings">
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3">
+    <section className="mx-auto flex min-h-full w-full max-w-[1024px] flex-col gap-5 p-6" data-page="settings">
+      <header className="ef-page-head">
         <div>
-          <p className="t-label">//05 SETTINGS</p>
-          <h1 className="t-display text-2xl text-text-1">设置</h1>
+          <p className="ef-eyebrow">// SETTINGS</p>
+          <h1 className="ef-title">设置</h1>
         </div>
-        <p className="max-w-[52ch] text-xs leading-snug text-text-3">
+        <p className="max-w-[52ch] text-[12px] leading-relaxed text-text-2">
           数据范围、设置项白名单、备份与运维、快捷键与关于。设置项改动立即生效并回执，且不进撤销栈。
         </p>
       </header>

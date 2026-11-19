@@ -1,4 +1,5 @@
 import pkg from '../../../package.json';
+import { isDesktop, platform } from '@/platform';
 import { useAppStore } from '@/store';
 import { Panel } from './controls';
 import { ABOUT_NOTICES, MIT_NOTICE, SHORTCUT_ROWS } from './settingsData';
@@ -50,17 +51,23 @@ export function AboutPanel() {
     >
       <dl className="mb-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-text-2">
         <div className="flex items-baseline gap-2">
-          <dt className="t-label">应用版本</dt>
-          <dd className="t-readout text-text-1">v{APP_VERSION}</dd>
+          <dt className="ef-eyebrow">应用版本</dt>
+          <dd className="ef-field text-text-1">v{APP_VERSION}</dd>
         </div>
         <div className="flex items-baseline gap-2">
-          <dt className="t-label">目录版本</dt>
-          <dd className="t-readout text-text-1">{catalogVersion}</dd>
+          <dt className="ef-eyebrow">目录版本</dt>
+          <dd className="ef-field text-text-1">{catalogVersion}</dd>
         </div>
         <div className="flex items-baseline gap-2">
-          <dt className="t-label">许可</dt>
-          <dd className="t-readout text-text-1">MIT</dd>
+          <dt className="ef-eyebrow">许可</dt>
+          <dd className="ef-field text-text-1">MIT</dd>
         </div>
+        {isDesktop() && (
+          <div className="flex min-w-[280px] items-baseline gap-2">
+            <dt className="ef-eyebrow shrink-0">数据目录</dt>
+            <dd className="ef-field break-all text-[11px] text-text-1">{platform()?.dataPath}</dd>
+          </div>
+        )}
       </dl>
 
       <ul className="space-y-2.5">

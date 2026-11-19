@@ -27,6 +27,8 @@ export interface DilutePanelProps {
   blockers: string[];
   canCommit: boolean;
   onCommit: () => void;
+  /** 正在提交（防连点） */
+  busy?: boolean;
 }
 
 function Field({
@@ -34,24 +36,30 @@ function Field({
   value,
   unit,
   onChange,
+  hint,
 }: {
   label: string;
   value: string;
   unit: string;
   onChange?: (raw: string) => void;
+  hint?: string;
 }) {
   return (
-    <label className="flex flex-col gap-0.5">
-      <span className="text-[10px] text-text-3">{label}</span>
-      <span className="flex items-center gap-1">
+    <label className="flex flex-col gap-1.5">
+      <span className="flex items-baseline justify-between gap-2">
+        <span className="ef-eyebrow">{label}</span>
+        {hint && <span className="text-[11px] text-text-2">{hint}</span>}
+      </span>
+      <span className="flex items-center gap-2">
         <input
           aria-label={label}
           value={value}
           inputMode="decimal"
           onChange={(event) => onChange?.(event.target.value)}
-          className="t-readout h-7 w-full border border-line bg-bg-1 px-1.5 text-xs text-text-1"
+          className="ef-input ef-input--lg"
+          style={{ height: 48 }}
         />
-        <span className="shrink-0 text-[10px] text-text-3">{unit}</span>
+        <span className="ef-field shrink-0 text-[12px] text-text-2">{unit}</span>
       </span>
     </label>
   );
@@ -62,21 +70,26 @@ function ResultRow({
   value,
   raw,
   resultKey,
+  strong,
 }: {
   label: string;
   value: number | undefined;
-  raw: number | undefined;
+  raw?: number | undefined;
   resultKey: 'neat' | 'thinner' | 'total' | 'taken';
+  strong?: boolean;
 }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <span className="text-[11px] text-text-2">{label}</span>
+      <span className="text-[13px] text-text-2">{label}</span>
       <span className="flex items-baseline gap-1.5">
-        <span data-result={resultKey} className="t-readout text-sm text-text-1">
+        <span
+          data-result={resultKey}
+          className={cn('ef-field text-text-1', strong ? 'text-[20px] font-bold' : 'text-[16px] font-semibold')}
+        >
           {value === undefined ? '—' : formatMl(value)}
         </span>
-        <span className="text-[10px] text-text-3">ml</span>
-        <span data-raw={resultKey} className="t-readout text-[9px] text-text-3">
+        <span className="ef-field text-[11px] text-text-2">ml</span>
+        <span data-raw={resultKey} className="ef-field text-[10px] text-text-2">
           {raw === undefined ? '' : '取整前 ' + formatRaw(raw)}
         </span>
       </span>
@@ -84,7 +97,7 @@ function ResultRow({
   );
 }
 
-/** 右栏 · 稀释模式：原浆 + 稀释剂，或把仓库里的已稀释漆料再稀释（不再选瓶容量） */
+/** 中栏 · 稀释：左侧选料，右侧填量 / 比例；确认后自动扣减并入库 */
 export function DilutePanel({
   source,
   inputMode,
@@ -108,9 +121,10 @@ export function DilutePanel({
   blockers,
   canCommit,
   onCommit,
+  busy = false,
 }: DilutePanelProps) {
   const thinned = source?.state === 'thinned';
-  const sourceLabel = source ? source.code + ' ' + source.name : '未选择';
+  const sourceLabel = source ? source.code + ' ' + source.name : '未选择漆料';
   const fromRatioN = source?.ratioN ?? 0;
   const ratioInvalid = thinned && ratioN <= fromRatioN;
 
@@ -118,167 +132,192 @@ export function DilutePanel({
     <aside
       aria-label="稀释面板"
       data-mix-panel="dilute"
-      className="flex shrink-0 flex-col border border-line bg-bg-1"
+      className="flex min-h-0 flex-1 flex-col border bg-surface"
+      style={{ borderColor: 'var(--ef-rule)' }}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2">
-        <h2 className="t-display text-[11px] tracking-[0.1em] text-text-2">稀释</h2>
-        <span className="t-readout text-[10px] text-text-3">{formatRatio(ratioN)}</span>
+      <div
+        className="flex shrink-0 items-center justify-between gap-3 border-b px-4"
+        style={{ height: 52, borderColor: 'var(--ef-rule)' }}
+      >
+        <div className="flex min-w-0 items-baseline gap-3">
+          <h2 className="text-[16px] font-bold">稀释</h2>
+          <span className="ef-field truncate text-[12px] text-text-2" data-source-line="">
+            {'取用：' + sourceLabel + (source ? ' · 余 ' + formatMl(source.volumeMl) + ' ml' : '')}
+          </span>
+        </div>
+        <span className="ef-field shrink-0 text-[11px] text-text-2" data-sop="">
+          ① 选料 → ② 填量/比例 → ③ 确认入库
+        </span>
       </div>
 
-      <div className="flex flex-col gap-3 p-3">
-        <p data-source-line="" className="truncate text-[11px] text-text-2">
-          {'取用：' + sourceLabel + (source ? ' · 余 ' + formatMl(source.volumeMl) + ' ml' : '')}
-        </p>
-
-        {thinned ? (
-          <>
-            <Field label="取用已稀释漆料 M" value={takenText} unit="ml" onChange={onTakenChange} />
-            <p className="text-[10px] leading-snug text-text-3">
-              {'当前比例 1:' + formatRatio(fromRatioN) + '；再稀释只会补加稀释剂，原比例会升高。'}
-            </p>
-          </>
-        ) : (
-          <>
-            <div role="radiogroup" aria-label="稀释输入口径" className="flex flex-col gap-1">
-              {DILUTE_INPUT_MODES.map((option) => (
-                <label
-                  key={option.value}
-                  className={cn(
-                    'flex cursor-pointer items-start gap-2 border px-2 py-1.5 transition-colors duration-hover',
-                    inputMode === option.value
-                      ? 'border-accent bg-surface-2'
-                      : 'border-transparent hover:bg-surface-2',
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="dilute-input-mode"
-                    value={option.value}
-                    aria-label={option.label}
-                    checked={inputMode === option.value}
-                    onChange={() => onInputModeChange(option.value)}
-                    className="mt-0.5 h-3 w-3 accent-accent"
-                  />
-                  <span className="min-w-0">
-                    <span className="block text-[11px] text-text-1">{option.label}</span>
-                    <span className="block text-[10px] text-text-3">{option.hint}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-            {inputMode === 'neat' ? (
-              <Field label="原浆量 A" value={neatText} unit="ml" onChange={onNeatChange} />
-            ) : (
-              <Field label="目标总量 V" value={totalText} unit="ml" onChange={onTotalChange} />
-            )}
-          </>
-        )}
-
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <span className="shrink-0 text-[11px] text-text-2">
-              {thinned ? '目标比例 1 :' : '比例 1 :'}
-            </span>
-            <input
-              aria-label="比例 N"
-              data-ratio-input=""
-              inputMode="decimal"
-              value={ratioText}
-              onChange={(event) => onRatioChange(event.target.value)}
-              className={cn(
-                't-readout h-7 w-16 border bg-bg-1 px-1 text-center text-xs text-text-1',
-                ratioClamped || ratioInvalid ? 'border-danger animate-[shake_60ms_ease-in-out_2]' : 'border-line',
-              )}
-            />
-            <span className="text-[10px] text-text-3">0–10 · 步进 0.1</span>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {RATIO_PRESETS.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                data-ratio-preset={preset}
-                aria-pressed={ratioN === preset}
-                onClick={() => onRatioPreset(preset)}
-                className={cn(
-                  't-readout h-6 border px-1.5 text-[10px] transition-colors duration-hover',
-                  ratioN === preset
-                    ? 'border-accent text-accent'
-                    : 'border-line text-text-2 hover:border-line-strong hover:text-text-1',
-                )}
-              >
-                {formatRatio(preset)}
-              </button>
-            ))}
-          </div>
-          {ratioClamped && (
-            <p data-ratio-clamped="" className="text-[10px] text-danger">
-              {'比例超出 0–10，已钳制到 ' + ratioText}
-            </p>
-          )}
-          {ratioInvalid && (
-            <p data-ratio-invalid="" className="text-[10px] text-danger">
-              {'目标比例必须大于当前比例 1:' + formatRatio(fromRatioN)}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1 border-t border-line pt-2" data-mix-results="">
+      <div className="grid min-h-0 flex-1 gap-5 overflow-auto p-5 md:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-4">
           {thinned ? (
             <>
-              <ResultRow label="其中原浆" value={plan?.neatMl} raw={plan?.neatRaw} resultKey="neat" />
-              <ResultRow label="补加稀释剂" value={plan?.addedThinnerMl} raw={undefined} resultKey="thinner" />
-              <ResultRow label="产物体积" value={plan?.totalMl} raw={plan?.totalRaw} resultKey="total" />
+              <Field label="取用已稀释漆料 M" value={takenText} unit="ml" onChange={onTakenChange} />
+              <p className="text-[12px] leading-relaxed text-text-2">
+                {'当前比例 ' + formatRatio(fromRatioN) + '；再稀释只会补加稀释剂，原比例会升高。'}
+              </p>
             </>
           ) : (
             <>
-              <ResultRow label="原浆 A" value={plan?.neatMl} raw={plan?.neatRaw} resultKey="neat" />
-              <ResultRow label="稀释剂" value={plan?.thinnerMl} raw={plan?.thinnerRaw} resultKey="thinner" />
-              <ResultRow label="合计" value={plan?.totalMl} raw={plan?.totalRaw} resultKey="total" />
+              <div role="radiogroup" aria-label="稀释输入口径" className="grid grid-cols-2 gap-2">
+                {DILUTE_INPUT_MODES.map((option) => (
+                  <label
+                    key={option.value}
+                    className={cn(
+                      'flex cursor-pointer flex-col gap-1 border px-3 py-2 transition-colors duration-hover',
+                      inputMode === option.value ? 'bg-chip' : 'border-transparent hover:bg-surface-2',
+                    )}
+                    style={{ borderColor: inputMode === option.value ? 'var(--ef-ink)' : 'var(--ef-rule)' }}
+                  >
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="dilute-input-mode"
+                        value={option.value}
+                        aria-label={option.label}
+                        checked={inputMode === option.value}
+                        onChange={() => onInputModeChange(option.value)}
+                        className="h-4 w-4"
+                        style={{ accentColor: 'var(--ef-ink)' }}
+                      />
+                      <span className="text-[13px] font-semibold text-text-1">{option.label}</span>
+                    </span>
+                    <span className="text-[11px] leading-snug text-text-2">{option.hint}</span>
+                  </label>
+                ))}
+              </div>
+              {inputMode === 'neat' ? (
+                <Field label="原浆量 A" value={neatText} unit="ml" onChange={onNeatChange} hint="按比例正推稀释剂" />
+              ) : (
+                <Field label="目标总量 V" value={totalText} unit="ml" onChange={onTotalChange} hint="按比例反推原浆" />
+              )}
             </>
           )}
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="shrink-0 text-[13px] text-text-2">{thinned ? '目标比例 1 :' : '比例 1 :'}</span>
+              <input
+                aria-label="比例 N"
+                data-ratio-input=""
+                inputMode="decimal"
+                value={ratioText}
+                onChange={(event) => onRatioChange(event.target.value)}
+                className="ef-input ef-input--lg w-24"
+                style={{
+                  height: 48,
+                  borderColor: ratioClamped || ratioInvalid ? 'var(--ef-trace)' : 'var(--ef-rule)',
+                }}
+              />
+              <span className="text-[11px] text-text-2">0–10 · 步进 0.1</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {RATIO_PRESETS.map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  data-ratio-preset={preset}
+                  aria-pressed={ratioN === preset}
+                  onClick={() => onRatioPreset(preset)}
+                  className={cn(
+                    'h-9 border px-3 text-[13px] transition-colors duration-hover',
+                    ratioN === preset
+                      ? 'border-transparent bg-ink font-semibold text-panel'
+                      : 'text-text-2 hover:border-text-1 hover:text-text-1',
+                  )}
+                  style={{ borderColor: ratioN === preset ? 'var(--ef-ink)' : 'var(--ef-rule)' }}
+                >
+                  {formatRatio(preset)}
+                </button>
+              ))}
+            </div>
+            {ratioClamped && (
+              <p data-ratio-clamped="" className="ef-flag" role="alert">
+                {'比例超出 0–10，已钳制到 ' + ratioText}
+              </p>
+            )}
+            {ratioInvalid && (
+              <p data-ratio-invalid="" className="ef-flag" role="alert">
+                {'目标比例必须大于当前比例 ' + formatRatio(fromRatioN)}
+              </p>
+            )}
+          </div>
         </div>
 
-        {thinnerUntracked && (plan?.addedThinnerMl ?? 0) > 0 && (
-          <p data-thinner-untracked="" className="text-[10px] text-warn">
-            已关闭「扣减稀释剂库存」：本次稀释剂只记数值，不扣库存
-          </p>
-        )}
-
-        {blockers.map((message) => (
-          <p
-            key={message}
-            role="alert"
-            data-blocker=""
-            className="border border-danger px-2 py-1 text-[10px] leading-relaxed text-danger"
-          >
-            {message}
-          </p>
-        ))}
-
-        {thinnerMissing && (
-          <div
-            role="alert"
-            data-blocker=""
-            data-thinner-missing=""
-            className="flex flex-col gap-1.5 border border-danger px-2 py-1.5"
-          >
-            <p className="text-[10px] leading-relaxed text-danger">
-              {'本次稀释已拦下：稀释剂 ' + formatMl(plan?.addedThinnerMl ?? 0) + ' ml 无法从库存扣减。'}
-            </p>
-            <p className="text-[10px] leading-relaxed text-text-2">
-              怎么办：本次不扣减稀释剂即可稀释；需要真实扣减时，先在采购页入库一条稀释剂（paintClass=aux），或在设置中关闭「扣减稀释剂库存」。
-            </p>
-            <Button data-action="skip-thinner" variant="secondary" size="sm" onClick={onSkipThinner}>
-              本次不扣减稀释剂
-            </Button>
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="border p-4" style={{ borderColor: 'var(--ef-rule)' }}>
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <span className="ef-eyebrow">本次产出</span>
+              <span className="ef-field text-[11px] text-text-2">{formatRatio(ratioN)}</span>
+            </div>
+            <div className="flex flex-col gap-2" data-mix-results="">
+              {thinned ? (
+                <>
+                  <ResultRow label="其中原浆" value={plan?.neatMl} raw={plan?.neatRaw} resultKey="neat" />
+                  <ResultRow label="补加稀释剂" value={plan?.addedThinnerMl} raw={undefined} resultKey="thinner" />
+                  <ResultRow label="产物体积" value={plan?.totalMl} raw={plan?.totalRaw} resultKey="total" strong />
+                </>
+              ) : (
+                <>
+                  <ResultRow label="原浆 A" value={plan?.neatMl} raw={plan?.neatRaw} resultKey="neat" />
+                  <ResultRow label="稀释剂" value={plan?.thinnerMl} raw={plan?.thinnerRaw} resultKey="thinner" />
+                  <ResultRow label="合计" value={plan?.totalMl} raw={plan?.totalRaw} resultKey="total" strong />
+                </>
+              )}
+            </div>
           </div>
-        )}
 
-        {thinnerLabel && <p className="t-readout text-[10px] leading-snug text-text-3">{'稀释剂来源 ' + thinnerLabel}</p>}
+          <div className="flex flex-col gap-1.5">
+            <p className="ef-field text-[11px] leading-snug text-text-2">
+              {thinnerLabel ? '稀释剂来源 ' + thinnerLabel : '稀释剂来源：暂无可用辅料'}
+            </p>
+            {thinnerUntracked && (plan?.addedThinnerMl ?? 0) > 0 && (
+              <p data-thinner-untracked="" className="ef-flag text-[12px]">
+                已关闭「扣减稀释剂库存」：本次稀释剂只记数值，不扣库存
+              </p>
+            )}
+          </div>
 
-        <Button data-action="dilute-commit" variant="primary" chamfer disabled={!canCommit} onClick={onCommit}>
-          稀释
+          {blockers.map((message) => (
+            <p key={message} role="alert" data-blocker="" className="ef-flag text-[12px] leading-relaxed">
+              {message}
+            </p>
+          ))}
+
+          {thinnerMissing && (
+            <div role="alert" data-blocker="" data-thinner-missing="" className="ef-flag gap-2">
+              <p className="text-[12px] leading-relaxed">
+                {'本次稀释已拦下：稀释剂 ' + formatMl(plan?.addedThinnerMl ?? 0) + ' ml 无法从库存扣减。'}
+              </p>
+              <p className="text-[12px] leading-relaxed text-text-2">
+                怎么办：本次不扣减稀释剂即可稀释；需要真实扣减时，先在采购页入库一条稀释剂（paintClass=aux），或在设置中关闭「扣减稀释剂库存」。
+              </p>
+              <Button data-action="skip-thinner" variant="secondary" size="sm" onClick={onSkipThinner}>
+                本次不扣减稀释剂
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div
+        className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t px-4 py-3"
+        style={{ borderColor: 'var(--ef-rule)' }}
+      >
+        <p className="text-[12px] leading-snug text-text-2">
+          确认后自动扣减库存并入库；库中已有同配方会自动合并容量。
+        </p>
+        <Button
+          data-action="dilute-commit"
+          variant="primary"
+          size="lg"
+          className="min-w-[180px]"
+          disabled={!canCommit || busy}
+          onClick={onCommit}
+        >
+          稀释并入库
         </Button>
       </div>
     </aside>

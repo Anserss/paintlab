@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { formatMl } from '@/core/math/quantity';
+import { decompositionOf, decompositionPartLabel, decompositionTitle } from '@/core/rules/decompose';
 import { useAppStore } from '@/store';
 import { Button, Dialog } from '@/components/ui';
 import { ADJUST_REASON_OPTIONS } from './useDepotData';
@@ -99,15 +100,28 @@ export function AdjustVolumeDialog({ row, onClose }: RowDialogProps) {
   );
 }
 
-/** 删除条目：二次确认（spec 3.10 危险动作） */
+/**
+ * 删除条目（2.1.1）：稀释漆料 / 调漆产物入库时记了组分快照，
+ * 可以选「直接删除」或「分解回仓库」（原浆 + 辅料 / 调漆前的稀释漆料）。
+ */
 export function DeleteItemDialog({ row, onClose }: RowDialogProps) {
   const removeStockItem = useAppStore((state) => state.removeStockItem);
+  const decomposeStockItem = useAppStore((state) => state.decomposeStockItem);
   const [busy, setBusy] = useState(false);
+  const plan = row ? decompositionOf(row.item) : null;
 
-  const submit = async () => {
+  const submitDirect = async () => {
     if (!row) return;
     setBusy(true);
     const result = await removeStockItem(row.item.id);
+    setBusy(false);
+    if (result.ok) onClose();
+  };
+
+  const submitDecompose = async () => {
+    if (!row) return;
+    setBusy(true);
+    const result = await decomposeStockItem({ itemId: row.item.id });
     setBusy(false);
     if (result.ok) onClose();
   };
@@ -119,23 +133,71 @@ export function DeleteItemDialog({ row, onClose }: RowDialogProps) {
         if (!open) onClose();
       }}
       title="删除条目"
-      description="条目连同工作台引用一起删除，可撤销。"
-      width={420}
+      description={
+        plan
+          ? '这条漆料记着组分：可以直接删除，也可以分解回仓库。'
+          : '条目连同工作台引用一起删除，可撤销。'
+      }
+      width={520}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
             取消
           </Button>
-          <Button variant="danger" disabled={busy} onClick={() => void submit()}>
+          {plan && row && (
+            <Button
+              variant="secondary"
+              data-action="decompose-item"
+              disabled={busy}
+              onClick={() => void submitDecompose()}
+            >
+              {decompositionTitle(row.item)}
+            </Button>
+          )}
+          <Button variant="danger" data-action="confirm-delete-item" disabled={busy} onClick={() => void submitDirect()}>
             确认删除
           </Button>
         </>
       }
     >
       {row && (
-        <p className="text-xs text-text-2">
-          {'确认删除「' + (row.paint.nameZh ?? row.paint.name) + ' ' + row.paint.code + '」？余量 ' + formatMl(row.item.volumeMl) + ' ml。'}
-        </p>
+        <div className="flex flex-col gap-3" data-delete-item="">
+          <p className="text-xs text-text-2">
+            {'确认删除「' + (row.paint.nameZh ?? row.paint.name) + ' ' + row.paint.code + '」？余量 ' + formatMl(row.item.volumeMl) + ' ml。'}
+          </p>
+          {plan ? (
+            <div
+              className="flex flex-col gap-1 border-t pt-3"
+              data-decomposition=""
+              style={{ borderColor: 'var(--ef-rule)' }}
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="ef-eyebrow">分解回仓库</span>
+                <span className="ef-field text-[11px] text-text-2">
+                  {plan.parts.length + ' 件 · ' + formatMl(plan.totalMl) + ' ml'}
+                </span>
+              </div>
+              <ul className="flex flex-col gap-0.5">
+                {plan.parts.map((part) => (
+                  <li
+                    key={part.paintId + ':' + part.state + ':' + part.ml}
+                    data-decomposition-part={part.aux ? 'aux' : part.state}
+                    className="flex items-baseline gap-2 text-[12px] text-text-1"
+                  >
+                    <span className="truncate">{decompositionPartLabel(part)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] leading-snug text-text-2">
+                分解 = 按当前余量把各组分重新入库、删除原条目；整单可撤销。
+              </p>
+            </div>
+          ) : (
+            <p className="text-[11px] leading-snug text-text-3">
+              该条目没有组分记录（2.0 之前入库或采购原浆），只能直接删除。
+            </p>
+          )}
+        </div>
       )}
     </Dialog>
   );

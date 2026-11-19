@@ -9,7 +9,7 @@ const SORT_OPTIONS: readonly { value: ProcureSort; label: string }[] = [
 ];
 
 const SELECT_CLASS =
-  'h-8 cursor-pointer border border-line bg-bg-0 px-2 text-xs text-text-2 transition-colors duration-hover hover:border-line-strong';
+  'h-10 cursor-pointer border bg-transparent px-3 text-[13px] text-text-2 transition-colors duration-hover hover:border-text-1';
 
 export interface ProcureToolbarProps {
   filters: ProcureFilters;
@@ -26,7 +26,10 @@ const KIND_OPTIONS = [
 
 export function ProcureToolbar({ filters, options, total, onChange }: ProcureToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-line bg-bg-1 px-3 py-2">
+    <div
+      className="flex flex-wrap items-center gap-2 border-b bg-surface px-4 py-3"
+      style={{ borderColor: 'var(--ef-rule)' }}
+    >
       <Segmented
         ariaLabel="货架"
         options={KIND_OPTIONS}
@@ -38,7 +41,7 @@ export function ProcureToolbar({ filters, options, total, onChange }: ProcureToo
         value={filters.query}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange({ query: event.target.value })}
         placeholder="搜索 色号 / 名称 / 色值 / 属性"
-        className="h-8 w-60 border border-line bg-bg-0 px-2 text-xs text-text-1 placeholder:text-text-3 hover:border-line-strong"
+        className="ef-input h-10 w-64"
       />
       <select
         aria-label="产品线"
@@ -83,18 +86,19 @@ export function ProcureToolbar({ filters, options, total, onChange }: ProcureToo
           </option>
         ))}
       </select>
-      <label className="flex cursor-pointer items-center gap-1.5 text-xs text-text-2">
+      <label className="flex cursor-pointer items-center gap-2 text-[13px] text-text-2">
         <input
           type="checkbox"
           aria-label="仅未入库"
           checked={filters.unregisteredOnly}
           onChange={(event) => onChange({ unregisteredOnly: event.target.checked })}
-          className="accent-accent"
+          className="h-4 w-4"
+          style={{ accentColor: 'var(--ef-ink)' }}
         />
         仅未入库
       </label>
-      <div className="ml-auto flex items-center gap-2">
-        <span className="t-readout text-[11px] text-text-3" data-procure-count="">
+      <div className="ml-auto flex items-center gap-3">
+        <span className="ef-field text-[12px] text-text-2" data-procure-count="">
           {total} 条
         </span>
         <Segmented<ProcureSort>

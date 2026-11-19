@@ -233,10 +233,11 @@ export function ProcurePage() {
 
   return (
     <section className="flex h-full min-h-0" data-page="procure">
-      <aside className="flex w-[216px] shrink-0 flex-col border-r border-line bg-bg-1" aria-label="品牌">
-        <div className="border-b border-line px-3 py-2">
-          <h1 className="t-display text-sm text-text-1">PROCURE // 采购大厅</h1>
-          <p className="t-label mt-1">//01 选择你拥有的漆</p>
+      <aside className="flex w-[240px] shrink-0 flex-col border-r bg-surface" aria-label="品牌" style={{ borderColor: 'var(--ef-rule)' }}>
+        <div className="border-b px-4 py-3" style={{ borderColor: 'var(--ef-rule)' }}>
+          <p className="ef-eyebrow">// PROCURE</p>
+          <h1 className="mt-1 text-[22px] font-bold leading-tight">采购大厅</h1>
+          <p className="mt-1 text-[12px] text-text-2">选择你拥有的漆</p>
         </div>
         <BrandColumn
           rows={brandRows}

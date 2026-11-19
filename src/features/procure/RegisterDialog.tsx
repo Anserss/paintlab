@@ -57,6 +57,11 @@ export function RegisterDialog({
   const line = first ? linesById[first.lineId] : undefined;
   /** 单件规格：辅料 50/110/250/400 ml 各自成 SKU，优先取 paint.volumeMl */
   const lineVolume = first?.volumeMl ?? line?.defaultVolumeMl ?? 10;
+  /**
+   * 2.1.1：稀释剂 / 缓干剂等辅料不区分「原浆 / 稀释」——
+   * 它们本身不是漆，采购入库时固定按未稀释（neat）记账，界面上不出现状态选项。
+   */
+  const isAuxOnly = paints.length > 0 && paints.every((paint) => paint.paintClass === 'aux');
 
   const [mode, setMode] = useState<CapacityMode>('whole');
   const [customMl, setCustomMl] = useState(lineVolume);
@@ -80,7 +85,7 @@ export function RegisterDialog({
   }, [open, paints]);
 
   const volumeMl = mode === 'whole' ? lineVolume : mode === 'half' ? r1(lineVolume / 2) : customMl;
-  const ratioValid = state !== 'thinned' || (ratioN >= 0 && ratioN <= 10);
+  const ratioValid = isAuxOnly || state !== 'thinned' || (ratioN >= 0 && ratioN <= 10);
   const canSubmit = Boolean(first) && volumeMl >= 0.5 && volumeMl <= 2500 && ratioValid && !busy;
 
   const summary = paints
@@ -98,10 +103,11 @@ export function RegisterDialog({
     if (!canSubmit) return;
     const payload: RegisterPayload = {
       volumeMl: r1(volumeMl),
-      state,
+      // 辅料没有「原浆 / 稀释」之分，入库一律记作未稀释
+      state: isAuxOnly ? 'neat' : state,
       groupId: groupId || null,
     };
-    if (state === 'thinned') payload.ratioN = ratioN;
+    if (!isAuxOnly && state === 'thinned') payload.ratioN = ratioN;
     const trimmed = note.trim();
     if (trimmed) payload.note = trimmed;
     onSubmit(payload);
@@ -152,31 +158,40 @@ export function RegisterDialog({
           </div>
         </div>
 
-        <div>
-          <span className={FIELD_LABEL}>初始状态</span>
-          <div className="flex flex-wrap items-center gap-2">
-            <Segmented<PaintState>
-              options={STATE_OPTIONS}
-              value={state}
-              onChange={setState}
-              ariaLabel="初始状态"
-            />
-            {state === 'thinned' && (
-              <div className="flex items-center gap-2">
-                <span className="t-readout text-xs text-text-2">1 :</span>
-                <Stepper
-                  value={ratioN}
-                  min={0}
-                  max={10}
-                  step={0.1}
-                  unit="N"
-                  ariaLabel="稀释比例"
-                  onChange={setRatioN}
-                />
-              </div>
-            )}
+        {isAuxOnly ? (
+          <div>
+            <span className={FIELD_LABEL}>初始状态</span>
+            <p data-aux-no-state="" className="text-[12px] leading-relaxed text-text-2">
+              稀释剂 / 缓干剂等辅料直接入库，不分原浆与稀释。
+            </p>
           </div>
-        </div>
+        ) : (
+          <div>
+            <span className={FIELD_LABEL}>初始状态</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Segmented<PaintState>
+                options={STATE_OPTIONS}
+                value={state}
+                onChange={setState}
+                ariaLabel="初始状态"
+              />
+              {state === 'thinned' && (
+                <div className="flex items-center gap-2">
+                  <span className="t-readout text-xs text-text-2">1 :</span>
+                  <Stepper
+                    value={ratioN}
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    unit="N"
+                    ariaLabel="稀释比例"
+                    onChange={setRatioN}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div>
           <span className={FIELD_LABEL}>分组（可选）</span>

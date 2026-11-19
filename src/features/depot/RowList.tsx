@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { Paint } from '@/core/model/types';
 import { formatMl } from '@/core/math/quantity';
+import { canEnterWorkbench } from '@/core/render/batch';
+import { isUndefinedColor } from '@/core/render/swatch';
 import { PaintRow } from '@/components/paint';
 import { cn } from '@/components/ui';
 import { groupByLine } from './model';
@@ -54,11 +56,15 @@ function DepotRowItem({ row, draggable, selected, actions, onSelect }: RowItemPr
         brand={row.brand}
         stock={{ volumeMl: row.item.volumeMl, initialMl: row.item.initialMl }}
         selected={selected}
+        swatchAlpha={row.displayAlpha}
+        swatchUndefined={isUndefinedColor(row.item.customHex ?? row.paint.hex, row.item.customAlpha)}
+        dilutionRatioN={row.dilutionRatioN}
         onSelect={() => onSelect(row)}
         onDetail={() => actions.onOpen?.(row)}
         actions={{
           onOpen: handleOpen,
-          onOpenCoat: () => actions.onOpenCoat?.(row),
+          // 2.1：原浆只能在仓库与调漆台之间流转，行上不提供「开涂」
+          ...(canEnterWorkbench(row.item.state) ? { onOpenCoat: () => actions.onOpenCoat?.(row) } : {}),
           onUse: () => actions.onUse?.(row),
         }}
       />

@@ -1,37 +1,55 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { Bottle, Paint } from '@/core/model/types';
-import { formatMl } from '@/core/math/quantity';
+import type { Paint } from '@/core/model/types';
+import { formatMl, formatRatio } from '@/core/math/quantity';
+import { canEnterWorkbench, dilutionTagText, WORKBENCH_NEAT_BLOCK } from '@/core/render/batch';
 import { useAppStore } from '@/store';
 import { Button, Dialog, Segmented } from '@/components/ui';
 import { BlendPanel } from './BlendPanel';
-import { BottleStage } from './BottleStage';
 import { DilutePanel } from './DilutePanel';
 import { MixRecents } from './MixRecents';
+import { RecipePreview } from './RecipePreview';
+import type { RecipePreviewPart } from './RecipePreview';
 import { StockPicker } from './StockPicker';
-import type { BlendPartRow, DiluteInputMode, MixMode } from './mixMath';
+import type { BlendLogic, BlendPartRow, DiluteInputMode, MixMode } from './mixMath';
 import { MIX_MODES, parseMl, parseRatio, planBlendFor, planDilution, stockShortText } from './mixMath';
+import type { StockRow } from './useMixData';
 import { useMixRecords, useMixStockRows, useThinnerRows } from './useMixData';
 
-type PaintRef = Pick<Paint, 'id' | 'brandId' | 'code' | 'name' | 'hex' | 'paintClass'>;
+type PaintRef = Pick<Paint, 'id' | 'brandId' | 'code' | 'name' | 'nameZh' | 'hex' | 'paintClass'>;
 
-const paintRefOf = (paint: Paint): PaintRef => ({
-  id: paint.id,
-  brandId: paint.brandId,
-  code: paint.code,
-  name: paint.name,
-  hex: paint.hex,
-  paintClass: paint.paintClass,
-});
+interface LastMixResult {
+  itemId: string;
+  label: string;
+  addedMl: number;
+  merged: boolean;
+}
 
 const MODE_OPTIONS = MIX_MODES.map((mode) => ({ value: mode.value, label: mode.label }));
 
-/** 调漆台：左取用 / 中批次 / 右计算器；稀释与调漆两种模式 */
+/** StockRow 的展示身份 → 写库用的漆料引用（调漆产物用自定义名/色） */
+function paintRefOfRow(row: StockRow): PaintRef | null {
+  if (!row.paint) return null;
+  return {
+    id: row.paint.id,
+    brandId: row.paint.brandId,
+    ...(row.paint.code ? { code: row.paint.code } : {}),
+    name: row.name,
+    nameZh: row.name,
+    hex: row.hex,
+    paintClass: row.paint.paintClass,
+  };
+}
+
+/**
+ * 调漆台 2.2：
+ * - 稀释 / 调漆确认后自动扣减库存并入库（不再产生“当前批次”，也没有使用 / 清空键）；
+ * - 同配方自动合并容量；
+ * - 左：取用候选；右上：操作（SOP + 计算 + 确认）；右下：紧凑配方条；底部：最近配方。
+ */
 export function MixPage() {
   const location = useLocation();
-  const bottles = useAppStore((state) => state.bottles);
-  const activeBottleId = useAppStore((state) => state.activeBottleId);
-  const selectBottle = useAppStore((state) => state.selectBottle);
+  const stockItems = useAppStore((state) => state.stockItems);
   const brands = useAppStore((state) => state.brands);
   const settings = useAppStore((state) => state.settings);
   const workbenches = useAppStore((state) => state.workbenches);
@@ -40,37 +58,35 @@ export function MixPage() {
   const ensureBrand = useAppStore((state) => state.ensureBrand);
   const diluteBatch = useAppStore((state) => state.diluteBatch);
   const blendBatch = useAppStore((state) => state.blendBatch);
-  const useBottle = useAppStore((state) => state.useBottle);
-  const clearBottle = useAppStore((state) => state.clearBottle);
-  const stockInBottle = useAppStore((state) => state.stockInBottle);
   const openCoat = useAppStore((state) => state.openCoat);
   const updateSetting = useAppStore((state) => state.updateSetting);
   const pushToast = useAppStore((state) => state.pushToast);
 
   const stockRows = useMixStockRows();
   const thinnerRows = useThinnerRows();
-  const records = useMixRecords(8);
-
-  const bottle: Bottle | undefined = useMemo(
-    () => bottles.find((row) => row.id === activeBottleId) ?? bottles[0],
-    [bottles, activeBottleId],
-  );
+  const records = useMixRecords(6);
 
   const [mode, setMode] = useState<MixMode>('dilute');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [lastResult, setLastResult] = useState<LastMixResult | null>(null);
+  const [coatPicker, setCoatPicker] = useState(false);
+
+  // 稀释
   const [inputMode, setInputMode] = useState<DiluteInputMode>('neat');
-  const [ratioN, setRatioN] = useState(bottle?.ratioN ?? settings.defaultRatio);
-  const [ratioText, setRatioText] = useState(String(bottle?.ratioN ?? settings.defaultRatio));
+  const [ratioN, setRatioN] = useState(settings.defaultRatio);
+  const [ratioText, setRatioText] = useState(String(settings.defaultRatio));
   const [ratioClamped, setRatioClamped] = useState(false);
   const [neatText, setNeatText] = useState('10.0');
   const [totalText, setTotalText] = useState('30.0');
   const [takenText, setTakenText] = useState('10.0');
-  const [useTarget, setUseTarget] = useState(true);
-  const [targetText, setTargetText] = useState('30.0');
-  const [partTexts, setPartTexts] = useState<Record<string, string>>({});
   const [thinnerId, setThinnerId] = useState<string | null>(null);
-  const [useAmount, setUseAmount] = useState(10);
-  const [coatPicker, setCoatPicker] = useState(false);
+
+  // 调漆
+  const [blendLogic, setBlendLogic] = useState<BlendLogic>('ratio');
+  const [targetText, setTargetText] = useState('30.0');
+  const [ratioTexts, setRatioTexts] = useState<Record<string, string>>({});
+  const [amountTexts, setAmountTexts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     void refreshInventory();
@@ -89,13 +105,7 @@ export function MixPage() {
     })();
   }, [brands, ensureBrand]);
 
-  const bottleId = bottle?.id;
-  useEffect(() => {
-    if (!bottle) return;
-    setUseAmount((current) => Math.min(current, Math.max(0.1, bottle.remainingMl)));
-  }, [bottleId]);
-
-  /** 稀释：单选；调漆：多选。切换模式时保留仍有效的选择 */
+  /** 稀释单选 / 调漆多选；切换模式时保留仍有效的选择 */
   useEffect(() => {
     setSelectedIds((prev) => {
       const valid = prev.filter((id) => stockRows.some((row) => row.item.id === id));
@@ -107,9 +117,14 @@ export function MixPage() {
     });
   }, [stockRows, mode]);
 
-  /** 调漆组分默认份量：10 ml */
+  /** 调漆份量默认值：配比口径默认 1 份，用量口径默认 10 ml */
   useEffect(() => {
-    setPartTexts((prev) => {
+    setRatioTexts((prev) => {
+      const next: Record<string, string> = {};
+      for (const id of selectedIds) next[id] = prev[id] ?? '1';
+      return next;
+    });
+    setAmountTexts((prev) => {
       const next: Record<string, string> = {};
       for (const id of selectedIds) next[id] = prev[id] ?? '10.0';
       return next;
@@ -117,8 +132,8 @@ export function MixPage() {
   }, [selectedIds]);
 
   /**
-   * 仓库 → 调漆：从仓库点「调漆」跳转时带 stockItemId，
-   * 这里直接选中那一条（只应用一次，之后用户手动改动不再被覆盖）。
+   * 仓库 / 工作台 → 调漆台：跳转时带 stockItemId，这里直接选中那一条
+   * （只应用一次，之后用户手动改动不再被覆盖）。
    */
   const navStockId = (location.state as { stockItemId?: string } | null)?.stockItemId ?? null;
   const appliedNavStock = useRef<string | null>(null);
@@ -129,6 +144,11 @@ export function MixPage() {
     setMode('dilute');
     setSelectedIds([navStockId]);
   }, [navStockId, stockRows]);
+
+  /** 产物被用完 / 撤销删除后，页头的「最近产出」不再指向幽灵条目 */
+  useEffect(() => {
+    if (lastResult && !stockItems.some((item) => item.id === lastResult.itemId)) setLastResult(null);
+  }, [stockItems, lastResult]);
 
   const selectedRows = stockRows.filter((row) => selectedIds.includes(row.item.id));
   const sourceRow = mode === 'dilute' ? (selectedRows[0] ?? null) : null;
@@ -158,17 +178,22 @@ export function MixPage() {
         id: row.item.id,
         code: row.code,
         name: row.name,
-        mlText: partTexts[row.item.id] ?? '10.0',
+        hex: row.hex,
+        weightText:
+          blendLogic === 'ratio' ? (ratioTexts[row.item.id] ?? '1') : (amountTexts[row.item.id] ?? '10.0'),
         ratioN: row.ratioN,
         availableMl: row.volumeMl,
+        state: row.state,
+        dilutionRatioN: row.dilutionRatioN,
+        mixed: Boolean(row.item.customName) && row.dilutionRatioN === null,
       })),
-    [selectedRows, partTexts],
+    [selectedRows, blendLogic, ratioTexts, amountTexts],
   );
 
   const blendPlan = useMemo(() => {
     if (mode !== 'blend') return null;
-    return planBlendFor(partRows, useTarget ? parseMl(targetText) : null);
-  }, [mode, partRows, useTarget, targetText]);
+    return planBlendFor(partRows, blendLogic === 'ratio' ? parseMl(targetText) : null);
+  }, [mode, partRows, blendLogic, targetText]);
 
   const dilutionBlockers = useMemo(() => {
     const list: string[] = [];
@@ -184,7 +209,13 @@ export function MixPage() {
     }
     if (dilutionPlan.totalMl <= 0) list.push('产物体积必须大于 0');
     if (sourceRow.volumeMl + 1e-6 < dilutionPlan.takenMl) {
-      list.push(stockShortText(sourceRow.code === '—' ? sourceRow.name : sourceRow.code, sourceRow.volumeMl, dilutionPlan.takenMl));
+      list.push(
+        stockShortText(
+          sourceRow.code === '—' ? sourceRow.name : sourceRow.code,
+          sourceRow.volumeMl,
+          dilutionPlan.takenMl,
+        ),
+      );
     }
     if (settings.trackThinner && thinnerRow && dilutionPlan.addedThinnerMl > 0) {
       if (thinnerRow.volumeMl + 1e-6 < dilutionPlan.addedThinnerMl) {
@@ -202,6 +233,8 @@ export function MixPage() {
     const list: string[] = [];
     if (mode !== 'blend') return list;
     if (partRows.length === 0) list.push('请至少勾选一个漆料组分');
+    if (selectedRows.some((row) => !row.paint)) list.push('有组分的目录信息未加载，暂不能调漆');
+    if (blendLogic === 'ratio' && parseMl(targetText) <= 0) list.push('目标总容量必须大于 0');
     if (!blendPlan) return list;
     if (blendPlan.totalMl <= 0) list.push('产物体积必须大于 0');
     for (const shortfall of blendPlan.shortfalls) {
@@ -209,7 +242,7 @@ export function MixPage() {
       list.push(stockShortText(row?.code ?? shortfall.id, shortfall.availableMl, shortfall.needMl));
     }
     return list;
-  }, [mode, partRows, blendPlan]);
+  }, [mode, partRows, selectedRows, blendPlan, blendLogic, targetText]);
 
   const canDilute = Boolean(
     mode === 'dilute' &&
@@ -221,15 +254,14 @@ export function MixPage() {
       dilutionBlockers.length === 0,
   );
 
-  const canBlend = Boolean(mode === 'blend' && blendPlan && blendPlan.totalMl > 0 && blendBlockers.length === 0);
-
-  const brandName = useMemo(() => {
-    if (!bottle) return undefined;
-    const brandId = bottle.components[0]?.brandId ?? bottle.labelBrandId;
-    if (!brandId) return undefined;
-    const brand = brands.find((entry) => entry.id === brandId);
-    return brand?.nameZh || brand?.shortName || brandId;
-  }, [bottle, brands]);
+  const canBlend = Boolean(
+    mode === 'blend' &&
+      selectedRows.every((row) => row.paint) &&
+      partRows.length > 0 &&
+      blendPlan &&
+      blendPlan.totalMl > 0 &&
+      blendBlockers.length === 0,
+  );
 
   const thinnerLabel =
     settings.trackThinner && thinnerRow
@@ -262,10 +294,25 @@ export function MixPage() {
     [mode],
   );
 
+  const handleLogicChange = useCallback((next: BlendLogic) => {
+    setBlendLogic(next);
+  }, []);
+
+  const rememberResult = useCallback(
+    (itemId: string, label: string, addedMl: number, merged: boolean) => {
+      setLastResult({ itemId, label, addedMl, merged });
+      setSelectedIds([itemId]);
+    },
+    [],
+  );
+
   const handleDilute = useCallback(async () => {
-    if (!sourceRow?.paint || !dilutionPlan) return;
+    if (busy || !sourceRow || !dilutionPlan) return;
+    const paint = paintRefOfRow(sourceRow);
+    if (!paint) return;
     const thinned = sourceRow.state === 'thinned';
-    await diluteBatch({
+    setBusy(true);
+    const result = await diluteBatch({
       sourceStockItemId: sourceRow.item.id,
       sourceIsThinned: thinned,
       ...(thinned
@@ -273,23 +320,43 @@ export function MixPage() {
         : { neatMl: dilutionPlan.neatMl }),
       targetRatioN: ratioN,
       ...(settings.trackThinner && thinnerRow ? { thinnerStockItemId: thinnerRow.item.id } : {}),
+      ...(thinnerRow?.paint ? { thinnerPaint: paintRefOfRow(thinnerRow) ?? undefined } : {}),
       trackThinner: settings.trackThinner,
-      paint: paintRefOf(sourceRow.paint),
+      paint,
     });
-  }, [sourceRow, dilutionPlan, diluteBatch, ratioN, settings.trackThinner, thinnerRow]);
+    setBusy(false);
+    if (!result.ok) return;
+    const item = result.data.item;
+    const label =
+      typeof item.dilutionRatioN === 'number' && item.dilutionRatioN > 0
+        ? dilutionTagText(item.dilutionRatioN) + ' ' + (item.customName ?? '稀释漆料')
+        : (item.customName ?? item.mixLabel ?? '稀释漆料');
+    rememberResult(item.id, label, result.data.addedMl, result.data.merged);
+  }, [busy, sourceRow, dilutionPlan, diluteBatch, ratioN, settings.trackThinner, thinnerRow, rememberResult]);
 
   const handleBlend = useCallback(async () => {
-    if (!blendPlan) return;
+    if (busy || !blendPlan) return;
     const parts = blendPlan.parts
       .map((share) => {
         const row = selectedRows.find((entry) => entry.item.id === share.id);
-        if (!row?.paint) return null;
-        return { stockItemId: share.id, paint: paintRefOf(row.paint), ml: parseMl(partTexts[share.id] ?? '0') };
+        const paint = row ? paintRefOfRow(row) : null;
+        if (!paint) return null;
+        return { stockItemId: share.id, paint, ml: share.ml };
       })
       .filter((part): part is { stockItemId: string; paint: PaintRef; ml: number } => part !== null);
     if (parts.length === 0) return;
-    await blendBatch({ parts, targetMl: useTarget ? parseMl(targetText) : null });
-  }, [blendPlan, selectedRows, partTexts, blendBatch, useTarget, targetText]);
+    setBusy(true);
+    const result = await blendBatch({ parts, targetMl: null });
+    setBusy(false);
+    if (!result.ok) return;
+    const item = result.data.item;
+    rememberResult(
+      item.id,
+      item.customName ?? item.mixLabel ?? '调漆产物',
+      result.data.addedMl,
+      result.data.merged,
+    );
+  }, [busy, blendPlan, selectedRows, blendBatch, rememberResult]);
 
   const handleSkipThinner = useCallback(async () => {
     const result = await updateSetting('trackThinner', false);
@@ -297,37 +364,6 @@ export function MixPage() {
     pushToast({ message: '已关闭「扣减稀释剂库存」：立即生效，且不进入撤销栈', tone: 'neutral' });
   }, [updateSetting, pushToast]);
 
-  const handleStockIn = useCallback(async () => {
-    if (!bottle) return;
-    await stockInBottle({ bottleId: bottle.id });
-  }, [bottle, stockInBottle]);
-
-  const handleCoat = useCallback(() => {
-    if (!bottle) return;
-    if (workbenches.length === 0) {
-      pushToast({ message: '还没有工作台，先去工作台页新建一个', tone: 'warn' });
-      return;
-    }
-    if (workbenches.length === 1) {
-      void openCoat({ workbenchId: workbenches[0].id, refs: [{ refType: 'bottle', refId: bottle.id }] });
-      return;
-    }
-    setCoatPicker(true);
-  }, [bottle, workbenches, openCoat, pushToast]);
-
-  const handleUse = useCallback(async () => {
-    if (!bottle) return;
-    const amount = parseMl(String(useAmount));
-    if (amount <= 0 || amount > bottle.remainingMl + 1e-6) return;
-    await useBottle({ bottleId: bottle.id, amountMl: amount });
-  }, [bottle, useBottle, useAmount]);
-
-  const handleClear = useCallback(async () => {
-    if (!bottle) return;
-    await clearBottle({ bottleId: bottle.id });
-  }, [bottle, clearBottle]);
-
-  /** 复现：把记录里的比例带回来（稀释模式） */
   const handleReproduce = useCallback((record: { ratioN: number; neatMl: number }) => {
     setRatioN(record.ratioN);
     setRatioText(String(record.ratioN));
@@ -337,46 +373,134 @@ export function MixPage() {
     setInputMode('neat');
   }, []);
 
-  const batches = useMemo(() => bottles.map((row) => ({ id: row.id, name: row.name })), [bottles]);
+  const producedItem = lastResult ? stockItems.find((item) => item.id === lastResult.itemId) : undefined;
+  const producedCanCoat = Boolean(producedItem && canEnterWorkbench(producedItem.state));
+
+  const handleCoat = useCallback(() => {
+    if (!producedItem) {
+      pushToast({ message: '该产物已用完或被删除', tone: 'warn' });
+      return;
+    }
+    if (!canEnterWorkbench(producedItem.state)) {
+      pushToast({ message: WORKBENCH_NEAT_BLOCK, tone: 'warn' });
+      return;
+    }
+    if (workbenches.length === 0) {
+      pushToast({ message: '还没有工作台，先去工作台页新建一个', tone: 'warn' });
+      return;
+    }
+    if (workbenches.length === 1) {
+      void openCoat({
+        workbenchId: workbenches[0].id,
+        refs: [{ refType: 'stock', refId: producedItem.id }],
+      });
+      return;
+    }
+    setCoatPicker(true);
+  }, [producedItem, workbenches, openCoat, pushToast]);
+
+  /** 配方条：稀释 = 原浆 + 稀释剂；调漆 = 各组分 */
+  const recipeParts: RecipePreviewPart[] = useMemo(() => {
+    if (mode === 'dilute') {
+      if (!dilutionPlan || !sourceRow || dilutionPlan.totalMl <= 0) return [];
+      const total = dilutionPlan.totalMl;
+      const parts: RecipePreviewPart[] = [];
+      if (dilutionPlan.neatMl > 0) {
+        parts.push({
+          key: 'neat',
+          label: sourceRow.name,
+          code: sourceRow.code,
+          hex: sourceRow.hex,
+          ml: dilutionPlan.neatMl,
+          share: dilutionPlan.neatMl / total,
+        });
+      }
+      if (dilutionPlan.thinnerMl > 0) {
+        parts.push({
+          key: 'thinner',
+          label: thinnerRow?.name ?? '稀释剂',
+          code: thinnerRow?.code,
+          hex: thinnerRow?.hex ?? '#dededb',
+          ml: dilutionPlan.thinnerMl,
+          share: dilutionPlan.thinnerMl / total,
+          aux: true,
+        });
+      }
+      return parts;
+    }
+    if (!blendPlan || blendPlan.totalMl <= 0) return [];
+    return blendPlan.parts
+      .map((share): RecipePreviewPart | null => {
+        const row = selectedRows.find((entry) => entry.item.id === share.id);
+        if (!row) return null;
+        return {
+          key: row.item.id,
+          label: row.name,
+          code: row.code,
+          hex: row.hex,
+          ml: share.ml,
+          share: share.ml / blendPlan.totalMl,
+          ...(typeof row.alpha === 'number' ? { alpha: row.alpha } : {}),
+        };
+      })
+      .filter((part): part is RecipePreviewPart => part !== null);
+  }, [mode, dilutionPlan, sourceRow, thinnerRow, blendPlan, selectedRows]);
+
+  const recipeTotal = mode === 'dilute' ? (dilutionPlan?.totalMl ?? 0) : (blendPlan?.totalMl ?? 0);
+  const recipeRatio = mode === 'dilute' ? ratioN : (blendPlan?.ratioN ?? 0);
+  const recipeModeLabel =
+    mode === 'dilute'
+      ? '稀释 · ' + formatRatio(ratioN)
+      : '调漆 · ' + (blendLogic === 'ratio' ? '总量 ÷ 配比' : '各组分用量');
 
   return (
-    <section data-page="mix" className="flex min-h-0 flex-1 flex-col gap-3 p-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-2">
-        <div className="flex items-baseline gap-3">
-          <h1 className="t-display text-lg text-text-1">MIX // 调漆台</h1>
-          <Segmented ariaLabel="调漆台模式" options={MODE_OPTIONS} value={mode} onChange={(next) => setMode(next as MixMode)} />
+    <section data-page="mix" className="flex h-full min-h-0 flex-col gap-3 p-4">
+      <header className="ef-page-head shrink-0">
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <p className="ef-eyebrow">// MIX</p>
+            <h1 className="ef-title">调漆台</h1>
+          </div>
+          <Segmented
+            ariaLabel="调漆台模式"
+            options={MODE_OPTIONS}
+            value={mode}
+            onChange={(next) => setMode(next as MixMode)}
+          />
+          <span className="ef-tag" data-auto-stock-in="">
+            自动入库
+          </span>
         </div>
-        <p className="t-readout text-[11px] text-text-3">
-          {bottle
-            ? '当前批次 ' + bottle.name + ' · ' + formatMl(bottle.remainingMl) + ' ml'
-            : '调漆台空 · 选好漆料后点「稀释」或「调漆」'}
+        <p className="ef-field flex flex-wrap items-center gap-2 text-[12px] text-text-2">
+          {lastResult ? (
+            <>
+              <span data-last-result="">
+                {'最近产出 ' +
+                  lastResult.label +
+                  ' · +' +
+                  formatMl(lastResult.addedMl) +
+                  ' ml' +
+                  (lastResult.merged ? '（已并入同配方瓶）' : '')}
+              </span>
+              <Button
+                size="sm"
+                variant="secondary"
+                data-action="coat-last"
+                disabled={!producedCanCoat}
+                title={producedCanCoat ? undefined : WORKBENCH_NEAT_BLOCK}
+                onClick={handleCoat}
+              >
+                开涂
+              </Button>
+            </>
+          ) : (
+            '稀释 / 调漆确认后自动扣减库存并入库；同配方合并，余量 0 ml 自动删除。'
+          )}
         </p>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[240px_minmax(0,1fr)_340px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[300px_minmax(0,1fr)]">
         <StockPicker rows={stockRows} multiple={mode === 'blend'} selectedIds={selectedIds} onToggle={handleToggle} />
-
-        <BottleStage
-          bottle={bottle}
-          brandName={brandName}
-          batches={batches}
-          activeBatchId={bottle?.id ?? null}
-          onSelectBatch={selectBottle}
-          onStockIn={() => {
-            void handleStockIn();
-          }}
-          onCoat={handleCoat}
-          onUse={() => {
-            void handleUse();
-          }}
-          onClear={() => {
-            void handleClear();
-          }}
-          useAmountMl={useAmount}
-          onUseAmountChange={setUseAmount}
-          canStockIn={Boolean(bottle && bottle.components.length > 0 && bottle.remainingMl > 0)}
-          coatHint={workbenches.length === 0 ? '先去工作台新建一个工作台' : null}
-        />
 
         <div className="flex min-h-0 flex-col gap-3">
           {mode === 'dilute' ? (
@@ -407,22 +531,25 @@ export function MixPage() {
               onCommit={() => {
                 void handleDilute();
               }}
+              busy={busy}
             />
           ) : (
             <BlendPanel
               rows={partRows}
-              onChangeMl={(itemId, raw) => setPartTexts((prev) => ({ ...prev, [itemId]: raw }))}
+              logic={blendLogic}
+              onLogicChange={handleLogicChange}
+              onChangeWeight={(itemId, raw) => {
+                if (blendLogic === 'ratio') setRatioTexts((prev) => ({ ...prev, [itemId]: raw }));
+                else setAmountTexts((prev) => ({ ...prev, [itemId]: raw }));
+              }}
               onRemove={(itemId) => setSelectedIds((prev) => prev.filter((id) => id !== itemId))}
               onEqualize={() =>
-                setPartTexts((prev) => {
+                setRatioTexts((prev) => {
                   const next = { ...prev };
-                  for (const id of selectedIds) next[id] = '10.0';
+                  for (const id of selectedIds) next[id] = '1';
                   return next;
                 })
               }
-              onClear={() => setSelectedIds([])}
-              useTarget={useTarget}
-              onUseTargetChange={setUseTarget}
               targetText={targetText}
               onTargetChange={setTargetText}
               plan={blendPlan}
@@ -431,17 +558,31 @@ export function MixPage() {
               onCommit={() => {
                 void handleBlend();
               }}
+              busy={busy}
             />
           )}
-          <MixRecents records={records} onReproduce={handleReproduce} />
+
+          <RecipePreview
+            parts={recipeParts}
+            totalMl={recipeTotal}
+            ratioN={recipeRatio}
+            modeLabel={recipeModeLabel}
+            lastResult={
+              lastResult
+                ? { label: lastResult.label, addedMl: lastResult.addedMl, merged: lastResult.merged }
+                : null
+            }
+          />
         </div>
       </div>
+
+      <MixRecents records={records} onReproduce={handleReproduce} />
 
       <Dialog
         open={coatPicker}
         onOpenChange={setCoatPicker}
         title="开涂"
-        description={'把「' + (bottle?.name ?? '') + '」送到哪个工作台'}
+        description={'把「' + (producedItem?.customName ?? lastResult?.label ?? '') + '」送到哪个工作台'}
         width={420}
         footer={
           <Button variant="ghost" onClick={() => setCoatPicker(false)}>
@@ -457,8 +598,11 @@ export function MixPage() {
               data-coat-target={workbench.id}
               onClick={() => {
                 setCoatPicker(false);
-                if (!bottle) return;
-                void openCoat({ workbenchId: workbench.id, refs: [{ refType: 'bottle', refId: bottle.id }] });
+                if (!producedItem) return;
+                void openCoat({
+                  workbenchId: workbench.id,
+                  refs: [{ refType: 'stock', refId: producedItem.id }],
+                });
               }}
               className="flex h-8 items-center border border-line px-2 text-xs text-text-1 transition-colors duration-hover hover:border-line-strong hover:bg-surface-2"
             >
