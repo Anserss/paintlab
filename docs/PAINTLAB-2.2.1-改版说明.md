@@ -51,10 +51,28 @@
 仓库详情里对调漆产物显示配方：
 
 ```
-调漆产物 · 配方：中灰 20.0 ml + 钴蓝 10.0 ml（原漆 JW020）
+调漆产物 · 配方：中灰 20.0 ml + 钴蓝 10.0 ml
 ```
 
 来源是 `StockItem.mixLabel`（2.2 起写入；旧数据迁移时补算）。这样两个不同配方但同名的调漆产物仍能区分。
+
+### 2.5 调漆产物只显示名称，不显示基础漆号
+
+用户 2026-11-19 第二轮反馈：调漆产物名称为 `A`，但仓库详情 / 工作台仍显示基础漆号 `JW020`；要求**删掉基础漆号，并在原来显示漆号的位置改显示名称**。
+
+- 判定（`core/render/batch.ts`）：
+  ```ts
+  isMixedProduct(item) = Boolean(item.customName) && item.dilutionRatioN == null
+  ```
+  调漆产物 = 有名称且不是稀释漆料；纯稀释漆料仍显示原浆漆号。
+- **仓库行**：不显示基础漆号；名称 `A` 是唯一标识。
+- **仓库详情**：整行大漆号（`JW020`）删除；标题只保留名称 `A`；配方行不再带「（原漆 JW020）」。
+- **调漆台取料行**：第一行由「漆号」改为「名称」（`A`）；第二行只留「容量偏低 / 调漆」标签，不重复名称；标题「取用：A · 余 8.5 ml」不再出现 `JW020`；调漆组分行同样只显示名称。
+- **工作台磁贴**：标题 `A` + 「调漆」小牌；删除下方 `JW020` 漆号行。
+- **用量面板**：标题 `A`；副行由漆号改为「调漆产物」。
+- **工作台侧栏「从仓库调取」**：第一行显示名称 `A`；第二行只留「调漆」标签。
+- **配方条**：调漆产物组分的图例不再显示基础漆号。
+- 数据不变：`StockItem.paintId` 仍指向基础漆（用于色值/组分解析），只是**界面不再展示这个漆号**。
 
 ## 3. 数据契约
 
@@ -85,26 +103,31 @@ renameStockItem(s, input): Result<StockWriteResult>
 
 ### 4.2 仓库详情
 
-- 调漆产物（`customMixed && dilutionRatioN == null`）的底部动作新增 **「改名」**（`data-detail-action="rename"`）。
+- 调漆产物（`isMixedProduct(item)`：有 `customName` 且 `dilutionRatioN == null`）的底部动作新增 **「改名」**（`data-detail-action="rename"`）。
 - 弹层：`data-dialog="rename-stock"`、`aria-label="新名称"`、`data-action="confirm-rename-stock"`；显示当前名称 + 原漆；保存后状态条回执「已改名为「…」」，可撤销。
-- 配方行：`data-custom-mixed` 显示 `mixLabel`。
+- 配方行：`data-custom-mixed` 显示 `mixLabel`，不带基础漆号。
+- 调漆产物的详情不再渲染 `data-paint-code`（大漆号行整体删除）。
 
 ## 5. 实测
 
 | 命令 | 结果 |
 |---|---|
 | `npx tsc --noEmit` | 0 错 |
-| `npx vitest run` | **34 文件 / 392 用例通过** |
+| `npx vitest run` | **34 文件 / 396 用例通过** |
 | `npm run build:desktop` / `npm run desktop` | 安装版 exe **2.2.1** |
-| 安装版走查 | 把库里的「调漆14」在仓库详情改名为 `JW020` → 调漆台取料行 / 工作台磁贴 / 用量面板都显示 `JW020`；改名可撤销；调漆面板自定义名称输入生效 |
+| 安装版走查 | 库里的调漆产物名称 `A`：仓库行 / 详情 / 调漆台取料行 / 工作台磁贴 / 用量面板都只显示 `A`，不再残留 `JW020`；改名与自定义名称输入生效 |
+| 安装版走查（前一轮） | 把「调漆14」改名为 `JW020` 后各处同步；改名可撤销 |
 
-相关截图：`reports/shots/2-2-1-rename-dialog.png`、`2-2-1-mix-name.png`、`2-2-1-workbench-jw020.png`。
+相关截图：`reports/shots/2-2-1-rename-dialog.png`、`2-2-1-mix-name.png`、`2-2-1-workbench-jw020.png`、`2-2-1-detail-a-no-code.png`、`2-2-1-mix-a-no-code.png`、`2-2-1-workbench-a-no-code.png`。
 
 新增 / 改写的用例：
 
 - `tests/unit/data/mix-stockin.test.ts`：自定义名称不消耗序号、留空回落「调漆1」、合并时改名 + 撤销、`renameStockItem` 落库/撤销/空名/超长/原浆拒绝。
-- `tests/unit/features/mix.test.tsx`：调漆面板「产物名称」输入 → `customName`；留空 → `调漆1`。
+- `tests/unit/features/mix.test.tsx`：调漆面板「产物名称」输入 → `customName`；留空 → `调漆1`；调漆产物取料行 / 取用行只显示名称，不出现基础漆号。
 - `tests/unit/features/depot-decompose.test.tsx`：调漆产物「调漆14」→「JW020」改名并撤销。
+- `tests/unit/core/batch.test.ts`：`isMixedProduct` 判定（调漆产物 vs 稀释漆料 / 原浆）。
+- `tests/unit/components/paint.test.tsx`：`PaintTile` / `PaintRow` 传 `hideCode` 时不渲染基础漆号。
+- `tests/unit/features/workbench.test.tsx`：工作台磁贴只显示名称 `A`，不显示 `C80`。
 
 ## 6. 2.2.0 提交记录（前置工作）
 
