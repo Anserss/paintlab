@@ -103,7 +103,7 @@ describe('导出 / 导入 / 重置（spec 3.8）', () => {
     expect(exported.data.format).toBe('pigment-depot/v1');
     expect(exported.data.user.stockItems).toHaveLength(1);
     expect(exported.data.user.groups.some((group) => group.system)).toBe(true);
-    expect(exported.data.settings.theme).toBe('dark');
+    expect(exported.data.settings.theme).toBe('light');
     expect(typeof exported.data.catalogVersion).toBe('string');
 
     await resetAll(store);
@@ -143,7 +143,8 @@ describe('撤销后的读模型一致性（骨架职责，不下放给特性层�
     });
     const app = () => useAppStore.getState();
 
-    const purchased = await app().purchase({ paint, initialMl: 17, state: 'neat', groupId: null });
+    // 2.1 平台流转：工作台只接收稀释 / 调漆产物，原浆不能上工作台
+    const purchased = await app().purchase({ paint, initialMl: 17, state: 'thinned', ratioN: 2, groupId: null });
     expect(purchased.ok).toBe(true);
     if (!purchased.ok) return;
     const stockId = purchased.data.item.id;

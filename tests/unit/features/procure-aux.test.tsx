@@ -153,6 +153,12 @@ describe('采购大厅 · 辅料货架（稀释剂 / 缓干剂）', () => {
 
     // 弹层打开后必须能看出本次规格是 250 ml（整瓶模式不渲染输入框，规格以文案呈现）
     await waitFor(() => expect(document.body.textContent).toContain('250'));
+    // 2.1.1：辅料没有「原浆 / 稀释」之分，弹层不出现初始状态选项
+    expect(document.querySelector('[data-aux-no-state]')).not.toBeNull();
+    expect(document.querySelector('[role="tablist"][aria-label="初始状态"]')).toBeNull();
+    expect(document.body.textContent).toContain('直接入库，不分原浆与稀释');
+    // 容量仍可选
+    expect(document.querySelector('[role="tablist"][aria-label="容量"]')).not.toBeNull();
 
     const confirm = Array.from(document.querySelectorAll('button')).find(
       (button) => button.textContent === '确认入库',

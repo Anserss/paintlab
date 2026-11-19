@@ -123,11 +123,11 @@ describe('AC-06 三档透明度', () => {
     expect(container.querySelector('[data-swatch-ring]')).not.toBeNull();
   });
 
-  it('< 24px 降级为实心圆点（不使用半透明）', () => {
+  it('< 24px 用实心直角小色块（不使用半透明，仍带 ring）', () => {
     const { container } = render(<PaintSwatch hex={solid.hex} paintClass="clear" size={16} />);
     const dot = container.querySelector('[data-swatch]');
     expect(dot?.getAttribute('data-swatch')).toBe('dot');
-    expect(container.querySelector('[data-swatch-ring]')).toBeNull();
+    expect(container.querySelector('[data-swatch-ring]')).not.toBeNull();
     const fill = container.querySelector('[data-swatch-fill]') as HTMLElement;
     expect(window.getComputedStyle(fill).opacity).toBe('1');
     expect(window.getComputedStyle(fill).backgroundColor).toBe('rgb(46, 94, 159)');
@@ -159,12 +159,11 @@ describe('PaintRow 结构', () => {
     expect(container.textContent ?? '').toContain('已入库×1');
   });
 
-  it('空瓶行整行淡化并出现「空」徽标', () => {
+  it('空瓶行整行弱化并出现「空」徽标', () => {
     const { container } = render(
       <PaintRow paint={solid} line={mrColor} brand={brand} stock={{ volumeMl: 0, initialMl: 17 }} />,
     );
     const row = container.querySelector('[data-paint-row]') as HTMLElement;
-    expect(row.className).toContain('opacity-50');
     expect(row.getAttribute('data-empty')).toBe('');
     expect(container.textContent ?? '').toContain('空');
   });

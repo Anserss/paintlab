@@ -142,6 +142,8 @@ describe('label · 名称与来源行', () => {
       secondary: 'Cobalt Blue',
     });
     expect(paintTitle({ name: 'Cobalt Blue' })).toEqual({ primary: 'Cobalt Blue' });
+    // 2.1：稀释/调漆产物的自定义名称中英文相同，不重复出副标题
+    expect(paintTitle({ name: '钴蓝', nameZh: '钴蓝' })).toEqual({ primary: '钴蓝' });
   });
 
   it('来源行 = 品牌 · 产品线，缺失用 — 占位', () => {

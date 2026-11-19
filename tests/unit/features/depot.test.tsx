@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { Group } from '@/core/model/types';
 import { hueBucket } from '@/core/math/color';
 import { UNGROUPED_ID } from '@/core/rules/groups';
-import { ToastStack } from '@/components/ui';
 import { createMemoryStore, setStore } from '@/data/db';
 import type { DepotStore } from '@/data/db';
 import { createGroup, ensureSystemGroup, listGroups } from '@/data/repos/group';
@@ -192,14 +191,7 @@ function contextMenu(element: Element) {
 }
 
 function Harness() {
-  const toasts = useAppStore((state) => state.toasts);
-  const dismissToast = useAppStore((state) => state.dismissToast);
-  return (
-    <>
-      <DepotPage />
-      <ToastStack items={toasts} onDismiss={dismissToast} />
-    </>
-  );
+  return <DepotPage />;
 }
 
 function renderPage() {
@@ -247,13 +239,13 @@ describe('AC-06 三档透明度出现在仓库列表', () => {
     expect(window.getComputedStyle(auxFill).backgroundColor).toBe('rgb(255, 255, 255)');
   });
 
-  it('低库存（<15%）行余量读数走 --bh-red 且进度条末端出现红块', async () => {
+  it('低库存（<15%）行挂低量标记，进度条末端出现黄块（不再用红色）', async () => {
     await addStock(solid, 0.5, 1, 20);
     await useAppStore.getState().refreshInventory();
     const { container } = renderPage();
     const row = rowOf(container, 'C80');
     const reading = row.querySelector('[data-paint-reading]') as HTMLElement;
-    expect(reading.className).toContain('text-bh-red');
+    expect(reading.getAttribute('data-low')).toBe('');
     expect(row.querySelector('[data-stock-low-mark]')).not.toBeNull();
   });
 });
@@ -284,7 +276,7 @@ describe('AC-07 分组深度', () => {
     await user.click(screen.getByLabelText('移动到 组C'));
 
     await waitFor(() => {
-      expect(screen.getByText(/分组最多 3 层/)).toBeInTheDocument();
+      expect(useAppStore.getState().toasts.some((toast) => /分组最多 3 层/.test(toast.message))).toBe(true);
     });
 
     const after = await listGroups(store);
@@ -430,9 +422,10 @@ describe('调整余量（盘点）', () => {
     expect((adjust?.meta as { reason?: string } | undefined)?.reason).toBe('evaporate');
 
     await waitFor(() => {
-      expect(screen.getByText(/余量已调整/)).toBeInTheDocument();
+      expect(useAppStore.getState().toasts.some((toast) => /余量已调整/.test(toast.message))).toBe(true);
     });
-    expect(screen.getByRole('button', { name: '撤销' })).toBeInTheDocument();
+    // 2.1：回执不再有右下角浮层，撤销走状态条的撤销栈
+    expect(useAppStore.getState().undoCount).toBeGreaterThan(0);
   });
 });
 

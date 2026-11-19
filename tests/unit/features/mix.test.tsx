@@ -69,6 +69,7 @@ const resetAppState = () => {
     brands: [],
     toasts: [],
     selected: [],
+    lowVolumeAlert: null,
     settings: { ...DEFAULT_SETTINGS },
     undoCount: 0,
     redoCount: 0,
@@ -143,46 +144,99 @@ async function switchMode(label: '稀释' | '调漆'): Promise<void> {
   fireEvent.click(screen.getByRole('tab', { name: label }));
 }
 
-describe('稀释模式（1:2 正算 / 反算，不再选瓶容量）', () => {
-  it('A=10、N=2 → 稀释剂 20.0 / 合计 30.0，点「稀释」后产出一支 30 ml 批次', async () => {
+/** 调漆是多选：先清掉当前勾选，再精确勾选目标条目（切换模式时默认会保留一支） */
+function setBlendSelection(ids: string[]): void {
+  for (const element of Array.from(document.querySelectorAll('[data-stock-item][aria-checked="true"]'))) {
+    fireEvent.click(element);
+  }
+  for (const id of ids) {
+    const element = document.querySelector('[data-stock-item="' + id + '"]');
+    if (!element) throw new Error('missing stock row ' + id);
+    fireEvent.click(element);
+  }
+}
+
+const mixedItems = () => useAppStore.getState().stockItems.filter((item) => item.origin === 'mixed');
+
+describe('稀释模式：确认后自动扣减 + 自动入库', () => {
+  it('A=10、N=2 → 稀释剂 20.0 / 合计 30.0；点「稀释并入库」后库存直接多一条 30 ml 稀释漆料', async () => {
     const seeded = await seedStocks();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
     fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
 
-    // 稀释模式没有瓶容量选择器（改版要求：删除选容量）
+    // 2.2 不再有瓶容量、使用、清空、入库这些批次动作
     expect(screen.queryByRole('group', { name: '瓶容量' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '使用' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '清空' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '入库' })).toBeNull();
+    expect(document.querySelector('[data-mix-panel="bottle"]')).toBeNull();
 
     fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
     expect(resultOf('neat')).toBe('10.0');
     expect(resultOf('thinner')).toBe('20.0');
     expect(resultOf('total')).toBe('30.0');
 
-    const results = document.querySelector('[data-mix-results]') as HTMLElement;
-    expect(within(results).getByText('稀释剂')).not.toBeNull();
-    expect(results.textContent).toContain('20.0');
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
 
-    fireEvent.click(screen.getByRole('button', { name: '稀释' }));
-
-    await waitFor(() => expect(useAppStore.getState().bottles).toHaveLength(1));
-    const bottle = useAppStore.getState().bottles[0];
-    expect(bottle.remainingMl).toBe(30);
-    expect(bottle.baselineMl).toBe(30);
-    expect(bottle.capacityMl).toBe(30);
-    expect(bottle.ratioN).toBe(2);
-    expect(bottle.mode).toBe('dilute');
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+    const item = mixedItems()[0];
+    expect(item.volumeMl).toBe(30);
+    expect(item.initialMl).toBe(30);
+    expect(item.state).toBe('thinned');
+    expect(item.ratioN).toBe(2);
+    expect(item.dilutionRatioN).toBe(2);
+    expect(item.customName).toBe('钴蓝');
+    expect(item.parts).toHaveLength(2);
+    expect(useAppStore.getState().bottles).toHaveLength(0);
 
     // 原浆与稀释剂都被扣减
     const stocks = await store.stockItems.toArray();
-    const blue = stocks.find((item) => item.paintId === BLUE.id);
-    const thinner = stocks.find((item) => item.paintId === THINNER.id);
-    expect(blue?.volumeMl).toBe(50);
-    expect(thinner?.volumeMl).toBe(180);
+    expect(stocks.find((row) => row.id === seeded.blueId)?.volumeMl).toBe(50);
+    expect(stocks.find((row) => row.id === seeded.thinnerId)?.volumeMl).toBe(180);
+
+    // 配方条与最近配方都出现
+    await waitFor(() => expect(document.querySelector('[data-recipe-preview]')?.textContent).toContain('钴蓝'));
+    expect(document.querySelector('[data-mix-panel="recents"]')?.textContent).toContain('稀释 30.0 ml');
+  });
+
+  it('同配方第二次稀释自动合并为一个瓶（initial 与 volume 一起累加）', async () => {
+    const seeded = await seedStocks();
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
+    await waitForPage();
+    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
+    fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+
+    // 再稀释一次同样的配方
+    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
+    fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+    await waitFor(() => expect(mixedItems()[0]?.volumeMl).toBe(60));
+
+    const items = mixedItems();
+    expect(items).toHaveLength(1);
+    expect(items[0].initialMl).toBe(60);
+    expect(items[0].parts?.find((part) => !part.aux)?.ml).toBe(20);
+    expect(document.body.textContent).toContain('已并入同配方瓶');
   });
 
   it('按目标总量 V=30、N=2 → 原浆 10.0 / 稀释剂 20.0', async () => {
     await seedStocks();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     fireEvent.click(screen.getByLabelText('按目标总量'));
@@ -195,7 +249,11 @@ describe('稀释模式（1:2 正算 / 反算，不再选瓶容量）', () => {
 
   it('比例超出 0–10 被钳制并提示', async () => {
     await seedStocks();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     fireEvent.change(screen.getByLabelText('比例 N'), { target: { value: '20' } });
@@ -204,9 +262,14 @@ describe('稀释模式（1:2 正算 / 反算，不再选瓶容量）', () => {
   });
 
   it('比例预设按钮 1:1.5 生效', async () => {
-    await seedStocks();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    const seeded = await seedStocks();
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
+    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
 
     fireEvent.click(screen.getByRole('button', { name: '1:1.5' }));
     fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
@@ -216,10 +279,14 @@ describe('稀释模式（1:2 正算 / 反算，不再选瓶容量）', () => {
 });
 
 describe('稀释模式 · 已稀释漆料再稀释（按取用毫升数）', () => {
-  it('取 10 ml（1:2）再稀释到 1:3 → 补加 3.3 ml，产物 13.3 ml', async () => {
+  it('取 10 ml（1:2）再稀释到 1:3 → 补加 3.3 ml，产物自动入库 13.3 ml', async () => {
     await seedStocks();
     const thinnedId = await seedThinned(BLUE, 30, 2);
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     fireEvent.click(document.querySelector('[data-stock-item="' + thinnedId + '"]') as Element);
@@ -232,9 +299,10 @@ describe('稀释模式 · 已稀释漆料再稀释（按取用毫升数）', () 
     expect(resultOf('thinner')).toBe('3.3');
     expect(resultOf('total')).toBe('13.3');
 
-    fireEvent.click(screen.getByRole('button', { name: '稀释' }));
-    await waitFor(() => expect(useAppStore.getState().bottles).toHaveLength(1));
-    expect(useAppStore.getState().bottles[0].remainingMl).toBe(13.3);
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+    expect(mixedItems()[0].volumeMl).toBe(13.3);
+    expect(mixedItems()[0].ratioN).toBe(3);
 
     const stocks = await store.stockItems.toArray();
     expect(stocks.find((item) => item.id === thinnedId)?.volumeMl).toBe(20);
@@ -242,132 +310,172 @@ describe('稀释模式 · 已稀释漆料再稀释（按取用毫升数）', () 
   });
 });
 
-describe('调漆模式（多组分按目标总容量分摊）', () => {
-  it('勾选 2 支漆、目标 30 ml、份量各 10 → 各分摊 15 / 15，合计 30', async () => {
-    await seedStocks();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+describe('调漆模式 · 两种算法', () => {
+  it('按总量 ÷ 配比：2 组分各 1 份、目标 30 → 各 15，确认后产物 30 ml 入库', async () => {
+    const seeded = await seedStocks();
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     await switchMode('调漆');
-    fireEvent.click(screen.getByRole('button', { name: '清空组分' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: /C80/ }));
-    fireEvent.click(screen.getByRole('checkbox', { name: /C1/ }));
+    setBlendSelection([seeded.blueId, seeded.whiteId]);
 
     fireEvent.change(screen.getByLabelText('目标总容量 V'), { target: { value: '30' } });
-    fireEvent.change(screen.getByLabelText('份量 C80'), { target: { value: '10' } });
-    fireEvent.change(screen.getByLabelText('份量 C1'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('配比 C80'), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText('配比 C1'), { target: { value: '1' } });
 
-    const parts = document.querySelectorAll('[data-part-ml]');
-    expect(parts).toHaveLength(2);
+    expect(document.querySelectorAll('[data-part-ml]')).toHaveLength(2);
     expect(resultOf('total')).toBe('30.0');
 
-    fireEvent.click(screen.getByRole('button', { name: '调漆' }));
-    await waitFor(() => expect(useAppStore.getState().bottles).toHaveLength(1));
-    const bottle = useAppStore.getState().bottles[0];
-    expect(bottle.mode).toBe('blend');
-    expect(bottle.remainingMl).toBe(30);
-    expect(bottle.components).toHaveLength(2);
+    fireEvent.click(screen.getByRole('button', { name: '调漆并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+    const item = mixedItems()[0];
+    expect(item.volumeMl).toBe(30);
+    expect(item.parts).toHaveLength(2);
+    expect(item.customName).toMatch(/^调漆/);
 
     const stocks = await store.stockItems.toArray();
-    expect(stocks.find((item) => item.paintId === BLUE.id)?.volumeMl).toBe(45);
-    expect(stocks.find((item) => item.paintId === WHITE.id)?.volumeMl).toBe(45);
+    expect(stocks.find((row) => row.id === seeded.blueId)?.volumeMl).toBe(45);
+    expect(stocks.find((row) => row.id === seeded.whiteId)?.volumeMl).toBe(45);
   });
 
-  it('取消「按目标总容量」后按各组分 ml 直接累加，等效比例由原浆/稀释剂折算', async () => {
+  it('按各组分用量：10 + 20 → 合计 30、原浆 16.7 / 稀释剂 13.3、等效 1:0.8', async () => {
     const seeded = await seedStocks();
     const thinnedId = await seedThinned(WHITE, 40, 2);
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     await switchMode('调漆');
-    fireEvent.click(screen.getByRole('button', { name: '清空组分' }));
-    // 同色号可能有多条条目（原浆 + 已稀释），按条目 id 勾选
-    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
-    fireEvent.click(document.querySelector('[data-stock-item="' + thinnedId + '"]') as Element);
+    fireEvent.click(screen.getByLabelText('按各组分用量'));
+    setBlendSelection([seeded.blueId, thinnedId]);
 
-    fireEvent.click(screen.getByLabelText('按目标总容量分摊'));
-    fireEvent.change(screen.getByLabelText('份量 C80'), { target: { value: '10' } });
-    fireEvent.change(screen.getByLabelText('份量 C1'), { target: { value: '20' } });
+    fireEvent.change(screen.getByLabelText('用量 C80'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('用量 C1'), { target: { value: '20' } });
 
     expect(resultOf('total')).toBe('30.0');
     expect(resultOf('neat')).toBe('16.7');
     expect(resultOf('thinner')).toBe('13.3');
     expect(resultOf('ratio')).toBe('1:0.8');
+
+    fireEvent.click(screen.getByRole('button', { name: '调漆并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+    expect(mixedItems()[0].volumeMl).toBe(30);
+    const stocks = await store.stockItems.toArray();
+    expect(stocks.find((row) => row.id === seeded.blueId)?.volumeMl).toBe(50);
+    expect(stocks.find((row) => row.id === thinnedId)?.volumeMl).toBe(20);
   });
 
   it('组分库存不足时给出可行动阻断，且不落库', async () => {
     await seedStocks({ blueMl: 5 });
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     await switchMode('调漆');
+    setBlendSelection([]);
     fireEvent.click(screen.getByRole('checkbox', { name: /C80/ }));
-    fireEvent.click(screen.getByLabelText('按目标总容量分摊'));
-    fireEvent.change(screen.getByLabelText('份量 C80'), { target: { value: '20' } });
+    fireEvent.change(screen.getByLabelText('目标总容量 V'), { target: { value: '30' } });
+    fireEvent.change(screen.getByLabelText('配比 C80'), { target: { value: '1' } });
 
     await waitFor(() => expect(document.body.textContent).toContain('库存不足'));
-    const commit = screen.getByRole('button', { name: '调漆' }) as HTMLButtonElement;
+    const commit = screen.getByRole('button', { name: '调漆并入库' }) as HTMLButtonElement;
     expect(commit.disabled).toBe(true);
-    fireEvent.click(commit);
-    expect(useAppStore.getState().bottles).toHaveLength(0);
+    expect(mixedItems()).toHaveLength(0);
+  });
+
+  it('组分支持选择已调漆产物并参与同配方判定', async () => {
+    const seeded = await seedStocks();
+    const pre = await createStockItem(store, {
+      paint: BLUE,
+      initialMl: 40,
+      state: 'thinned',
+      ratioN: 2,
+      groupId: null,
+    });
+    if (!pre.ok) throw new Error(pre.error);
+    await store.stockItems.put({
+      ...pre.data.item,
+      customName: '旧调漆',
+      customHex: '#336699',
+      mixKey: 'f:test-mixed',
+    });
+    await useAppStore.getState().refreshInventory();
+
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
+    await waitForPage();
+    await switchMode('调漆');
+    setBlendSelection([pre.data.item.id, seeded.whiteId]);
+    fireEvent.click(screen.getByLabelText('按各组分用量'));
+    fireEvent.change(screen.getByLabelText('用量 C80'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('用量 C1'), { target: { value: '10' } });
+
+    fireEvent.click(screen.getByRole('button', { name: '调漆并入库' }));
+    await waitFor(async () => {
+      const rows = await store.stockItems.toArray();
+      expect(rows.some((item) => item.customName?.startsWith('调漆'))).toBe(true);
+    });
+    // 旧调漆产物作为组分被扣减 10 ml
+    await waitFor(async () => {
+      expect((await store.stockItems.get(pre.data.item.id))?.volumeMl).toBe(30);
+    });
   });
 });
 
 describe('稀释剂缺失时的可行动提示（3.10）', () => {
   it('开启扣减但没有 aux 库存 → 拦下并给出「本次不扣减稀释剂」，点击后可继续', async () => {
-    await createStockItem(store, { paint: BLUE, initialMl: 60, state: 'neat', groupId: null });
+    const blue = await createStockItem(store, { paint: BLUE, initialMl: 60, state: 'neat', groupId: null });
+    if (!blue.ok) throw new Error(blue.error);
     await useAppStore.getState().refreshInventory();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
 
     fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
 
     await waitFor(() => expect(document.querySelector('[data-thinner-missing]')).not.toBeNull());
-    expect(screen.getByRole('button', { name: '稀释' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '稀释并入库' })).toBeDisabled();
 
     fireEvent.click(screen.getByRole('button', { name: '本次不扣减稀释剂' }));
     await waitFor(() => expect(useAppStore.getState().settings.trackThinner).toBe(false));
-    await waitFor(() => expect(screen.getByRole('button', { name: '稀释' })).not.toBeDisabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: '稀释并入库' })).not.toBeDisabled());
 
-    fireEvent.click(screen.getByRole('button', { name: '稀释' }));
-    await waitFor(() => expect(useAppStore.getState().bottles).toHaveLength(1));
-    expect(useAppStore.getState().bottles[0].remainingMl).toBe(30);
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+    expect(mixedItems()[0].volumeMl).toBe(30);
   });
 });
 
-describe('批次的后续动作：使用 / 入库 / 开涂', () => {
-  async function commitBatch(): Promise<void> {
-    await seedStocks();
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+describe('2.2 产出后一键开涂', () => {
+  it('没有工作台时提示；有 1 个时把刚入库的库存条目加进工作台', async () => {
+    const seeded = await seedStocks();
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
+    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
     fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
-    fireEvent.click(screen.getByRole('button', { name: '稀释' }));
-    await waitFor(() => expect(useAppStore.getState().bottles).toHaveLength(1));
-  }
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
 
-  it('使用 10 ml → remaining 20，baseline 不变', async () => {
-    await commitBatch();
-    fireEvent.change(screen.getByLabelText('使用量'), { target: { value: '10' } });
-    fireEvent.click(screen.getByRole('button', { name: '使用' }));
-
-    await waitFor(() => expect(useAppStore.getState().bottles[0].remainingMl).toBe(20));
-    expect(useAppStore.getState().bottles[0].baselineMl).toBe(30);
-  });
-
-  it('入库：批次变成仓库里的一条已稀释漆料，批次消失', async () => {
-    await commitBatch();
-    fireEvent.click(screen.getByRole('button', { name: '入库' }));
-
-    await waitFor(() => expect(useAppStore.getState().bottles).toHaveLength(0));
-    const stocks = await store.stockItems.toArray();
-    const added = stocks.find((item) => item.origin === 'mixed');
-    expect(added?.state).toBe('thinned');
-    expect(added?.volumeMl).toBe(30);
-    expect(added?.ratioN).toBe(2);
-  });
-
-  it('开涂：没有工作台时给出提示；有 1 个时直接加入', async () => {
-    await commitBatch();
     fireEvent.click(screen.getByRole('button', { name: '开涂' }));
     await waitFor(() =>
       expect(useAppStore.getState().toasts.some((toast) => toast.message.includes('还没有工作台'))).toBe(true),
@@ -376,17 +484,62 @@ describe('批次的后续动作：使用 / 入库 / 开涂', () => {
     const created = await useAppStore.getState().newWorkbench({ name: '喷涂位' });
     expect(created.ok).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: '开涂' }));
-
     await waitFor(() => expect(useAppStore.getState().workbenchItems).toHaveLength(1));
-    expect(useAppStore.getState().workbenchItems[0].refType).toBe('bottle');
+    expect(useAppStore.getState().workbenchItems[0].refType).toBe('stock');
+    expect(useAppStore.getState().workbenchItems[0].refId).toBe(mixedItems()[0].id);
+  });
+});
+
+describe('2.2 容量偏低：小牌与弹窗', () => {
+  it('稀释后原浆只剩 10/60 → 弹窗列出该条目，名称栏出现红底白字「容量偏低」', async () => {
+    const seeded = await seedStocks();
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
+    await waitForPage();
+    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
+    fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '50' } });
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+
+    await waitFor(() => expect(useAppStore.getState().lowVolumeAlert).not.toBeNull());
+    expect(useAppStore.getState().lowVolumeAlert?.some((row) => row.itemId === seeded.blueId)).toBe(true);
+
+    const row = document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as HTMLElement | null;
+    expect(row).not.toBeNull();
+    expect(row?.querySelector('[data-low-volume-tag]')?.textContent).toBe('容量偏低');
+    expect(row?.getAttribute('data-low-volume')).toBe('');
+  });
+
+  it('组分被完全用完（余量 0）时直接从仓库删除', async () => {
+    const seeded = await seedStocks({ blueMl: 10 });
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
+    await waitForPage();
+    fireEvent.click(document.querySelector('[data-stock-item="' + seeded.blueId + '"]') as Element);
+    fireEvent.change(screen.getByLabelText('原浆量 A'), { target: { value: '10' } });
+    fireEvent.click(screen.getByRole('button', { name: '稀释并入库' }));
+
+    await waitFor(() => expect(useAppStore.getState().stockItems.some((item) => item.id === seeded.blueId)).toBe(false));
+    const stocks = await store.stockItems.toArray();
+    expect(stocks.some((item) => item.id === seeded.blueId)).toBe(false);
   });
 });
 
 describe('空状态', () => {
-  it('没有批次时显示「调漆台空」；没有任何库存时左栏给出空提示', async () => {
-    render(<MemoryRouter><MixPage /></MemoryRouter>);
+  it('没有任何库存时左栏给出空提示；页头提示自动入库与同配方合并', async () => {
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
     await waitForPage();
-    expect(document.body.textContent).toContain('调漆台空');
     expect(document.body.textContent).toContain('仓库里没有可用的漆料');
+    expect(document.body.textContent).toContain('同配方合并');
+    expect(document.querySelector('[data-auto-stock-in]')).not.toBeNull();
   });
 });

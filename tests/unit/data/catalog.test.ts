@@ -50,9 +50,9 @@ describe('品牌包归一化（null -> undefined、aliases -> []、丢弃未知�
 
     expect(bundle.brand.id).toBe('gsi');
     expect(bundle.brand.aliases).toEqual([]);
-    // 郡士 23 条产品线、448 条漆料（含按容量拆 SKU 的辅料）
-    expect(bundle.lines).toHaveLength(23);
-    expect(bundle.paints).toHaveLength(448);
+    // 郡士 25 条产品线、468 条漆料（含按容量拆 SKU 的辅料；2.1.2 新增 LASCIVUS CL 两支产品线 20 条）
+    expect(bundle.lines).toHaveLength(25);
+    expect(bundle.paints).toHaveLength(468);
 
     const first = bundle.paints[0];
     expect(first.hex).toMatch(/^#[0-9a-fA-F]{6}$/);
@@ -97,6 +97,6 @@ describe('品牌包归一化（null -> undefined、aliases -> []、丢弃未知�
 
     await cacheBundle(store, loaded.data);
     expect((await store.brands.get('gsi'))?.shortName).toBe('GSI');
-    expect(await readCachedPaints(store, 'gsi')).toHaveLength(448);
+    expect(await readCachedPaints(store, 'gsi')).toHaveLength(468);
   });
 });

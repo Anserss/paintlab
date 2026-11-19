@@ -1,4 +1,5 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Brand, Paint, PaintLine } from '@/core/model/types';
 import { DEFAULT_SETTINGS } from '@/core/model/types';
@@ -93,9 +94,9 @@ async function createWorkbench(name: string) {
   return result.data;
 }
 
-/** 往工作台里放一件初始量为 initialMl、计划用量 plannedUseMl 的库存条目 */
+/** 往工作台里放一件初始量为 initialMl、计划用量 plannedUseMl 的库存条目（2.1：只有非原浆能上工作台） */
 async function seedWorkbenchItem(workbenchId: string, initialMl: number, plannedUseMl: number) {
-  const created = await createStockItem(store, { paint, initialMl, state: 'neat', groupId: null });
+  const created = await createStockItem(store, { paint, initialMl, state: 'thinned', ratioN: 2, groupId: null });
   if (!created.ok) throw new Error(created.error);
   await useAppStore.getState().refreshInventory();
   const added = await useAppStore.getState().openCoat({
@@ -109,7 +110,11 @@ async function seedWorkbenchItem(workbenchId: string, initialMl: number, planned
 
 /** 挂载后等待组件自身的数据刷新落地（避免 act 警告） */
 async function renderPage() {
-  const view = render(<WorkbenchPage />);
+  const view = render(
+    <MemoryRouter initialEntries={['/workbench']}>
+      <WorkbenchPage />
+    </MemoryRouter>,
+  );
   await act(async () => {});
   return view;
 }
@@ -209,11 +214,11 @@ describe('AC-09 入库（spec 3.5 / 3.6）', () => {
 });
 
 describe('空状态与统计（spec 3.10 / 3.5）', () => {
-  it('空工作台显示「工作台待命」+「从仓库多选漆料，加入此工作台。」', async () => {
+  it('空工作台显示「工作台待命」+「从左侧「从仓库调取」加入稀释漆料。」', async () => {
     await createWorkbench('空台');
     const { container } = await renderPage();
     expect(container.textContent).toContain('工作台待命');
-    expect(container.textContent).toContain('从仓库多选漆料，加入此工作台。');
+    expect(container.textContent).toContain('从左侧「从仓库调取」加入稀释漆料。');
   });
 
   it('统计文案：条目 1 · 合计 17.0 ml · 预计可涂 6 个套件（估算）', async () => {
