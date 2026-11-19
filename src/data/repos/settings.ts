@@ -43,6 +43,8 @@ export const SETTINGS_KEYS: (keyof Settings)[] = [
   'undoDepth',
   'confirmDestructive',
   'catalogMirror',
+  'mixSeq',
+  'recentBottleColors',
 ];
 
 export const CATALOG_VERSION_KEY = '__catalog.version';
@@ -65,7 +67,11 @@ export async function readSettings(s: DepotStore): Promise<Settings> {
     if (parsed.success) candidate[key] = parsed.data;
   }
   const checked = SettingsSchema.safeParse(candidate);
-  return checked.success ? checked.data : { ...DEFAULT_SETTINGS };
+  if (!checked.success) return { ...DEFAULT_SETTINGS };
+  return {
+    ...checked.data,
+    recentBottleColors: checked.data.recentBottleColors ?? [],
+  };
 }
 
 export async function readSetting<K extends keyof Settings>(s: DepotStore, key: K): Promise<Settings[K]> {
@@ -293,6 +299,19 @@ export async function importAll(
       }
       if (parsed.data.catalogVersion) {
         await s.settings.put({ key: CATALOG_VERSION_KEY, value: parsed.data.catalogVersion });
+      }
+      // 混合序号：老备份没有 mixSeq 时按已导入批次的最大 seq 推导，避免下一支撞号
+      let maxSeq = typeof parsed.data.settings?.mixSeq === 'number' ? parsed.data.settings.mixSeq : 0;
+      for (const value of user.bottles ?? []) {
+        const seq = (value as { seq?: unknown } | null)?.seq;
+        if (typeof seq === 'number' && seq > maxSeq) maxSeq = seq;
+      }
+      if (mode === 'replace') {
+        await s.settings.put({ key: 'mixSeq', value: maxSeq });
+      } else if (maxSeq > 0) {
+        const current = await s.settings.get('mixSeq');
+        const currentSeq = typeof current?.value === 'number' ? current.value : 0;
+        if (maxSeq > currentSeq) await s.settings.put({ key: 'mixSeq', value: maxSeq });
       }
     });
   } catch (error) {

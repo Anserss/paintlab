@@ -88,6 +88,35 @@ export interface Paint {
   origin: Origin;
 }
 
+/**
+ * 2.1.1 分解快照：批次/库存条目入库时按组分记下「从哪来、各多少 ml」，
+ * 删除条目时可以选择「分解回仓库」而不是直接丢掉。
+ */
+export interface BatchPart {
+  paintId: string;
+  brandId: string;
+  code?: string;
+  name: string;
+  nameZh?: string;
+  hex: string;
+  paintClass: PaintClass;
+  /** 该组分在产品里的体积（ml） */
+  ml: number;
+  state: PaintState;
+  ratioN?: number;
+  /** 稀释剂 / 缓干剂等辅料：分解后单独作为辅料条目回仓库 */
+  aux?: boolean;
+  /** 来源本身是「稀释漆料」（带比例牌）：分解后按稀释漆料还原 */
+  dilute?: boolean;
+  /**
+   * 2.2：来源条目本身的配方签名（调漆产物 / 已稀释漆料作为组分时写入）。
+   * 同配方合并按它判等，避免「两支不同混合漆恰好以同一原浆打底」被误合并。
+   */
+  sourceKey?: string;
+  /** 2.2：来源条目的展示名（配方说明 / 分解文案用） */
+  sourceLabel?: string;
+}
+
 export interface StockItem {
   id: string;
   paintId: string;
@@ -102,6 +131,25 @@ export interface StockItem {
   openedAt?: number;
   /** 冗余缓存：色环坐标（9.7），由写入层计算，读取层可直接用 */
   cachedHsl?: { h: number; s: number; l: number };
+  /** 调漆产物入库时保留的自定义名称 / 颜色（仓库行优先显示） */
+  customName?: string;
+  customHex?: string;
+  customAlpha?: number;
+  /**
+   * 2.1 稀释漆料标记：来源批次是「稀释」时记下比例 1:N。
+   * 有它 = 稀释漆料：名称与色值沿用原浆，显示时名称前加「(1:N)稀释」灰底白字小牌；
+   * 缺省 = 采购原浆或调漆产物（调漆沿用 2.0 的自定义名/色）。
+   */
+  dilutionRatioN?: number;
+  /** 2.1.1 组分快照：删除时可「分解回原浆 / 辅料 / 调漆前的稀释漆料」 */
+  parts?: BatchPart[];
+  /**
+   * 2.2：配方签名（同配方自动合并的唯一判定键）。
+   * 稀释产物 = 原浆 + 稀释剂 + 比例；调漆产物 = 各组分身份 + 体积占比。缺省时按 parts 现算。
+   */
+  mixKey?: string;
+  /** 2.2：配方说明（例如「钴蓝 10.0 ml + 白 10.0 ml」），只用于展示 */
+  mixLabel?: string;
 }
 
 export interface Group {
@@ -129,6 +177,14 @@ export interface Bottle {
   updatedAt: number;
   /** 这一批是「稀释」还是「调漆」产出的（界面标签用） */
   mode?: MixBatchMode;
+  /** 调漆序号（调漆1、调漆2…）：递增、删除不回收 */
+  seq?: number;
+  /** 自定义展示色（#RRGGBB）；缺省 = 未定色白 */
+  colorHex?: string;
+  /** 自定义透明度 0–100；缺省 = 70 */
+  colorAlpha?: number;
+  /** 2.1.1 组分快照：入库后写到 StockItem.parts，删除时可分解回仓库 */
+  parts?: BatchPart[];
 }
 
 export interface BottleComponent {
@@ -163,7 +219,10 @@ export interface WorkbenchItem {
 
 export interface MixRecord {
   id: string;
-  bottleId: string;
+  /** 2.1 及更早：调漆台批次 id（2.2 起不再产生新 bottle，保留给旧记录） */
+  bottleId?: string;
+  /** 2.2：自动入库后的库存条目 id（同配方合并时指向被合并的那一瓶） */
+  stockItemId?: string;
   neatMl: number;
   thinnerMl: number;
   ratioN: number;
@@ -265,10 +324,14 @@ export interface Settings {
   undoDepth: number;
   confirmDestructive: boolean;
   catalogMirror: string;
+  /** 调漆序号计数器：只增不减，删除批次不回收 */
+  mixSeq: number;
+  /** 颜色编辑器最近使用色（最多 12 条，最近在前） */
+  recentBottleColors: { hex: string; alpha: number }[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  theme: 'dark',
+  theme: 'light',
   density: 'normal',
   levelMode: 'baseline',
   showTicks: true,
@@ -280,6 +343,8 @@ export const DEFAULT_SETTINGS: Settings = {
   undoDepth: 3,
   confirmDestructive: true,
   catalogMirror: 'bundled',
+  mixSeq: 0,
+  recentBottleColors: [],
 };
 
 /** 目录包（public/catalog/{brandId}.json 与 index.json） */

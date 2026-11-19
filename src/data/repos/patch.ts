@@ -109,6 +109,13 @@ export async function applyPatch(s: DepotStore, p: Patch): Promise<void> {
   }
   const current = await table.get(p.id);
   if (!current) {
+    // settings 是 key/value 行：没有对应行时按补丁创建（混合序号等新设置项可能从未写过）
+    if (p.collection === 'settings') {
+      const doc: Record<string, unknown> = { key: p.id };
+      setPath(doc, p.path, p.value);
+      await table.put(doc);
+      return;
+    }
     throw new PatchError('补丁目标不存在：' + p.collection + '/' + p.id);
   }
   setPath(current, p.path, p.value);

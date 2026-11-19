@@ -126,6 +126,7 @@ export const createWorkbenchSlice: StateCreator<AppState, [], [], WorkbenchSlice
     }
     await get().refreshAllReadModels();
     notifyUndoable(get, '已记录用量并入库 ×' + result.data.count);
+    if (result.data.lowVolume.length > 0) get().showLowVolumeAlert(result.data.lowVolume);
     return result;
   },
 

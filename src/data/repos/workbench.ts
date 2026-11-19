@@ -1,5 +1,6 @@
 import { createCommand, newId, patch } from '@/core/history/command';
 import { r1 } from '@/core/math/quantity';
+import { canEnterWorkbench, WORKBENCH_NEAT_BLOCK } from '@/core/render/batch';
 import { nameSchema, parseOrErrors, WorkbenchItemSchema, WorkbenchSchema } from '@/core/model/schemas';
 import type {
   Bottle,
@@ -12,6 +13,8 @@ import type {
   WorkbenchItem,
 } from '@/core/model/types';
 import { checkUsageAmount, checkWorkbenchCount, MAX_WORKBENCHES } from '@/core/rules/invariants';
+import { isLowVolume } from '@/core/rules/low-volume';
+import type { LowVolumeNotice } from '@/core/rules/low-volume';
 import type { DepotStore } from '../db';
 import { recordCommand } from './history';
 import { runPatches } from './patch';
@@ -227,6 +230,12 @@ export async function openCoat(
       (item) => item.workbenchId === workbench.id && item.refType === ref.refType && item.refId === ref.refId,
     );
     if (duplicate) continue;
+    if (ref.refType === 'stock') {
+      const stock = await s.stockItems.get(ref.refId);
+      if (!stock) return fail('库存条目不存在', 'conflict');
+      // 2.1 平台流转：原浆只能在仓库与调漆台之间流转，不能上工作台
+      if (!canEnterWorkbench(stock.state)) return fail(WORKBENCH_NEAT_BLOCK, 'validation');
+    }
     const item: WorkbenchItem = {
       id: newId('sitem'),
       workbenchId: workbench.id,
@@ -298,7 +307,7 @@ export interface StockInInput {
 export async function recordUsageAndStockIn(
   s: DepotStore,
   input: StockInInput,
-): Promise<Result<{ command: Command; count: number; usedMl: number }>> {
+): Promise<Result<{ command: Command; count: number; usedMl: number; lowVolume: LowVolumeNotice[] }>> {
   const workbench = await s.workbenches.get(input.workbenchId);
   if (!workbench) return fail('工作台不存在', 'conflict');
   const entries = input.entries.filter((entry) => entry.itemId);
@@ -308,6 +317,8 @@ export async function recordUsageAndStockIn(
   const forward: Patch[] = [];
   const inverse: Patch[] = [];
   const usageRecords: UsageRecord[] = [];
+  const lowVolume: LowVolumeNotice[] = [];
+  const allWorkbenchItems = await s.workbenchItems.toArray();
   let usedTotal = 0;
 
   for (const entry of entries) {
@@ -324,8 +335,24 @@ export async function recordUsageAndStockIn(
         const violation = checkUsageAmount(used, stock.volumeMl);
         if (violation) return fail(violation.message, 'invariant', { violationId: violation.id });
       }
-      forward.push(patch.replace('stockItems', stock.id, 'volumeMl', r1(stock.volumeMl - used)));
-      inverse.push(patch.replace('stockItems', stock.id, 'volumeMl', stock.volumeMl));
+      const next = r1(stock.volumeMl - used);
+      // 2.2：余量归零 = 删除条目（连同所有工作台引用），可撤销
+      if (used > 0 && next <= 0) {
+        const refs = allWorkbenchItems.filter(
+          (row) => row.refType === 'stock' && row.refId === stock.id,
+        );
+        forward.push(...refs.map((row) => patch.remove('workbenchItems', row.id)), patch.remove('stockItems', stock.id));
+        inverse.push(
+          patch.add('stockItems', record(stock)),
+          ...refs.map((row) => addPatch('workbenchItems', row)),
+        );
+      } else {
+        forward.push(patch.replace('stockItems', stock.id, 'volumeMl', next));
+        inverse.push(patch.replace('stockItems', stock.id, 'volumeMl', stock.volumeMl));
+        if (used > 0 && isLowVolume(next, stock.initialMl)) {
+          lowVolume.push({ itemId: stock.id, volumeMl: next, initialMl: stock.initialMl });
+        }
+      }
     } else {
       const bottle = await s.bottles.get(workbenchItem.refId);
       if (!bottle) continue;
@@ -371,7 +398,7 @@ export async function recordUsageAndStockIn(
   const command = createCommand('workbench', label, forward, inverse, at);
   const recorded = await recordCommand(s, command);
   if (!recorded.ok) return recorded;
-  return ok({ command, count: entries.length, usedMl: usedTotal });
+  return ok({ command, count: entries.length, usedMl: usedTotal, lowVolume });
 }
 
 /** 移到另一工作台（可批量） */

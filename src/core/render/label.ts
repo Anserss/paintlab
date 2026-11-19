@@ -79,10 +79,10 @@ export function paintDescription(
   return [solventZh(line.solvent), gloss, classZh(paint.paintClass)].join(' · ');
 }
 
-/** 第 1 行名称：中文优先，英文次要 */
+/** 第 1 行名称：中文优先，英文次要；中英文同名（调漆/稀释产物的自定义名称）不重复出副标题 */
 export function paintTitle(paint: Pick<Paint, 'name' | 'nameZh'>): { primary: string; secondary?: string } {
-  if (paint.nameZh) return { primary: paint.nameZh, secondary: paint.name };
-  return { primary: paint.name };
+  if (paint.nameZh && paint.nameZh !== paint.name) return { primary: paint.nameZh, secondary: paint.name };
+  return { primary: paint.nameZh || paint.name };
 }
 
 /** 第 3 行来源：品牌 · 产品线 */
@@ -95,4 +95,16 @@ export function paintOriginLine(
 
 export function codeOrDash(code: string | undefined): string {
   return code && code.trim() ? code : DASH;
+}
+
+/**
+ * SVG 里没有文本测量 API：按「半角 0.55em / 全角 1em」估算宽度，
+ * 给瓶身信息牌上的灰底小牌定宽（宁宽勿窄，避免字被裁掉）。
+ */
+export function estimateTextWidth(text: string, fontSize: number): number {
+  let width = 0;
+  for (const char of Array.from(text)) {
+    width += /[\u0000-\u00ff]/.test(char) ? fontSize * 0.58 : fontSize;
+  }
+  return width;
 }

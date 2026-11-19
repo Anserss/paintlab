@@ -91,6 +91,8 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     }
     await get().hydrateSettings();
     await get().hydrateHistoryState();
+    // 2.2：导入的旧备份里可能有 0 ml 条目，统一清掉（不写撤销栈）
+    await get().purgeEmptyStockItems();
     await get().refreshInventory();
     await get().refreshBottles();
     await get().refreshWorkbenches();

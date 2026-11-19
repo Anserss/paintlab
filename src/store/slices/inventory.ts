@@ -24,14 +24,17 @@ import {
   adjustStockVolume,
   aggregateStockByPaint,
   createStockItem,
+  decomposeStockItem as decomposeStockItemRepo,
   deleteStockItem,
   listStockItems,
   moveStockToGroup,
+  purgeEmptyStockItems,
   stockTotalMl,
 } from '@/data/repos/stock';
 import type {
   AdjustVolumeInput,
   CreateStockInput,
+  DecomposeStockInput,
   PaintStockAggregate,
   StockWriteResult,
 } from '@/data/repos/stock';
@@ -47,9 +50,13 @@ export interface InventorySlice {
   inventoryReady: boolean;
   hydrateInventory: () => Promise<void>;
   refreshInventory: () => Promise<void>;
+  /** 2.2：启动时清掉历史遗留的 0 ml 条目（不写撤销栈） */
+  purgeEmptyStockItems: () => Promise<number>;
   purchase: (input: CreateStockInput) => Promise<Result<StockWriteResult>>;
   adjustVolume: (input: AdjustVolumeInput) => Promise<Result<StockWriteResult>>;
   removeStockItem: (itemId: string) => Promise<Result<StockWriteResult>>;
+  /** 分解删除（2.1.1）：稀释漆料 → 原浆 + 辅料；调漆产物 → 调漆前的组分 */
+  decomposeStockItem: (input: DecomposeStockInput) => Promise<Result<{ command: Command; items: StockItem[] }>>;
   moveSelectedToGroup: (groupId: string | null) => Promise<Result<StockWriteResult | { command: Command; message: string }>>;
   createGroup: (input: CreateGroupInput) => Promise<Result<{ command: Command; group: Group }>>;
   renameGroup: (input: RenameGroupInput) => Promise<Result<{ command: Command; group: Group }>>;
@@ -89,6 +96,15 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
     await get().refreshInventory();
   },
 
+  async purgeEmptyStockItems() {
+    try {
+      const result = await purgeEmptyStockItems(getStore());
+      return result.removed;
+    } catch {
+      return 0;
+    }
+  },
+
   async purchase(input) {
     const result = await createStockItem(getStore(), input);
     if (!result.ok) {
@@ -107,9 +123,11 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
       notifyError(get, result.error);
       return result;
     }
-    await get().refreshInventory();
-    get().refreshHistory();
+    await get().refreshAllReadModels();
     notifyUndoable(get, result.data.message);
+    if (result.data.lowVolume && result.data.lowVolume.length > 0) {
+      get().showLowVolumeAlert(result.data.lowVolume);
+    }
     return result;
   },
 
@@ -122,6 +140,17 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
     // 删除条目会连带移除其工作台引用，必须一并重读工作台读模型
     await get().refreshAllReadModels();
     notifyUndoable(get, result.data.message);
+    return result;
+  },
+
+  async decomposeStockItem(input) {
+    const result = await decomposeStockItemRepo(getStore(), input);
+    if (!result.ok) {
+      notifyError(get, result.error);
+      return result;
+    }
+    await get().refreshAllReadModels();
+    notifyUndoable(get, '已分解为 ' + result.data.items.length + ' 件回仓库');
     return result;
   },
 

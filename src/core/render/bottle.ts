@@ -85,6 +85,10 @@ export const isBelowOneTick = (fraction: number): boolean => fraction > 0 && fra
 
 export const isEmptyBottle = (remainingMl: number): boolean => remainingMl <= 0;
 
-/** 低库存（< 15%，4.5.1 / 4.2） */
+/**
+ * 旧 15% 阈值（2.1 的瓶身低库存标记）。
+ * 2.2 起「容量偏低」以 `core/rules/low-volume.ts` 的 20% / 10 ml 为准；
+ * 本函数仅保留给旧测试 / 瓶身液位辅助，不要用于库存红牌判定。
+ */
 export const isLowStock = (remainingMl: number, initialMl: number): boolean =>
   initialMl > 0 && remainingMl / initialMl < 0.15;

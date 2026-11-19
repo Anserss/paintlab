@@ -40,6 +40,9 @@ export async function hydrateApp(): Promise<void> {
   try {
     await state.hydrateSettings();
     await state.hydrateHistoryState();
+    // 2.2：2.1.x 留在调漆台的旧批次先静默入库，再清掉历史遗留的 0 ml 条目
+    await state.migrateLegacyBottles();
+    await state.purgeEmptyStockItems();
     await state.refreshInventory();
     await state.hydrateBottles();
     await state.hydrateWorkbenches();

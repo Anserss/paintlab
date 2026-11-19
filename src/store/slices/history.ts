@@ -78,6 +78,7 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
   },
 
   async undo() {
+    get().dismissLowVolumeAlert();
     const result = await undoCommand(getStore());
     if (!result.ok) {
       notifyError(get, result.code === 'invariant' ? result.error : '无法撤销：' + result.error);
@@ -97,6 +98,7 @@ export const createHistorySlice: StateCreator<AppState, [], [], HistorySlice> = 
   },
 
   async redo() {
+    get().dismissLowVolumeAlert();
     const result = await redoCommand(getStore());
     if (!result.ok) {
       notifyError(get, '无法反撤销：' + result.error);

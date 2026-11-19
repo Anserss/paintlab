@@ -99,6 +99,24 @@ export const PaintSchema = z.object({
   origin: OriginSchema,
 });
 
+export const BatchPartSchema = z.object({
+  paintId: IdSchema,
+  brandId: z.string().default(''),
+  code: z.string().max(24).optional(),
+  name: z.string().min(1),
+  nameZh: z.string().optional(),
+  hex: HexSchema,
+  paintClass: PaintClassSchema,
+  ml: z.number().min(0),
+  state: PaintStateSchema,
+  ratioN: RatioNSchema.optional(),
+  aux: z.boolean().optional(),
+  dilute: z.boolean().optional(),
+  /** 2.2：来源条目的配方签名 / 展示名（调漆产物作为组分时写） */
+  sourceKey: z.string().max(640).optional(),
+  sourceLabel: z.string().max(60).optional(),
+});
+
 export const StockItemSchema = z
   .object({
     id: IdSchema,
@@ -112,6 +130,16 @@ export const StockItemSchema = z
     origin: OriginSchema,
     createdAt: z.number(),
     openedAt: z.number().optional(),
+    customName: z.string().trim().min(1).max(16).optional(),
+    customHex: HexSchema.optional(),
+    customAlpha: z.number().int().min(0).max(100).optional(),
+    /** 2.1 稀释漆料：入库来源批次的比例 1:N（存在即按原浆名称/色值显示） */
+    dilutionRatioN: RatioNSchema.optional(),
+    /** 2.1.1 组分快照：删除时可分解回仓库 */
+    parts: z.array(BatchPartSchema).optional(),
+    /** 2.2：同配方合并签名 / 配方说明（可选，旧数据按 parts 现算） */
+    mixKey: z.string().max(640).optional(),
+    mixLabel: z.string().max(80).optional(),
   })
   .refine((v) => v.volumeMl <= v.initialMl + 1e-6, {
     message: '余量不能超过初始量',
@@ -158,6 +186,10 @@ export const BottleSchema = z
     levelMode: LevelModeSchema,
     updatedAt: z.number(),
     mode: z.enum(['dilute', 'blend']).optional(),
+    seq: z.number().int().min(1).max(9999).optional(),
+    colorHex: HexSchema.optional(),
+    colorAlpha: z.number().int().min(0).max(100).optional(),
+    parts: z.array(BatchPartSchema).optional(),
   })
   .refine((v) => v.remainingMl <= v.baselineMl + 1e-6, {
     message: '余量不能超过基准量',
@@ -186,27 +218,35 @@ export const WorkbenchItemSchema = z.object({
   addedAt: z.number(),
 });
 
-export const MixRecordSchema = z.object({
-  id: IdSchema,
-  bottleId: IdSchema,
-  neatMl: z.number().min(0),
-  thinnerMl: z.number().min(0),
-  ratioN: RatioNSchema,
-  totalMl: z.number().min(0),
-  filledToMl: z.number().min(0),
-  at: z.number(),
-  mode: z.enum(['dilute', 'blend']).optional(),
-  parts: z
-    .array(
-      z.object({
-        stockItemId: IdSchema,
-        paintId: IdSchema,
-        ml: z.number().min(0),
-        ratioN: RatioNSchema,
-      }),
-    )
-    .optional(),
-});
+export const MixRecordSchema = z
+  .object({
+    id: IdSchema,
+    /** 2.1 及更早的调漆台批次；2.2 起不再产生新 bottle */
+    bottleId: IdSchema.optional(),
+    /** 2.2：自动入库后的库存条目 */
+    stockItemId: IdSchema.optional(),
+    neatMl: z.number().min(0),
+    thinnerMl: z.number().min(0),
+    ratioN: RatioNSchema,
+    totalMl: z.number().min(0),
+    filledToMl: z.number().min(0),
+    at: z.number(),
+    mode: z.enum(['dilute', 'blend']).optional(),
+    parts: z
+      .array(
+        z.object({
+          stockItemId: IdSchema,
+          paintId: IdSchema,
+          ml: z.number().min(0),
+          ratioN: RatioNSchema,
+        }),
+      )
+      .optional(),
+  })
+  .refine((v) => Boolean(v.bottleId || v.stockItemId), {
+    message: '配方记录必须指向一个批次或一条库存',
+    path: ['bottleId'],
+  });
 
 export const UsageRecordSchema = z.object({
   id: IdSchema,
@@ -239,6 +279,11 @@ export const SettingsSchema = z.object({
   undoDepth: z.number().int().min(3).max(20),
   confirmDestructive: z.boolean(),
   catalogMirror: z.string().min(1),
+  mixSeq: z.number().int().min(0).max(99999),
+  recentBottleColors: z
+    .array(z.object({ hex: HexSchema, alpha: z.number().int().min(0).max(100) }))
+    .max(12)
+    .optional(),
 });
 
 export const SettingsPartialSchema = SettingsSchema.partial();

@@ -3,8 +3,11 @@ import { hexToHsl } from '@/core/math/color';
 import { r1 } from '@/core/math/quantity';
 import { parseOrErrors, StockItemSchema } from '@/core/model/schemas';
 import type { Command, CollectionName, LedgerEntry, Origin, Paint, Patch, PaintState, StockItem } from '@/core/model/types';
+import { decompositionOf } from '@/core/rules/decompose';
 import { UNGROUPED_ID } from '@/core/rules/groups';
 import { checkStockVolume } from '@/core/rules/invariants';
+import { isLowVolume } from '@/core/rules/low-volume';
+import type { LowVolumeNotice } from '@/core/rules/low-volume';
 import type { DepotStore } from '../db';
 import { ensureSystemGroup } from './group';
 import { recordCommand } from './history';
@@ -94,6 +97,10 @@ export interface StockWriteResult {
   command: Command;
   item: StockItem;
   message: string;
+  /** 2.2：本次操作后转为容量偏低的条目（弹窗用） */
+  lowVolume?: LowVolumeNotice[];
+  /** 2.2：余量归零，条目已从仓库删除 */
+  removed?: boolean;
 }
 
 function zodIssues(failure: { errors: { path: string; message: string }[] }): string {
@@ -181,6 +188,42 @@ export async function adjustStockVolume(
     meta: { reason: input.reason, note: input.note ?? '', from: item.volumeMl, to: next },
   };
   const label = '调整余量 ' + describeStockPaint({ id: item.paintId }) + ' ' + next.toFixed(1) + ' ml';
+
+  // 2.2：余量归零 = 删除条目（连同工作台引用），可撤销
+  if (next <= 0) {
+    const workbenchItems = (await s.workbenchItems.toArray()).filter(
+      (entry) => entry.refType === 'stock' && entry.refId === item.id,
+    );
+    const zeroLedger: LedgerEntry = {
+      ...ledgerEntry,
+      deltaMl: -item.volumeMl,
+      meta: { ...ledgerEntry.meta, action: 'adjust-to-zero' },
+    };
+    const command = createCommand(
+      'adjust',
+      '余量归零，删除条目 ' + describeStockPaint({ id: item.paintId }),
+      [
+        ...workbenchItems.map((entry) => patch.remove('workbenchItems', entry.id)),
+        patch.remove('stockItems', item.id),
+        appendPatch('ledger', zeroLedger),
+      ],
+      [
+        patch.add('stockItems', record(item)),
+        ...workbenchItems.map((entry) => patch.add('workbenchItems', record(entry))),
+        patch.remove('ledger', zeroLedger.id),
+      ],
+      at,
+    );
+    const recorded = await recordCommand(s, command);
+    if (!recorded.ok) return recorded;
+    return ok({
+      command,
+      item: { ...item, volumeMl: 0 },
+      message: '余量归零：已删除该条目（可撤销）',
+      removed: true,
+    });
+  }
+
   const command = createCommand(
     'adjust',
     label,
@@ -197,12 +240,119 @@ export async function adjustStockVolume(
     command,
     item: { ...item, volumeMl: next },
     message: '余量已调整：' + next.toFixed(1) + ' ml（' + ADJUST_REASON_LABELS[input.reason] + '）',
+    ...(isLowVolume(next, item.initialMl)
+      ? { lowVolume: [{ itemId: item.id, volumeMl: next, initialMl: item.initialMl }] }
+      : {}),
   });
 }
 
 export interface DeleteStockInput {
   itemId: string;
   at?: number;
+}
+
+/**
+ * 2.2：清理历史遗留的 0 ml 条目（升级搬家，不写 Command）。
+ * 旧版本允许余量停在 0；2.2 起「所有物品在容量为 0 ml 后删除」，
+ * 启动时把这类条目连同工作台引用一并清掉。
+ */
+export async function purgeEmptyStockItems(s: DepotStore): Promise<{ removed: number }> {
+  const zeros = (await s.stockItems.toArray()).filter((item) => !(item.volumeMl > 0));
+  if (zeros.length === 0) return { removed: 0 };
+  await s.transaction('rw', ['stockItems', 'workbenchItems'], async () => {
+    const refs = await s.workbenchItems.toArray();
+    for (const item of zeros) {
+      for (const ref of refs) {
+        if (ref.refType === 'stock' && ref.refId === item.id) await s.workbenchItems.delete(ref.id);
+      }
+      await s.stockItems.delete(item.id);
+    }
+  });
+  return { removed: zeros.length };
+}
+
+export interface DecomposeStockInput {
+  itemId: string;
+  at?: number;
+}
+
+/**
+ * 分解删除（2.1.1）：稀释漆料还原成「原浆 + 稀释剂」，调漆产物还原成调漆前的各组分；
+ * 各组分按当前余量等比回仓库，整单一个 Command，可撤销。
+ */
+export async function decomposeStockItem(
+  s: DepotStore,
+  input: DecomposeStockInput,
+): Promise<Result<{ command: Command; items: StockItem[] }>> {
+  const item = await s.stockItems.get(input.itemId);
+  if (!item) return fail('库存条目不存在', 'conflict');
+  const plan = decompositionOf(item);
+  if (!plan) return fail('该条目没有可分解的组分记录，只能直接删除', 'validation');
+
+  const at = input.at ?? Date.now();
+  const items: StockItem[] = [];
+  for (const part of plan.parts) {
+    const volumeMl = r1(part.ml);
+    const next: StockItem = {
+      id: newId('stock'),
+      paintId: part.paintId,
+      volumeMl,
+      initialMl: Math.max(volumeMl, 0.5),
+      state: part.state,
+      ...(part.state === 'thinned' && typeof part.ratioN === 'number' ? { ratioN: r1(part.ratioN) } : {}),
+      groupId: item.groupId,
+      origin: 'mixed',
+      createdAt: at,
+      note: '分解自「' + (item.customName ?? item.paintId) + '」',
+      cachedHsl: hexToHsl(part.hex),
+    };
+    // 来源本身是稀释漆料的组分：分解后继续按「稀释漆料」显示（名称前带比例牌）
+    if (part.state === 'thinned' && part.dilute && typeof part.ratioN === 'number' && part.ratioN > 0) {
+      next.dilutionRatioN = r1(part.ratioN);
+    }
+    const parsed = parseOrErrors(StockItemSchema, next);
+    if (!parsed.ok) {
+      return fail(
+        parsed.errors.map((issue) => (issue.path ? issue.path + '：' : '') + issue.message).join('；'),
+        'validation',
+        { issues: parsed.errors },
+      );
+    }
+    items.push(next);
+  }
+
+  const workbenchItems = (await s.workbenchItems.toArray()).filter(
+    (entry) => entry.refType === 'stock' && entry.refId === item.id,
+  );
+  const ledgerEntry: LedgerEntry = {
+    id: newId('ledger'),
+    type: 'adjust',
+    deltaMl: 0,
+    refId: item.id,
+    at,
+    meta: {
+      action: 'decompose',
+      parts: plan.parts.map((part) => ({ paintId: part.paintId, ml: part.ml, state: part.state })),
+    },
+  };
+  const label =
+    '分解「' + (item.customName ?? item.paintId) + '」为 ' + items.length + ' 件';
+  const forward: Patch[] = [
+    ...workbenchItems.map((entry) => patch.remove('workbenchItems', entry.id)),
+    patch.remove('stockItems', item.id),
+    ...items.map((next) => appendPatch('stockItems', next)),
+    appendPatch('ledger', ledgerEntry),
+  ];
+  const inverse: Patch[] = [
+    ...items.map((next) => patch.remove('stockItems', next.id)),
+    addPatch('stockItems', item),
+    ...workbenchItems.map((entry) => addPatch('workbenchItems', entry)),
+    patch.remove('ledger', ledgerEntry.id),
+  ];
+  const command = createCommand('adjust', label, forward, inverse, at);
+  const recorded = await recordCommand(s, command);
+  if (!recorded.ok) return recorded;
+  return ok({ command, items });
 }
 
 /** 删除库存条目（连同其工作台引用），可撤销 */

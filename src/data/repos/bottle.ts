@@ -3,8 +3,10 @@ import { hexToHsl, mixHex } from '@/core/math/color';
 import { diluteThinned, planBlend } from '@/core/math/blend';
 import { fromNeat } from '@/core/math/dilution';
 import { r1 } from '@/core/math/quantity';
+import { bottleDisplayLabel, bottleDilutionRatio, stockDilutionRatio } from '@/core/render/batch';
 import { BottleSchema, parseOrErrors } from '@/core/model/schemas';
 import type {
+  BatchPart,
   Bottle,
   BottleComponent,
   Command,
@@ -29,6 +31,20 @@ const appendPatch = (collection: 'bottles' | 'stockItems' | 'mixRecords' | 'usag
   patch.append(collection, record(doc));
 
 export const BOTTLE_HEX_EMPTY = '#bfbfbf';
+
+/** 未定色的默认值：70% 透明度的白（"还没调出颜色"） */
+export const BOTTLE_COLOR_DEFAULT_HEX = '#FFFFFF';
+export const BOTTLE_COLOR_DEFAULT_ALPHA = 70;
+
+/** 读调漆序号计数器（settings.mixSeq），没有记录时按 0 起算 */
+async function readMixSeq(s: DepotStore): Promise<number> {
+  const row = await s.settings.get('mixSeq');
+  const value = row?.value;
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+}
+
+/** 调漆批次命名：调漆1、调漆2…（序号由 mixSeq 递增发放，删除不回收） */
+export const batchDisplayName = (seq: number): string => '调漆' + seq;
 
 export async function listBottles(s: DepotStore): Promise<Bottle[]> {
   const bottles = await s.bottles.toArray();
@@ -69,6 +85,8 @@ export async function createBottle(s: DepotStore, input: CreateBottleInput): Pro
     components: [],
     levelMode: input.levelMode ?? 'baseline',
     updatedAt: at,
+    colorHex: BOTTLE_COLOR_DEFAULT_HEX,
+    colorAlpha: BOTTLE_COLOR_DEFAULT_ALPHA,
   };
   const parsed = parseOrErrors(BottleSchema, bottle);
   if (!parsed.ok) {
@@ -160,8 +178,111 @@ export async function setBottleCapacity(
   return ok({ command, bottle: nextBottle });
 }
 
-/** 调漆台里一支漆料的最小引用（补丁与组分只需要这些字段） */
-export type BatchPaintRef = Pick<Paint, 'id' | 'brandId' | 'code' | 'name' | 'hex' | 'paintClass'>;
+export interface RenameBottleInput {
+  bottleId: string;
+  name: string;
+  at?: number;
+}
+
+/** 重命名批次：1–16 字，落 ledger，可撤销 */
+export async function renameBottle(
+  s: DepotStore,
+  input: RenameBottleInput,
+): Promise<Result<{ command: Command; bottle: Bottle }>> {
+  const bottle = await s.bottles.get(input.bottleId);
+  if (!bottle) return fail('批次不存在', 'conflict');
+  const name = input.name.trim();
+  if (name === bottle.name) return fail('新名称与当前名称相同', 'conflict');
+  const at = input.at ?? Date.now();
+  const nextBottle: Bottle = { ...bottle, name, updatedAt: at };
+  const parsed = parseOrErrors(BottleSchema, nextBottle);
+  if (!parsed.ok) {
+    return fail(
+      parsed.errors.map((issue) => (issue.path ? issue.path + '：' : '') + issue.message).join('；'),
+      'validation',
+      { issues: parsed.errors },
+    );
+  }
+  const ledgerEntry: LedgerEntry = {
+    id: newId('ledger'),
+    type: 'adjust',
+    refId: bottle.id,
+    at,
+    meta: { action: 'bottle-rename', from: bottle.name, to: name },
+  };
+  const command = createCommand(
+    'adjust',
+    '批次「' + bottle.name + '」改名为「' + name + '」',
+    [patch.replace('bottles', bottle.id, 'name', name), patch.replace('bottles', bottle.id, 'updatedAt', at), appendPatch('ledger', ledgerEntry)],
+    [patch.replace('bottles', bottle.id, 'name', bottle.name), patch.replace('bottles', bottle.id, 'updatedAt', bottle.updatedAt), patch.remove('ledger', ledgerEntry.id)],
+    at,
+  );
+  const recorded = await recordCommand(s, command);
+  if (!recorded.ok) return recorded;
+  return ok({ command, bottle: nextBottle });
+}
+
+export interface BottleColorInput {
+  bottleId: string;
+  colorHex: string;
+  colorAlpha: number;
+  at?: number;
+}
+
+/** 设置批次展示色：HEX + 透明度 0–100（整数），落 ledger，可撤销 */
+export async function setBottleColor(
+  s: DepotStore,
+  input: BottleColorInput,
+): Promise<Result<{ command: Command; bottle: Bottle }>> {
+  const bottle = await s.bottles.get(input.bottleId);
+  if (!bottle) return fail('批次不存在', 'conflict');
+  const colorHex = input.colorHex.trim().toUpperCase();
+  const colorAlpha = Math.round(input.colorAlpha);
+  if (!Number.isInteger(colorAlpha) || colorAlpha < 0 || colorAlpha > 100) {
+    return fail('透明度必须是 0–100 的整数', 'validation');
+  }
+  if (colorHex === (bottle.colorHex ?? BOTTLE_COLOR_DEFAULT_HEX) && colorAlpha === (bottle.colorAlpha ?? BOTTLE_COLOR_DEFAULT_ALPHA)) {
+    return fail('颜色没有变化', 'conflict');
+  }
+  const at = input.at ?? Date.now();
+  const nextBottle: Bottle = { ...bottle, colorHex, colorAlpha, updatedAt: at };
+  const parsed = parseOrErrors(BottleSchema, nextBottle);
+  if (!parsed.ok) {
+    return fail(
+      parsed.errors.map((issue) => (issue.path ? issue.path + '：' : '') + issue.message).join('；'),
+      'validation',
+      { issues: parsed.errors },
+    );
+  }
+  const ledgerEntry: LedgerEntry = {
+    id: newId('ledger'),
+    type: 'adjust',
+    refId: bottle.id,
+    at,
+    meta: { action: 'bottle-color', from: { hex: bottle.colorHex, alpha: bottle.colorAlpha }, to: { hex: colorHex, alpha: colorAlpha } },
+  };
+  const command = createCommand(
+    'adjust',
+    '批次「' + bottle.name + '」颜色改为 ' + colorHex + '（' + colorAlpha + '%）',
+    [
+      patch.replace('bottles', bottle.id, 'colorHex', colorHex),
+      patch.replace('bottles', bottle.id, 'colorAlpha', colorAlpha),
+      patch.replace('bottles', bottle.id, 'updatedAt', at),
+      appendPatch('ledger', ledgerEntry),
+    ],
+    [
+      patch.replace('bottles', bottle.id, 'colorHex', bottle.colorHex ?? BOTTLE_COLOR_DEFAULT_HEX),
+      patch.replace('bottles', bottle.id, 'colorAlpha', bottle.colorAlpha ?? BOTTLE_COLOR_DEFAULT_ALPHA),
+      patch.replace('bottles', bottle.id, 'updatedAt', bottle.updatedAt),
+      patch.remove('ledger', ledgerEntry.id),
+    ],
+    at,
+  );
+  const recorded = await recordCommand(s, command);
+  if (!recorded.ok) return recorded;
+  return ok({ command, bottle: nextBottle });
+}
+export type BatchPaintRef = Pick<Paint, 'id' | 'brandId' | 'code' | 'name' | 'nameZh' | 'hex' | 'paintClass'>;
 
 export interface DiluteBatchInput {
   /** 取用来源（原浆或已稀释漆料）的库存条目 */
@@ -180,6 +301,8 @@ export interface DiluteBatchInput {
   /** 目标比例 1:N */
   targetRatioN: number;
   paint: BatchPaintRef;
+  /** 稀释剂的漆料引用（用于 2.1.1 分解快照；缺省时按目录/来源条目推导） */
+  thinnerPaint?: BatchPaintRef;
   at?: number;
 }
 
@@ -204,13 +327,16 @@ export interface MixBatchPayload {
   message: string;
 }
 
-const batchName = (prefix: string, label: string, totalMl: number): string => {
-  const text = prefix + ' ' + label + ' ' + totalMl.toFixed(1) + 'ml';
-  return text.length <= 16 ? text : text.slice(0, 16);
-};
+const batchName = (seq: number): string => batchDisplayName(seq);
 
-/** 批次名的来源标签：尽量用漆名（色号往往只有 1–2 个字符，拼进名字不好读） */
-const batchLabel = (ref: { code?: string; name: string }): string => ref.name || ref.code || '漆料';
+/**
+ * 稀释批次的名称（2.1）：沿用原浆名称，名称前由界面加「(1:N)稀释」灰底白字小牌。
+ * 不占用调漆序号（mixSeq 只给调漆批次发号）；名字硬截断到 schema 的 16 字。
+ */
+export function diluteBatchName(paint: Pick<Paint, 'name' | 'nameZh'>): string {
+  const text = paint.nameZh || paint.name;
+  return text.length <= 16 ? text : text.slice(0, 16);
+}
 
 /** 批次容量：按产出体积自动取整（最小 5 ml），不再让用户选瓶容量 */
 const batchCapacity = (totalMl: number): number => Math.max(5, Math.ceil(totalMl - 1e-6));
@@ -224,9 +350,13 @@ function batchBottle(input: {
   components: BottleComponent[];
   mode: MixBatchMode;
   at: number;
+  /** 调漆序号；稀释批次不发号（2.1） */
+  seq?: number;
+  /** 2.1.1 组分快照（删除时可分解回仓库） */
+  parts?: BatchPart[];
 }): Bottle {
   const capacityMl = batchCapacity(input.totalMl);
-  return {
+  const bottle: Bottle = {
     id: newId('bottle'),
     name: input.name,
     capacityMl,
@@ -240,6 +370,20 @@ function batchBottle(input: {
     updatedAt: input.at,
     mode: input.mode,
   };
+  if (input.seq !== undefined) bottle.seq = input.seq;
+  if (input.parts && input.parts.length > 0) bottle.parts = input.parts;
+  // 只有调漆批次有「自定义色 / 未定色」的语义；稀释批次按原浆色值显示
+  if (input.mode === 'blend') {
+    bottle.colorHex = BOTTLE_COLOR_DEFAULT_HEX;
+    bottle.colorAlpha = BOTTLE_COLOR_DEFAULT_ALPHA;
+  }
+  return bottle;
+}
+
+/** 生成下一支批次的序号与设置补丁（同一事务内递增；不进撤销栈的 inverse） */
+async function nextMixSeq(s: DepotStore): Promise<{ seq: number; forwardPatch: Patch }> {
+  const seq = (await readMixSeq(s)) + 1;
+  return { seq, forwardPatch: patch.replace('settings', 'mixSeq', 'value', seq) };
 }
 
 /**
@@ -311,8 +455,52 @@ export async function diluteIntoBatch(s: DepotStore, input: DiluteBatchInput): P
   };
   if (input.paint.code) component.code = input.paint.code;
   const thinnerMl = r1(totalMl - neatMl);
+
+  /**
+   * 2.1.1 组分快照：删除条目时可「分解为原浆和辅料」。
+   * 稀释剂身份优先级：界面传入 > 目录缓存 > 来源条目的已有辅料组分。
+   */
+  const thinnerPaint =
+    input.thinnerPaint ?? (thinnerStock ? await s.paints.get(thinnerStock.paintId) : undefined);
+  const sourceAuxPart = (source.parts ?? []).find((part) => part.aux);
+  const neatPart: BatchPart = {
+    paintId: input.paint.id,
+    brandId: input.paint.brandId,
+    name: input.paint.name,
+    hex: input.paint.hex,
+    paintClass: input.paint.paintClass,
+    ml: r1(neatMl),
+    state: 'neat',
+  };
+  if (input.paint.code) neatPart.code = input.paint.code;
+  if (input.paint.nameZh) neatPart.nameZh = input.paint.nameZh;
+  let batchParts: BatchPart[] | undefined = [neatPart];
+  if (thinnerMl > 0) {
+    const auxPaintId = thinnerPaint?.id ?? sourceAuxPart?.paintId ?? '';
+    if (!auxPaintId) {
+      // 稀释剂身份不明：不留快照，删除时只能直接删（不编造组分）
+      batchParts = undefined;
+    } else {
+      const auxPart: BatchPart = {
+        paintId: auxPaintId,
+        brandId: thinnerPaint?.brandId ?? sourceAuxPart?.brandId ?? '',
+        name: thinnerPaint?.name ?? sourceAuxPart?.name ?? '稀释剂',
+        hex: thinnerPaint?.hex ?? sourceAuxPart?.hex ?? '#ffffff',
+        paintClass: 'aux',
+        ml: thinnerMl,
+        state: 'neat',
+        aux: true,
+      };
+      const auxCode = thinnerPaint?.code ?? sourceAuxPart?.code;
+      if (auxCode) auxPart.code = auxCode;
+      const auxNameZh = thinnerPaint?.nameZh ?? sourceAuxPart?.nameZh;
+      if (auxNameZh) auxPart.nameZh = auxNameZh;
+      batchParts = [neatPart, auxPart];
+    }
+  }
+
   const bottle = batchBottle({
-    name: batchName('稀释', batchLabel(input.paint), totalMl),
+    name: diluteBatchName(input.paint),
     totalMl,
     ratioN: targetRatioN,
     paintClass: input.paint.paintClass,
@@ -320,6 +508,7 @@ export async function diluteIntoBatch(s: DepotStore, input: DiluteBatchInput): P
     components: [component],
     mode: 'dilute',
     at,
+    ...(batchParts ? { parts: batchParts } : {}),
   });
   const parsed = parseOrErrors(BottleSchema, bottle);
   if (!parsed.ok) {
@@ -447,9 +636,30 @@ export async function blendIntoBatch(s: DepotStore, input: BlendBatchInput): Pro
   });
   const hex = mixHex(components.map((component) => ({ hex: component.hex, ml: component.neatMl, paintClass: component.paintClass })));
   const paintClass = bottlePaintClass(components);
-  const label = components.length === 1 ? batchLabel(components[0]) : components.length + ' 组分';
+  // 2.1.1 组分快照：删除条目时可「分解为调漆前的各组分」，已稀释的颜料按稀释漆料回仓库
+  const batchParts: BatchPart[] = plan.parts.map((share) => {
+    const part = parts.find((entry) => entry.stockItemId === share.id) as BlendBatchPartInput;
+    const stock = stocks.get(share.id) as StockItem;
+    const thinned = share.ratioN > 0 || stock.state === 'thinned';
+    const next: BatchPart = {
+      paintId: part.paint.id,
+      brandId: part.paint.brandId,
+      name: part.paint.name,
+      hex: part.paint.hex,
+      paintClass: part.paint.paintClass,
+      ml: r1(share.ml),
+      state: thinned ? 'thinned' : 'neat',
+    };
+    if (part.paint.code) next.code = part.paint.code;
+    if (part.paint.nameZh) next.nameZh = part.paint.nameZh;
+    if (thinned) next.ratioN = r1(share.ratioN);
+    if (stockDilutionRatio(stock) !== null) next.dilute = true;
+    return next;
+  });
+  const { seq, forwardPatch: seqPatch } = await nextMixSeq(s);
   const bottle = batchBottle({
-    name: batchName('调漆', label, plan.totalMl),
+    name: batchName(seq),
+    seq,
     totalMl: plan.totalMl,
     ratioN: plan.ratioN,
     paintClass,
@@ -457,6 +667,7 @@ export async function blendIntoBatch(s: DepotStore, input: BlendBatchInput): Pro
     components,
     mode: 'blend',
     at,
+    parts: batchParts,
   });
   const parsed = parseOrErrors(BottleSchema, bottle);
   if (!parsed.ok) {
@@ -493,7 +704,7 @@ export async function blendIntoBatch(s: DepotStore, input: BlendBatchInput): Pro
     meta: { mode: 'blend', neatMl: plan.neatMl, thinnerMl: plan.thinnerMl, ratioN: plan.ratioN, parts: mixRecord.parts },
   };
 
-  const forward: Patch[] = [appendPatch('bottles', bottle), appendPatch('mixRecords', mixRecord), appendPatch('ledger', ledgerEntry)];
+  const forward: Patch[] = [appendPatch('bottles', bottle), appendPatch('mixRecords', mixRecord), appendPatch('ledger', ledgerEntry), seqPatch];
   const inverse: Patch[] = [patch.remove('bottles', bottle.id), patch.remove('mixRecords', mixRecord.id), patch.remove('ledger', ledgerEntry.id)];
   for (const share of plan.parts) {
     const stock = stocks.get(share.id) as StockItem;
@@ -503,7 +714,7 @@ export async function blendIntoBatch(s: DepotStore, input: BlendBatchInput): Pro
 
   const command = createCommand(
     'mix',
-    '调漆「' + label + '」' + mlText(plan.totalMl) + ' ml（1:' + mlText(plan.ratioN) + '）',
+    '调漆「' + (components.length === 1 ? components[0].name : components.length + ' 组分') + '」' + mlText(plan.totalMl) + ' ml（1:' + mlText(plan.ratioN) + '）',
     forward,
     inverse,
     at,
@@ -636,7 +847,10 @@ export async function stockInBottle(s: DepotStore, input: StockInBottleInput): P
   const at = input.at ?? Date.now();
   const volumeMl = r1(bottle.remainingMl);
   const primary = bottle.components[0];
-  const thinned = bottle.ratioN > 0 && bottle.mode !== 'blend';
+  const dilutionRatioN = bottleDilutionRatio(bottle);
+  const isDilute = dilutionRatioN !== null;
+  // 稀释漆料入库保真：原浆名称 + 原浆色值 + 比例牌；调漆继续保留自定义名/色（2.0）
+  const displayHex = isDilute ? bottle.hex : (bottle.colorHex ?? bottle.hex);
   const item: StockItem = {
     id: newId('stock'),
     paintId: primary.paintId,
@@ -648,9 +862,21 @@ export async function stockInBottle(s: DepotStore, input: StockInBottleInput): P
     groupId: input.groupId ?? null,
     origin: 'mixed',
     createdAt: at,
-    note: (thinned ? '稀释产物入库「' : '调漆产物入库「') + bottle.name + '」',
-    cachedHsl: hexToHsl(bottle.hex),
+    note: (isDilute ? '稀释产物入库「' : '调漆产物入库「') + bottleDisplayLabel(bottle) + '」',
+    cachedHsl: hexToHsl(displayHex),
+    // 入库保真：仓库行优先显示调漆台上的名称与颜色
+    customName: bottle.name,
+    customHex: displayHex,
   };
+  if (isDilute) {
+    item.dilutionRatioN = bottle.ratioN;
+  } else if (typeof bottle.colorAlpha === 'number') {
+    item.customAlpha = bottle.colorAlpha;
+  }
+  // 2.1.1 组分快照：删除条目时可分解回原浆 / 辅料 / 调漆前的稀释漆料
+  if (bottle.parts && bottle.parts.length > 0) {
+    item.parts = bottle.parts.map((part) => ({ ...part }));
+  }
   const workbenchItems = (await s.workbenchItems.toArray()).filter(
     (entry) => entry.refType === 'bottle' && entry.refId === bottle.id,
   );
