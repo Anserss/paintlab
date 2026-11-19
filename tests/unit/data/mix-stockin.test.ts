@@ -5,7 +5,7 @@ import type { DepotStore } from '@/data/db';
 import { blendAndStockIn, diluteAndStockIn, migrateLegacyBottles } from '@/data/repos/mix';
 import { ensureSystemGroup } from '@/data/repos/group';
 import { clearHistory, undo } from '@/data/repos/history';
-import { adjustStockVolume, createStockItem, purgeEmptyStockItems } from '@/data/repos/stock';
+import { adjustStockVolume, createStockItem, purgeEmptyStockItems, renameStockItem } from '@/data/repos/stock';
 import { createWorkbench, openCoat, recordUsageAndStockIn } from '@/data/repos/workbench';
 
 const BLUE = {
@@ -163,7 +163,7 @@ describe('2.2 调漆自动入库 + 同配方合并', () => {
     });
     expect(first.ok).toBe(true);
     if (!first.ok) return;
-    expect(first.data.item.customName).toMatch(/^调漆/);
+    expect(first.data.item.customName).toBe('调漆1');
     expect(first.data.item.volumeMl).toBe(20);
 
     const second = await blendAndStockIn(store, {
@@ -212,6 +212,73 @@ describe('2.2 调漆自动入库 + 同配方合并', () => {
     expect((await store.stockItems.get(first.data.item.id))?.volumeMl).toBe(15);
   });
 });
+
+  it('用户自定义名称：填了就用自定义名，留空才「调漆N」；合并时改名并可撤销', async () => {
+    const ids = await seedStocks();
+    const named = await blendAndStockIn(store, {
+      parts: [
+        { stockItemId: ids.blueId, paint: BLUE, ml: 10 },
+        { stockItemId: ids.whiteId, paint: WHITE, ml: 10 },
+      ],
+      name: 'JW020',
+    });
+    expect(named.ok).toBe(true);
+    if (!named.ok) return;
+    expect(named.data.item.customName).toBe('JW020');
+
+    // 自定义名不吃调漆序号：下一个默认产物仍是「调漆1」
+    const fallback = await blendAndStockIn(store, {
+      parts: [
+        { stockItemId: ids.blueId, paint: BLUE, ml: 5 },
+        { stockItemId: ids.whiteId, paint: WHITE, ml: 20 },
+      ],
+    });
+    expect(fallback.ok).toBe(true);
+    if (!fallback.ok) return;
+    expect(fallback.data.item.customName).toBe('调漆1');
+
+    // 同配方再调 + 新名称：合并进同一瓶并改名
+    const renamed = await blendAndStockIn(store, {
+      parts: [
+        { stockItemId: ids.blueId, paint: BLUE, ml: 10 },
+        { stockItemId: ids.whiteId, paint: WHITE, ml: 10 },
+      ],
+      name: '夜航蓝',
+    });
+    expect(renamed.ok).toBe(true);
+    if (!renamed.ok) return;
+    expect(renamed.data.merged).toBe(true);
+    expect(renamed.data.item.customName).toBe('夜航蓝');
+    expect(renamed.data.item.id).toBe(named.data.item.id);
+
+    await undo(store);
+    expect((await store.stockItems.get(named.data.item.id))?.customName).toBe('JW020');
+  });
+
+  it('调漆产物改名：落库可撤销；空名 / 超长 / 原浆拒绝', async () => {
+    const ids = await seedStocks();
+    const blended = await blendAndStockIn(store, {
+      parts: [
+        { stockItemId: ids.blueId, paint: BLUE, ml: 10 },
+        { stockItemId: ids.whiteId, paint: WHITE, ml: 10 },
+      ],
+    });
+    if (!blended.ok) throw new Error(blended.error);
+    expect(blended.data.item.customName).toBe('调漆1');
+
+    const renamed = await renameStockItem(store, { itemId: blended.data.item.id, name: 'JW020' });
+    expect(renamed.ok).toBe(true);
+    if (!renamed.ok) return;
+    expect(renamed.data.item.customName).toBe('JW020');
+    expect((await store.stockItems.get(blended.data.item.id))?.customName).toBe('JW020');
+
+    await undo(store);
+    expect((await store.stockItems.get(blended.data.item.id))?.customName).toBe('调漆1');
+
+    expect((await renameStockItem(store, { itemId: blended.data.item.id, name: '   ' })).ok).toBe(false);
+    expect((await renameStockItem(store, { itemId: blended.data.item.id, name: 'x'.repeat(17) })).ok).toBe(false);
+    expect((await renameStockItem(store, { itemId: ids.blueId, name: '原浆改名' })).ok).toBe(false);
+  });
 
 describe('2.2 其他扣减路径：0 ml 删除 + 容量偏低', () => {
   it('盘点调到 0 → 删除条目；调到偏低 → lowVolume；撤销恢复', async () => {

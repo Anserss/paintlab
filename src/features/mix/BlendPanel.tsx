@@ -15,6 +15,9 @@ export interface BlendPanelProps {
   /** 目标总容量（仅「按总量 ÷ 配比」口径） */
   targetText: string;
   onTargetChange: (raw: string) => void;
+  /** 2.2.1：用户自定义产物名称；留空 = 调漆N */
+  nameText: string;
+  onNameChange: (raw: string) => void;
   plan: BlendPlan | null;
   blockers: string[];
   canCommit: boolean;
@@ -36,6 +39,8 @@ export function BlendPanel({
   onEqualize,
   targetText,
   onTargetChange,
+  nameText,
+  onNameChange,
   plan,
   blockers,
   canCommit,
@@ -242,6 +247,26 @@ export function BlendPanel({
               ? '按配比权重把目标总容量分摊到各组分；合计严格等于 V。'
               : '按各组分填写的 ml 直接混合；合计与占比自动累加。'}
           </p>
+
+          <label className="flex shrink-0 flex-col gap-1.5">
+            <span className="flex items-baseline justify-between gap-2">
+              <span className="ef-eyebrow">产物名称（可选）</span>
+              <span className="ef-field text-[10px] text-text-2">{nameText.trim().length + '/16'}</span>
+            </span>
+            <input
+              aria-label="产物名称"
+              data-mix-name=""
+              maxLength={16}
+              value={nameText}
+              placeholder="留空 = 调漆N"
+              onChange={(event) => onNameChange(event.target.value)}
+              className="ef-input"
+              style={{ height: 44 }}
+            />
+            <span className="text-[11px] leading-snug text-text-2">
+              用户自定义名称；留空按「调漆N」自动命名。同配方合并时填了名称会给那一瓶改名。
+            </span>
+          </label>
         </div>
       </div>
 

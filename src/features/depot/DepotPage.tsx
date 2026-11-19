@@ -18,7 +18,7 @@ import { BrandView } from './BrandView';
 import { GroupView } from './GroupView';
 import { HueView } from './HueView';
 import { PaintDetail } from './PaintDetail';
-import { AdjustVolumeDialog, DeleteItemDialog, CoatPickDialog } from './Dialogs';
+import { AdjustVolumeDialog, DeleteItemDialog, CoatPickDialog, RenameItemDialog } from './Dialogs';
 import { DEPOT_VIEWS, brandLabel, needsReorder, planGroupDrag, planGroupDrop } from './model';
 import type { BrandSelection, DepotRow, DepotView, DropPayload, DropTarget, HueBin } from './model';
 import { useDepotGroups, useDepotRows } from './useDepotData';
@@ -64,6 +64,7 @@ export function DepotPage() {
   const [selectedGroupId, setSelectedGroupId] = useState<string>(UNGROUPED_ID);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [adjustRow, setAdjustRow] = useState<DepotRow | null>(null);
+  const [renameRow, setRenameRow] = useState<DepotRow | null>(null);
   const [deleteRow, setDeleteRow] = useState<DepotRow | null>(null);
   const [workbenchRows, setWorkbenchRows] = useState<DepotRow[]>([]);
   const [dragLabel, setDragLabel] = useState<string | null>(null);
@@ -361,11 +362,13 @@ export function DepotPage() {
           onOpenCoat={(row) => requestWorkbench([row])}
           onUse={sendToMix}
           onAdjust={(row) => setAdjustRow(row)}
+          onRename={(row) => setRenameRow(row)}
           onDelete={(row) => setDeleteRow(row)}
           onMoveToGroup={(row, groupId) => applyDrop({ kind: 'item', stockItemId: row.item.id }, { kind: 'group', groupId })}
         />
 
         <AdjustVolumeDialog row={adjustRow} onClose={() => setAdjustRow(null)} />
+        <RenameItemDialog row={renameRow} onClose={() => setRenameRow(null)} />
         <DeleteItemDialog row={deleteRow} onClose={() => setDeleteRow(null)} />
         <CoatPickDialog rows={workbenchRows} onClose={() => setWorkbenchRows([])} />
       </section>

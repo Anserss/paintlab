@@ -335,11 +335,40 @@ describe('调漆模式 · 两种算法', () => {
     const item = mixedItems()[0];
     expect(item.volumeMl).toBe(30);
     expect(item.parts).toHaveLength(2);
-    expect(item.customName).toMatch(/^调漆/);
+    expect(item.customName).toBe('调漆1');
 
     const stocks = await store.stockItems.toArray();
     expect(stocks.find((row) => row.id === seeded.blueId)?.volumeMl).toBe(45);
     expect(stocks.find((row) => row.id === seeded.whiteId)?.volumeMl).toBe(45);
+  });
+
+  it('产物名称可自定义：填 JW020 就按 JW020 入库；留空才用「调漆N」', async () => {
+    const seeded = await seedStocks();
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
+    await waitForPage();
+    await switchMode('调漆');
+    setBlendSelection([seeded.blueId, seeded.whiteId]);
+    fireEvent.change(screen.getByLabelText('目标总容量 V'), { target: { value: '20' } });
+    fireEvent.change(screen.getByLabelText('产物名称'), { target: { value: 'JW020' } });
+
+    expect(document.querySelector('[data-mix-name]')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '调漆并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(1));
+    expect(mixedItems()[0].customName).toBe('JW020');
+
+    // 换一个配方、清空名称 → 默认「调漆1」（自定义名不消耗序号）
+    fireEvent.change(screen.getByLabelText('产物名称'), { target: { value: '' } });
+    setBlendSelection([seeded.blueId, seeded.whiteId]);
+    fireEvent.change(screen.getByLabelText('目标总容量 V'), { target: { value: '30' } });
+    fireEvent.change(screen.getByLabelText('配比 C80'), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText('配比 C1'), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: '调漆并入库' }));
+    await waitFor(() => expect(mixedItems()).toHaveLength(2));
+    expect(mixedItems().some((item) => item.customName === '调漆1')).toBe(true);
   });
 
   it('按各组分用量：10 + 20 → 合计 30、原浆 16.7 / 稀释剂 13.3、等效 1:0.8', async () => {

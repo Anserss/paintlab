@@ -1,11 +1,11 @@
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Brand, Paint, PaintLine, StockItem } from '@/core/model/types';
 import { createMemoryStore, setStore } from '@/data/db';
 import type { DepotStore } from '@/data/db';
 import { ensureSystemGroup } from '@/data/repos/group';
 import { clearHistory } from '@/data/repos/history';
-import { DeleteItemDialog } from '@/features/depot/Dialogs';
+import { DeleteItemDialog, RenameItemDialog } from '@/features/depot/Dialogs';
 import type { DepotRow } from '@/features/depot/model';
 import { useAppStore } from '@/store';
 
@@ -94,6 +94,24 @@ function rowOf(item: StockItem): DepotRow {
   return { item, paint: BLUE, line: LINE, brand: BRAND, customMixed: true };
 }
 
+/** 一支调漆产物：默认名「调漆14」，有组分快照但没有稀释比例 */
+function mixedItem(patch: Partial<StockItem> = {}): StockItem {
+  return {
+    id: 'stock-mixed',
+    paintId: BLUE.id,
+    volumeMl: 8.5,
+    initialMl: 30,
+    state: 'thinned',
+    ratioN: 2,
+    groupId: null,
+    origin: 'mixed',
+    createdAt: 1,
+    customName: '调漆14',
+    customHex: '#667893',
+    ...patch,
+  };
+}
+
 let store: DepotStore;
 
 beforeEach(async () => {
@@ -115,6 +133,28 @@ beforeEach(async () => {
     brands: [BRAND],
     paintsById: { [BLUE.id]: BLUE },
     linesById: { [LINE.id]: LINE },
+  });
+});
+
+describe('2.2.1 调漆产物改名（用户自定义名称）', () => {
+  it('「调漆14」改成 JW020，落库可撤销', async () => {
+    const item = mixedItem();
+    await store.stockItems.put(item);
+
+    render(<RenameItemDialog row={rowOf(item)} onClose={() => undefined} />);
+    await waitFor(() => expect(document.querySelector('[data-dialog="rename-stock"]')).not.toBeNull());
+    expect(document.body.textContent).toContain('当前名称「调漆14」');
+
+    fireEvent.change(screen.getByLabelText('新名称'), { target: { value: 'JW020' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存名称' }));
+    await waitFor(async () => {
+      expect((await store.stockItems.get(item.id))?.customName).toBe('JW020');
+    });
+
+    await useAppStore.getState().undo();
+    await waitFor(async () => {
+      expect((await store.stockItems.get(item.id))?.customName).toBe('调漆14');
+    });
   });
 });
 

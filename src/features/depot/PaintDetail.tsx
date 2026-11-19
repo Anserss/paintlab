@@ -18,6 +18,7 @@ export interface PaintDetailProps {
   onOpenCoat: (row: DepotRow) => void;
   onUse: (row: DepotRow) => void;
   onAdjust: (row: DepotRow) => void;
+  onRename: (row: DepotRow) => void;
   onDelete: (row: DepotRow) => void;
   onMoveToGroup: (row: DepotRow, groupId: string) => void;
 }
@@ -30,6 +31,7 @@ export function PaintDetail({
   onOpenCoat,
   onUse,
   onAdjust,
+  onRename,
   onDelete,
   onMoveToGroup,
 }: PaintDetailProps) {
@@ -119,7 +121,7 @@ export function PaintDetail({
           </p>
         ) : row.customMixed ? (
           <p className="ef-field text-[11px] text-text-2" data-custom-mixed="">
-            调漆产物 · 自定义名称与颜色（来自原漆 {row.paint.code ?? '—'}）
+            {'调漆产物 · 配方：' + (row.item.mixLabel ?? '未记录') + '（原漆 ' + codeOrDash(row.paint.code) + '）'}
           </p>
         ) : null}
 
@@ -241,6 +243,11 @@ export function PaintDetail({
         <Button variant="secondary" size="sm" data-detail-action="mix" onClick={() => onUse(row)}>
           调漆
         </Button>
+        {row.customMixed && row.dilutionRatioN === undefined && (
+          <Button variant="secondary" size="sm" data-detail-action="rename" onClick={() => onRename(row)}>
+            改名
+          </Button>
+        )}
         <Button variant="secondary" size="sm" data-detail-action="adjust" onClick={() => onAdjust(row)}>
           调整余量
         </Button>

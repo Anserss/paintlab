@@ -101,6 +101,90 @@ export function AdjustVolumeDialog({ row, onClose }: RowDialogProps) {
 }
 
 /**
+ * 2.2.1 调漆产物改名：名称是用户自定义的，留空才用默认「调漆N」。
+ * 默认名「调漆N」可改成色号 / 习惯叫法（例如 JW020），落库可撤销。
+ */
+export function RenameItemDialog({ row, onClose }: RowDialogProps) {
+  const renameStockItem = useAppStore((state) => state.renameStockItem);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!row) return;
+    setText(row.item.customName ?? '');
+    setBusy(false);
+    // 仅在切换条目时重置
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.item.id]);
+
+  const current = row?.item.customName ?? '';
+  const trimmed = text.trim();
+  const invalid = trimmed.length === 0 || trimmed.length > 16 || trimmed === current;
+
+  const submit = async () => {
+    if (!row || invalid) return;
+    setBusy(true);
+    const result = await renameStockItem({ itemId: row.item.id, name: trimmed });
+    setBusy(false);
+    if (result.ok) onClose();
+  };
+
+  return (
+    <Dialog
+      open={row !== null}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      title="调漆产物改名"
+      description="调漆产物的名称默认是「调漆N」；你可以改成色号或习惯叫法（1–16 字）。"
+      width={420}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            取消
+          </Button>
+          <Button variant="primary" data-action="confirm-rename-stock" disabled={invalid || busy} onClick={() => void submit()}>
+            保存名称
+          </Button>
+        </>
+      }
+    >
+      {row && (
+        <div data-dialog="rename-stock" className="flex flex-col gap-3">
+          <p className="text-xs text-text-2">
+            {'当前名称「' + current + '」 · ' + (row.paint.nameZh ?? row.paint.name) + ' ' + (row.paint.code ?? '—')}
+          </p>
+          <label className="flex flex-col gap-1">
+            <span className="flex items-center justify-between text-[11px] text-text-2">
+              <span>新名称</span>
+              <span className="ef-field">{trimmed.length + '/16'}</span>
+            </span>
+            <input
+              aria-label="新名称"
+              data-field="stock-name"
+              maxLength={16}
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') void submit();
+              }}
+              className="ef-input"
+              style={{ height: 44 }}
+            />
+          </label>
+          <p className="text-[11px] leading-relaxed text-text-2">
+            改名只影响显示名称，不改组分、比例与余量；可撤销。
+          </p>
+          {trimmed === current && current !== '' && (
+            <p className="ef-flag text-[12px]">新名称与当前名称相同。</p>
+          )}
+        </div>
+      )}
+    </Dialog>
+  );
+}
+
+/**
  * 删除条目（2.1.1）：稀释漆料 / 调漆产物入库时记了组分快照，
  * 可以选「直接删除」或「分解回仓库」（原浆 + 辅料 / 调漆前的稀释漆料）。
  */

@@ -29,6 +29,7 @@ import {
   listStockItems,
   moveStockToGroup,
   purgeEmptyStockItems,
+  renameStockItem as renameStockItemRepo,
   stockTotalMl,
 } from '@/data/repos/stock';
 import type {
@@ -54,6 +55,8 @@ export interface InventorySlice {
   purgeEmptyStockItems: () => Promise<number>;
   purchase: (input: CreateStockInput) => Promise<Result<StockWriteResult>>;
   adjustVolume: (input: AdjustVolumeInput) => Promise<Result<StockWriteResult>>;
+  /** 2.2.1：调漆产物改名（用户自定义名称） */
+  renameStockItem: (input: { itemId: string; name: string }) => Promise<Result<StockWriteResult>>;
   removeStockItem: (itemId: string) => Promise<Result<StockWriteResult>>;
   /** 分解删除（2.1.1）：稀释漆料 → 原浆 + 辅料；调漆产物 → 调漆前的组分 */
   decomposeStockItem: (input: DecomposeStockInput) => Promise<Result<{ command: Command; items: StockItem[] }>>;
@@ -128,6 +131,17 @@ export const createInventorySlice: StateCreator<AppState, [], [], InventorySlice
     if (result.data.lowVolume && result.data.lowVolume.length > 0) {
       get().showLowVolumeAlert(result.data.lowVolume);
     }
+    return result;
+  },
+
+  async renameStockItem(input) {
+    const result = await renameStockItemRepo(getStore(), input);
+    if (!result.ok) {
+      notifyError(get, result.error);
+      return result;
+    }
+    await get().refreshAllReadModels();
+    notifyUndoable(get, result.data.message);
     return result;
   },
 

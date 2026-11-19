@@ -85,6 +85,7 @@ export function MixPage() {
   // 调漆
   const [blendLogic, setBlendLogic] = useState<BlendLogic>('ratio');
   const [targetText, setTargetText] = useState('30.0');
+  const [blendName, setBlendName] = useState('');
   const [ratioTexts, setRatioTexts] = useState<Record<string, string>>({});
   const [amountTexts, setAmountTexts] = useState<Record<string, string>>({});
 
@@ -346,7 +347,7 @@ export function MixPage() {
       .filter((part): part is { stockItemId: string; paint: PaintRef; ml: number } => part !== null);
     if (parts.length === 0) return;
     setBusy(true);
-    const result = await blendBatch({ parts, targetMl: null });
+    const result = await blendBatch({ parts, targetMl: null, name: blendName.trim() || undefined });
     setBusy(false);
     if (!result.ok) return;
     const item = result.data.item;
@@ -356,7 +357,7 @@ export function MixPage() {
       result.data.addedMl,
       result.data.merged,
     );
-  }, [busy, blendPlan, selectedRows, blendBatch, rememberResult]);
+  }, [busy, blendPlan, selectedRows, blendBatch, rememberResult, blendName]);
 
   const handleSkipThinner = useCallback(async () => {
     const result = await updateSetting('trackThinner', false);
@@ -552,6 +553,8 @@ export function MixPage() {
               }
               targetText={targetText}
               onTargetChange={setTargetText}
+              nameText={blendName}
+              onNameChange={setBlendName}
               plan={blendPlan}
               blockers={blendBlockers}
               canCommit={canBlend}

@@ -251,6 +251,52 @@ export interface DeleteStockInput {
   at?: number;
 }
 
+export interface RenameStockInput {
+  itemId: string;
+  /** 1–16 字 */
+  name: string;
+  at?: number;
+}
+
+/**
+ * 2.2.1：调漆产物改名（用户自定义名称；默认「调漆N」可改成 JW020 等）。
+ * 只允许已入库的调漆产物（有 customName）；写 ledger + 可撤销。
+ */
+export async function renameStockItem(
+  s: DepotStore,
+  input: RenameStockInput,
+): Promise<Result<StockWriteResult>> {
+  const item = await s.stockItems.get(input.itemId);
+  if (!item) return fail('库存条目不存在', 'conflict');
+  if (!item.customName) return fail('只有调漆产物可以改名', 'validation');
+  const name = input.name.trim();
+  if (!name) return fail('名称不能为空', 'validation');
+  if (name.length > 16) return fail('名称最多 16 字', 'validation');
+  if (name === item.customName) return fail('新名称与当前名称相同', 'conflict');
+  const at = input.at ?? Date.now();
+  const next: StockItem = { ...item, customName: name };
+  const parsed = parseOrErrors(StockItemSchema, next);
+  if (!parsed.ok) return fail(zodIssues(parsed), 'validation', { issues: parsed.errors });
+
+  const ledgerEntry: LedgerEntry = {
+    id: newId('ledger'),
+    type: 'adjust',
+    refId: item.id,
+    at,
+    meta: { action: 'stock-rename', from: item.customName, to: name },
+  };
+  const command = createCommand(
+    'adjust',
+    '调漆产物「' + item.customName + '」改名为「' + name + '」',
+    [patch.replace('stockItems', item.id, 'customName', name), appendPatch('ledger', ledgerEntry)],
+    [patch.replace('stockItems', item.id, 'customName', item.customName), patch.remove('ledger', ledgerEntry.id)],
+    at,
+  );
+  const recorded = await recordCommand(s, command);
+  if (!recorded.ok) return recorded;
+  return ok({ command, item: next, message: '已改名为「' + name + '」' });
+}
+
 /**
  * 2.2：清理历史遗留的 0 ml 条目（升级搬家，不写 Command）。
  * 旧版本允许余量停在 0；2.2 起「所有物品在容量为 0 ml 后删除」，

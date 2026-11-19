@@ -80,6 +80,11 @@ export interface BlendStockInput {
   parts: BlendStockPartInput[];
   /** 已知总容量：按各组分 ml 比例分摊（不传则按各组 ml 直接混合） */
   targetMl?: number | null;
+  /**
+   * 2.2.1：用户自定义产物名称（1–16 字）。
+   * 留空 = 默认「调漆N」；同配方合并时填了名称会把那一瓶改名。
+   */
+  name?: string;
   at?: number;
 }
 
@@ -525,6 +530,9 @@ export async function blendAndStockIn(
   }
 
   const at = input.at ?? Date.now();
+  /** 2.2.1：用户自定义名称；留空走默认「调漆N」 */
+  const requestedName = (input.name ?? '').trim();
+  if (requestedName.length > 16) return fail('产物名称最多 16 字', 'validation');
   const components: BottleComponent[] = plan.parts.map((share) => {
     const part = parts.find((entry) => entry.stockItemId === share.id) as BlendStockPartInput;
     const component: BottleComponent = {
@@ -595,6 +603,8 @@ export async function blendAndStockIn(
     };
     if (mixKey) item.mixKey = mixKey;
     if (!item.mixLabel && mixLabel) item.mixLabel = mixLabel;
+    // 2.2.1：用户填了名称 → 合并时把这一瓶改名（同配方仍然一个瓶）
+    if (requestedName) item.customName = requestedName;
     const parsed = parseOrErrors(StockItemSchema, item);
     if (!parsed.ok) {
       return fail(
@@ -622,15 +632,25 @@ export async function blendAndStockIn(
       forward.push(patch.replace('stockItems', target.id, 'mixLabel', mixLabel));
       if (target.mixLabel !== undefined) inverse.push(patch.replace('stockItems', target.id, 'mixLabel', target.mixLabel));
     }
+    if (requestedName && requestedName !== target.customName) {
+      forward.push(patch.replace('stockItems', target.id, 'customName', requestedName));
+      if (target.customName !== undefined) {
+        inverse.push(patch.replace('stockItems', target.id, 'customName', target.customName));
+      }
+    }
     notices.push(
       isLowVolume(nextVolume, nextInitial)
         ? { itemId: target.id, volumeMl: nextVolume, initialMl: nextInitial }
         : null,
     );
   } else {
-    const { seq, forwardPatch } = await nextMixSeq(s);
-    seqPatch = forwardPatch;
-    const name = '调漆' + seq;
+    // 2.2.1：用户定义了名称就用它；没定义才按「调漆N」自动命名并消耗序号
+    let name = requestedName;
+    if (!name) {
+      const next = await nextMixSeq(s);
+      seqPatch = next.forwardPatch;
+      name = '调漆' + next.seq;
+    }
     item = stockedItemOf({
       paint: parts[0].paint,
       name,
@@ -731,7 +751,9 @@ export async function blendAndStockIn(
       mlText(plan.totalMl) +
       ' ml（等效 1:' +
       mlText(plan.ratioN) +
-      '）' +
+      '）「' +
+      (item.customName ?? '调漆产物') +
+      '」' +
       (merged ? '，已并入同配方瓶' : ''),
     lowVolume: collectLowVolume(notices),
   });
