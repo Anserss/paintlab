@@ -1,6 +1,6 @@
-# PAINTLAB 2.2.0 · 实现说明
+# PAINTLAB 2.2.1 · 实现说明
 
-> 2.1 变更清单见 `docs/PAINTLAB-2.1-改版说明.md`；2.1.1 见 `docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录见 `docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 见 `docs/PAINTLAB-2.2-改版说明.md`；视觉与交互规格见 `docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`。
+> 2.1 变更清单见 `docs/PAINTLAB-2.1-改版说明.md`；2.1.1 见 `docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录见 `docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 见 `docs/PAINTLAB-2.2-改版说明.md`；2.2.1 见 `docs/PAINTLAB-2.2.1-改版说明.md`；视觉与交互规格见 `docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`。
 > 本文件偏目录、分层、脚本与验收命令。
 >
 > **版本号规则：未经用户明确指示，不得修改版本号**（`package.json` 的 `version` 与 `src/platform.ts` 的兜底值）；改版本前必须先得到用户明确许可。
@@ -17,7 +17,7 @@ npm run build          # PWA 构建
 npm run build:desktop  # 桌面构建（关闭 Service Worker）
 npm run desktop        # 构建 + 安装到 %LOCALAPPDATA%\Programs\PAINTLAB + 快捷方式
 npm run typecheck      # tsc --noEmit，期望 0 错
-npm test               # vitest run，34 文件 / 388 用例（2.2.0 实测）
+npm test               # vitest run，34 文件 / 392 用例（2.2.1 实测）
 npm run check          # 目录核验 + 重建 public/catalog
 npm run launcher       # 浏览器版单文件启动器（固定端口 8787）
 ```
@@ -28,15 +28,15 @@ npm run launcher       # 浏览器版单文件启动器（固定端口 8787）
 features → store → data → core
 ```
 
-| 层 | 目录 | 2.2.0 变化 |
+| 层 | 目录 | 2.2.x 变化 |
 |---|---|---|
 | core | `src/core/**` | 新增 `rules/low-volume.ts`（20% / 10 ml 判定、红牌文案、通知结构）与 `rules/formula.ts`（配方签名 / 合并 / 说明）；`StockItem.mixKey/mixLabel`、`BatchPart.sourceKey/sourceLabel`、`MixRecord.stockItemId`（`bottleId` 转可选） |
-| data | `src/data/**` | 新增 `repos/mix.ts`：`diluteAndStockIn` / `blendAndStockIn`（一事务一 Command：扣组分 + 零量删除 + 同配方合并 + 自动入库）、`migrateLegacyBottles`（升级搬家，不写 Command）；`adjustStockVolume` / `recordUsageAndStockIn` 支持 0 ml 删除与 lowVolume 回传 |
+| data | `src/data/**` | 新增 `repos/mix.ts`：`diluteAndStockIn` / `blendAndStockIn`（一事务一 Command：扣组分 + 零量删除 + 同配方合并 + 自动入库）、`migrateLegacyBottles`（升级搬家，不写 Command）；`adjustStockVolume` / `recordUsageAndStockIn` 支持 0 ml 删除与 lowVolume 回传；2.2.1 新增 `renameStockItem`（调漆产物改名可撤销） |
 | store | `src/store/**` | `ui.lowVolumeAlert` + `showLowVolumeAlert/dismissLowVolumeAlert`；`diluteBatch/blendBatch` 改用新 repo 并弹提示；`migrateLegacyBottles` 进 `hydrateApp` |
-| features | `src/features/**` | 调漆台重做：`MixPage` + `DilutePanel` + `BlendPanel`（两种算法）+ `RecipePreview`（紧凑配方条）+ `StockPicker`（调漆产物 / 容量偏低标记）；删除 `BottleStage.tsx` / `ColorEditor.tsx`（批次动作与批次改色下线） |
+| features | `src/features/**` | 调漆台重做：`MixPage` + `DilutePanel` + `BlendPanel`（两种算法 + 2.2.1 产物名称输入）+ `RecipePreview`（紧凑配方条）+ `StockPicker`（调漆产物 / 容量偏低标记）；仓库详情 2.2.1 增加「改名」；删除 `BottleStage.tsx` / `ColorEditor.tsx`（批次动作与批次改色下线） |
 | components | `src/components/**` | 新增 `paint/LowVolumeTag.tsx`；`PaintMeta/PaintRow/PaintTile` 名称栏最前面挂「容量偏低」 |
 | app | `src/app/**` | 新增全局 `LowVolumeDialog`（Shell 挂载），显示需求原文 + 受影响条目 |
-| desktop | `desktop/electron/**` | 无结构变化；`package.json` 版本随根版本（2.2.0） |
+| desktop | `desktop/electron/**` | 无结构变化；`package.json` 版本随根版本（2.2.1） |
 
 ## 桌面化要点
 
@@ -91,6 +91,24 @@ features → store → data → core
 - 红牌样式：`.ef-low-volume-tag` + `--ef-low-volume-bg/fg`；这是「红色只给删除」的唯一例外（用户 2026-11-19 明确要求红底白字）。
 - 同配方合并时 `initialMl` 与 `volumeMl` 一起累加，所以 20% 始终相对这瓶的累计容量。
 
+### 2.2.1 调漆产物命名（用户自定义）
+
+```
+调漆确认
+  → 面板「产物名称（可选）」：trim 后 1–16 字
+  → 填了名称：customName = 用户名称；不消耗 settings.mixSeq
+  → 留空：customName = 「调漆N」（N = mixSeq + 1，同 2.1 规则）
+  → 同配方合并时填了名称：合并进同一瓶，并把 customName 改成用户名称（inverse 恢复旧名）
+
+仓库详情「改名」
+  → renameStockItem(itemId, name)：只允许已有 customName 的调漆产物
+  → patch customName + ledger(adjust, action=stock-rename)，一个 Command，可撤销
+```
+
+- 名称只影响展示；组分快照、比例、余量、`mixKey` 不变。
+- 2.0 手动改过的名称（如「夜航蓝」）继续原样显示；未定义的自动名「调漆N」也可通过「改名」改成色号。
+- 详情抽屉同时显示 `mixLabel`（例如「中灰 20.0 ml + 钴蓝 10.0 ml」），避免不同配方的同名产物无法区分。
+
 ### 附：2.1 批次流程（仅旧数据 / 迁移参考）
 
 - `repos/bottle.ts` 的 `diluteIntoBatch` / `blendIntoBatch` / `stockInBottle` 保留，供旧数据迁移与历史测试使用；2.2 调漆台不再调用。
@@ -143,20 +161,21 @@ Tailwind 颜色键保留旧名但值全部指向 `--ef-*`；组件不再硬编�
 
 ```
 npx tsc --noEmit        → 0 error
-npx vitest run          → 34 文件 / 388 用例通过
+npx vitest run          → 34 文件 / 392 用例通过
 npx vite build          → ✓（PWA）
 npx vite build --mode desktop → ✓（无 sw.js）
 ```
 
-2.2.0 新增/改写用例：
+2.2.0 / 2.2.1 新增/改写用例：
 
 - `tests/unit/core/formula.test.ts`（9 条）：配方签名比例归一、顺序无关、不同比例 / `sourceKey` 区分、组分 ml 合并、旧数据签名退化、说明截断。
 - `tests/unit/core/low-volume.test.ts`（5 条）：20% / 10 ml 边界、0 ml 不算偏低、提示去重、文案原文。
-- `tests/unit/data/mix-stockin.test.ts`（8 条）：稀释自动入库 + 同配方合并、不同比例不合并、偏低 / 归零删除与撤销、调漆合并、调漆产物作组分、盘点归零、工作台归零、旧 bottle 迁移与工作台引用迁移。
-- `tests/unit/features/mix.test.tsx`（13 条）：自动入库、二次稀释合并、两种调漆算法、调漆产物作组分、库存不足阻断、稀释剂缺失、偏低红牌 + `lowVolumeAlert`、归零删除、无使用 / 清空 / 入库键。
+- `tests/unit/data/mix-stockin.test.ts`（10 条）：稀释自动入库 + 同配方合并、不同比例不合并、偏低 / 归零删除与撤销、调漆合并、调漆产物作组分、2.2.1 自定义名称 / 合并改名 / 改名校验、盘点归零、工作台归零、旧 bottle 迁移与工作台引用迁移。
+- `tests/unit/features/mix.test.tsx`（14 条）：自动入库、二次稀释合并、两种调漆算法、2.2.1 产物名称输入、调漆产物作组分、库存不足阻断、稀释剂缺失、偏低红牌 + `lowVolumeAlert`、归零删除、无使用 / 清空 / 入库键。
 - `tests/unit/features/low-volume.test.tsx`（2 条）：全局弹窗展示需求原文 + 条目，点「知道了」关闭。
 - `tests/unit/features/dilution-flow.test.tsx`：仍是三边流转，最后一个用例改成 2.2 自动入库断言。
-- 保留并通过：`core/batch`、`core/decompose`、`data/decompose`、`data/bottle-color`、`features/depot-decompose` 等旧用例（旧 `repos/bottle.ts` 流程仍被直接测试）。
+- `tests/unit/features/depot-decompose.test.tsx`：2.1.1 分解两条 + **2.2.1 调漆产物改名并撤销**。
+- 保留并通过：`core/batch`、`core/decompose`、`data/decompose`、`data/bottle-color` 等旧用例（旧 `repos/bottle.ts` 流程仍被直接测试）。
 
 ## 已知缺口（声明项）
 
