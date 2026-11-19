@@ -5,6 +5,7 @@ dev-dist
 coverage
 test-results
 playwright-report
+reports/shots/
 .DS_Store
 *.log
 .npmcache
@@ -12,3 +13,9 @@ release/
 .launcher-build/
 desktop-build/
 .tmpbuild/
+desktop/electron-runtime/
+desktop/electron-rehearsal/
+desktop/electron-clean-test/
+desktop/smoke/
+desktop/smoke3719/
+desktop/paintlab-il-test/

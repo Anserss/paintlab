@@ -80,12 +80,14 @@ ${dictMime}
 
     private static int Main()
     {
-        int port = FindFreePort(8787);
+        // 浏览器版固定端口 8787：给 IndexedDB 一个稳定 origin（换端口即等于换库）
+        const int port = 8787;
         var listener = new TcpListener(IPAddress.Loopback, port);
         try { listener.Start(); }
         catch (Exception error)
         {
-            Console.Error.WriteLine("无法监听端口: " + error.Message);
+            Console.Error.WriteLine("端口 " + port + " 已被占用（" + error.Message + "）");
+            Console.Error.WriteLine("请先关闭上一个 PAINTLAB 窗口，或改用桌面版（PAINTLAB.exe 安装版）。");
             Console.Error.WriteLine("按任意键退出…");
             Console.ReadKey(true);
             return 1;
@@ -93,8 +95,9 @@ ${dictMime}
 
         string url = "http://127.0.0.1:" + port + "/";
         Console.WriteLine();
-        Console.WriteLine("  PAINTLAB 1.0 · 漆料工作台");
+        Console.WriteLine("  PAINTLAB 2.0 · 漆料工作台（浏览器版）");
         Console.WriteLine("  " + url);
+        Console.WriteLine("  数据只存在本浏览器；长期使用请用桌面版。");
         Console.WriteLine("  关闭此窗口即停止服务。");
         Console.WriteLine();
 
