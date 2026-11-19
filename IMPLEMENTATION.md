@@ -1,121 +1,168 @@
-# PAINTLAB 1.1 · 实现说明（Application Implementation）
+# PAINTLAB 2.2.0 · 实现说明
 
-> 交班总结与工程描述见 `docs/PAINTLAB-1.0-交班总结与工程描述.md`；
-> 本轮改版（术语统一 / 数据换代 / 调漆台双模式）见 `docs/PAINTLAB-1.1-改版说明.md`。
-> 本文件偏目录、脚本与分层的速查。
+> 2.1 变更清单见 `docs/PAINTLAB-2.1-改版说明.md`；2.1.1 见 `docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录见 `docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 见 `docs/PAINTLAB-2.2-改版说明.md`；视觉与交互规格见 `docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`。
+> 本文件偏目录、分层、脚本与验收命令。
+>
+> **版本号规则：未经用户明确指示，不得修改版本号**（`package.json` 的 `version` 与 `src/platform.ts` 的兜底值）；改版本前必须先得到用户明确许可。
 
-Vite 5 + React 18 + TypeScript 5.6(strict) + Tailwind 3.4 + Zustand 4 + Dexie 4 + Zod 3。
-设计依据仍是 `docs/漆料管理软件-项目设计描述书.md`（3.4 节已按本轮改版加注）。
+Vite 5 + React 18 + TypeScript 5.6(strict) + Tailwind 3.4 + Zustand 4 + Dexie 4 + Zod 3，
+桌面壳 Electron（`desktop/electron`，固定 origin `app://paintlab`）。
 
 ## 快速开始
 
 ```bash
-npm install --ignore-scripts   # 本机沙箱下 esbuild 的 postinstall 会被拦，平台包已随 optionalDependencies 安装
-npm run dev                    # http://localhost:5175
-npm run typecheck              # tsc --noEmit，期望 0 错
-npm test                       # vitest run，24 文件 / 323 用例
-npm run build                  # tsc --noEmit && vite build（PWA 壳）
-npm run import:catalog         # paintlab CSV → docs/seed/paint-catalog.seed.json
-npm run check                  # verify:catalog + build:catalog
-npm run launcher               # 重新产出 release/PAINTLAB.exe
+npm install --ignore-scripts
+npm run dev            # http://localhost:5175（浏览器）
+npm run build          # PWA 构建
+npm run build:desktop  # 桌面构建（关闭 Service Worker）
+npm run desktop        # 构建 + 安装到 %LOCALAPPDATA%\Programs\PAINTLAB + 快捷方式
+npm run typecheck      # tsc --noEmit，期望 0 错
+npm test               # vitest run，34 文件 / 388 用例（2.2.0 实测）
+npm run check          # 目录核验 + 重建 public/catalog
+npm run launcher       # 浏览器版单文件启动器（固定端口 8787）
 ```
 
-## 分层（spec 5.2 铁律）
+## 分层（方向不可逆）
 
 ```
-features → store → data → core        方向不可逆
+features → store → data → core
 ```
 
-| 层 | 目录 | 约束 |
+| 层 | 目录 | 2.2.0 变化 |
 |---|---|---|
-| core | `src/core/**` | 纯 TS，零 React / 零 Dexie；类型、Zod、稀释（dilution）与调漆分摊（blend）算法、三档色块、I1–I8 不变量、分组三级规则、撤销栈 |
-| data | `src/data/**` | Dexie 表（v2）+ 仓储 + 目录包加载/归一化；所有写入走「补丁事务」并产出 Command |
-| store | `src/store/**` | Zustand 切片（ui/settings/catalog/inventory/mix/workbench/history）；读模型 + 回执 |
-| features | `src/features/**` | 五个页面（procure / depot / mix / workbench / settings），只消费 store 与展示组件 |
-| components | `src/components/**` | UI 原语 + 色卡原子（PaintRow/PaintTile/PaintSwatch/PaintMeta/StockBar）+ 瓶身 SVG |
-| app | `src/app/**` | Shell / TopBar / SideNav / 路由（`/procure` `/depot` `/mix` `/workbench` `/settings`） |
+| core | `src/core/**` | 新增 `rules/low-volume.ts`（20% / 10 ml 判定、红牌文案、通知结构）与 `rules/formula.ts`（配方签名 / 合并 / 说明）；`StockItem.mixKey/mixLabel`、`BatchPart.sourceKey/sourceLabel`、`MixRecord.stockItemId`（`bottleId` 转可选） |
+| data | `src/data/**` | 新增 `repos/mix.ts`：`diluteAndStockIn` / `blendAndStockIn`（一事务一 Command：扣组分 + 零量删除 + 同配方合并 + 自动入库）、`migrateLegacyBottles`（升级搬家，不写 Command）；`adjustStockVolume` / `recordUsageAndStockIn` 支持 0 ml 删除与 lowVolume 回传 |
+| store | `src/store/**` | `ui.lowVolumeAlert` + `showLowVolumeAlert/dismissLowVolumeAlert`；`diluteBatch/blendBatch` 改用新 repo 并弹提示；`migrateLegacyBottles` 进 `hydrateApp` |
+| features | `src/features/**` | 调漆台重做：`MixPage` + `DilutePanel` + `BlendPanel`（两种算法）+ `RecipePreview`（紧凑配方条）+ `StockPicker`（调漆产物 / 容量偏低标记）；删除 `BottleStage.tsx` / `ColorEditor.tsx`（批次动作与批次改色下线） |
+| components | `src/components/**` | 新增 `paint/LowVolumeTag.tsx`；`PaintMeta/PaintRow/PaintTile` 名称栏最前面挂「容量偏低」 |
+| app | `src/app/**` | 新增全局 `LowVolumeDialog`（Shell 挂载），显示需求原文 + 受影响条目 |
+| desktop | `desktop/electron/**` | 无结构变化；`package.json` 版本随根版本（2.2.0） |
 
-## 术语（v1.1 全站统一）
+## 桌面化要点
 
-| 动线 | 统一叫法 | 代码 |
-|---|---|---|
-| 进入仓库 | **入库** | `createStockItem` / `stockInBottle` / `recordUsageAndStockIn`（工作台放回） |
-| 进入调漆台 | **调漆** | 仓库行 `sendToMix` → 路由带 `stockItemId`，调漆台自动选中 |
-| 进入工作台 | **开涂** | `openCoat`（store / repo / 按钮 `data-action="coat"`） |
-| 调漆台产出 | **稀释 / 调漆** | `diluteIntoBatch` / `blendIntoBatch` |
+- origin 固定 `app://paintlab`（protocol standard + secure），IndexedDB 作用域稳定；数据在 `%APPDATA%\PAINTLAB`。
+- 窗口 1280×800、最小 1120×720；`titleBarStyle: hidden` + `titleBarOverlay` 深色 40px，命令栏即标题栏拖拽区。
+- preload 只暴露 `window.platform.saveFile/openFile/info`，渲染层不接触 Node。
+- 导出走原生保存框；导入在桌面端额外提供「从文件选择…」按钮，浏览器端保留 `<input type=file>`。
+- 桌面构建 `vite build --mode desktop` 关闭 PWA（WebView 里 SW 会造成更新不可见）。
+- 安装脚本 `scripts/make-desktop.mjs`：优先使用 `desktop/electron-runtime`，缺失时从 `%LOCALAPPDATA%\electron\Cache` 解压 Electron win32-x64 包，复制到安装目录并建快捷方式。
 
-实体：原「工位」→ **工作台**（`Workbench` / `workbenches` / `workbenchItems` 表）。
-
-## 调漆台（v1.1 重做）
+## 调漆台数据流（2.2，当前）
 
 ```
-稀释：原浆 A + 稀释剂 A×N            → 已稀释漆料 A(1+N)
-      已稀释漆料 M（1:r0）+ 补加稀释剂 → 目标 1:rN（N > r0）
-调漆：多组分（原浆 / 已稀释漆料）按 ml 或按目标总容量 V 分摊
-      每组按自身比例折算原浆，等效比例 = Σ稀释剂 / Σ原浆
+稀释提交（调漆台 · 稀释）
+  → 校验来源 / 稀释剂 / 比例；算 neat + thinner + total
+  → 组分快照 parts：原浆（+稀释剂 aux，身份已知时）
+  → mixKey = formulaKeyOfParts(parts)
+  → 找库中同配方条目（排除本次被取用的条目）
+       命中 → volumeMl / initialMl / parts.ml 累加（同配方合并）
+       未命中 → 新建 StockItem（origin='mixed'，名称 = 原浆名 / 调漆N，色值 = 原浆色 / 加权混色）
+  → 扣减来源与稀释剂：next > 0 改余量；next ≤ 0 删除条目 + 清工作台引用
+  → 一个事务 + 一个 Command（forward/inverse 成对，撤销恢复合并前的容量与被删条目）
+  → 返回 { item, merged, addedMl, mixRecord, lowVolume }
+
+调漆提交（调漆台 · 调漆）
+  → 两种算法都落成 parts[{ stockItemId, paint, ml }]：
+      ratio  ：weight = 配比，targetMl = V，planBlend 分摊
+      amount ：weight = 各组分 ml，targetMl = null
+  → 每个组分按自身 state/ratioN 折算 neat / thinner，等效比例 = Σthinner / Σneat
+  → 调漆产物作为组分时，快照写 sourceKey（来源配方签名），避免不同混合漆误合并
+  → 新建条目才占 settings.mixSeq（同配方合并不发新号）
 ```
 
-- **不再选择调漆瓶容量**：批次容量 = 产出体积向上取整（最小 5 ml，Schema 上限放宽到 2500）。
-- 每次提交生成一支**批次**（`Bottle.mode = 'dilute' | 'blend'`），可切换历史批次。
-- 批次动作：入库（`stockInBottle`，比例为 0 且非调漆产物时记作原浆，否则记作已稀释）/ 开涂（`refType='bottle'`）/ 使用 / 清空。
-- 算法都在 core，可单测：`src/core/math/dilution.ts`（正算 / 反算 / 补满 / 溢出）与
-  `src/core/math/blend.ts`（`diluteThinned` / `neatShareOf` / `planBlend`）。
+- 展示：稀释漆料用 `dilutionRatioN` + 原浆名称/色值；调漆产物用 `customName` + 加权混色。展示解析仍在 `core/render/batch.ts`。
+- 平台流转：稀释漆料 / 调漆产物（`state==='thinned'`）可在仓库 / 调漆台 / 工作台三边流转；原浆 `state==='neat'` 被 `openCoat` 拒绝。
+- 工作台侧栏读模型：`buildStockLane()` 只列非原浆、非辅料、有余量的条目。
+- **升级迁移**：`migrateLegacyBottles()` 在 `hydrateApp` 里、读库存之前执行：2.1.x 遗留 bottle 有余量的转成 StockItem（同配方合并、工作台 bottle 引用改成 stock 引用），bottle 删除；随后 `purgeEmptyStockItems()` 清掉历史遗留的 0 ml 条目（连带工作台引用）。两者都**不写 Command**（版本搬家，不进撤销栈）。
 
-## 数据（paintlab 合并表）
+### 2.2 容量偏低与归零
 
-| 项目 | 值 |
-|---|---|
-| 品牌 | 2（gsi 郡士 448 / jy 匠域 169） |
-| 产品线 | 34（由「系列」生成） |
-| 漆料 | 617（实色 531 / 透明 55 / 辅助 31） |
-| 色值 | 复用既有目录 121 条 + 按色名推定 465 条（`hexEstimated`） |
+```
+任何扣减（稀释 / 调漆 / 工作台用量 / 盘点）后：
+  next = r1(volumeMl - used)
+  next <= 0 → 删除 StockItem + 其所有 workbenchItems（可撤销）
+  next > 0 且 (next < initialMl × 0.2 || next < 10)
+            → data 层返回 lowVolume[{ itemId, volumeMl, initialMl }]
+            → store.showLowVolumeAlert() → Shell 的 LowVolumeDialog 弹窗（需求原文）
+            → 仓库行 / 详情 / 工作台磁贴 / 调漆台取料行：名称栏最前面红底白字「容量偏低」
+```
 
-管线：`scripts/import-paintlab.mjs`（CSV → seed）→ `scripts/verify-catalog.mjs`（0 错）→
-`scripts/build-catalog.mjs`（seed → `public/catalog/*.json`，透传 `hexEstimated`）。
+- 判定唯一处：`core/rules/low-volume.ts`（`isLowVolume` / `LOW_VOLUME_MESSAGE` / `LowVolumeNotice`）。
+- 红牌样式：`.ef-low-volume-tag` + `--ef-low-volume-bg/fg`；这是「红色只给删除」的唯一例外（用户 2026-11-19 明确要求红底白字）。
+- 同配方合并时 `initialMl` 与 `volumeMl` 一起累加，所以 20% 始终相对这瓶的累计容量。
 
-**数据换代**：`DepotDB` 升到 `version(2)`，升级回调清空全部表（含旧目录缓存与撤销栈），
-等于「原有数据清除，重新入库」。旧品牌的 `ak.json` / `tamiya.json` 已删除，索引只剩 gsi/jy。
+### 附：2.1 批次流程（仅旧数据 / 迁移参考）
+
+- `repos/bottle.ts` 的 `diluteIntoBatch` / `blendIntoBatch` / `stockInBottle` 保留，供旧数据迁移与历史测试使用；2.2 调漆台不再调用。
+- 旧批次：稀释名称 = 原浆名、不占 `mixSeq`；调漆名称 = `调漆N`、`colorHex:'#FFFFFF'` + `colorAlpha:70` 为「未定色」。
+- 旧入库：`stockInBottle` 把 `bottle.parts` 复制到 `StockItem.parts`；旧条目没有 `mixKey`，2.2 合并时按 `parts` 现算签名。
+
+
+### 2.1.1 删除分解
+
+```
+删除条目（仓库详情）
+  → decompositionOf(item)   （core/rules/decompose.ts）
+      · 无 parts / 余量 0 → null：弹层只给「确认删除」
+      · 有 parts → 按 item.volumeMl / Σparts.ml 等比还原，最后一段兜误差
+  → decomposeStockItem()    （data/repos/stock.ts）
+      · 一个事务 + 一个 Command：删原条目（连带 workbenchItems）→ 按组分新建库存条目 → ledger(adjust, action=decompose)
+      · 组分为稀释漆料时写 dilutionRatioN（显示 (1:N)稀释）
+      · inverse 完整：撤销后原条目 + 工作台引用回来，分解产物删除
+```
+
+- 组分快照来源：`diluteIntoBatch` = 原浆 + 稀释剂（`aux`）；`blendIntoBatch` = 调漆前各组分（带各自 `state/ratioN/dilute`）。
+- 辅料采购：`RegisterDialog` 里 `paints.every(paintClass==='aux')` 时隐藏「原浆/稀释」，提交强制 `state:'neat'`。
+
+### 2.1.2 目录管线：CSV + 手补
+
+```
+paintlab/郡士_匠域_油性漆_合并.csv        （617 行，CSV 管线）
+        +
+docs/seed/paint-catalog.extra.json        （手补：郡士 CL01~09 / CL101~111，20 条，自带官方色卡取样色值）
+        ↓ node scripts/import-paintlab.mjs
+docs/seed/paint-catalog.seed.json         （637 条 / 36 产品线；--no-extra 可跳过手补）
+        ↓ npm run check（verify-catalog + build-catalog）
+public/catalog/{gsi,jy}.json              （gsi 468 / jy 169）
+```
+
+- 手补条目会被校验 `brandId/lineId` 存在、id 去重；色值原样保留（不再按色名推定）。
+- 重跑导入复用 `public/catalog` 的色值时**保留 `hexEstimated`**，避免把推定色洗成已核验色。
+- 官方来源与 20 条清单见 `docs/PAINTLAB-2.1.2-目录补录.md`；`CLC / LDL` 为粉末类，未纳入。
+
+## 视觉 token（唯一真相）
+
+`src/styles/tokens.css` 是唯一真相；`base.css` 定义部件（`.ef-btn` / `.ef-input` / `.ef-cmd` / `.ef-dilution-tag` / `.ef-low-volume-tag` / `.ef-status__message` / `.ef-flag` / `.ef-board`）。
+Tailwind 颜色键保留旧名但值全部指向 `--ef-*`；组件不再硬编码色值。
+
+浅色：纸 `#F4F4F2` / 板 `#FFF` / 墨 `#161616` / 强调色 `#FFFA00`（只做填充） / 稀释小牌灰底 `#5C5C5C` / 容量偏低红底 `#B3261E` + 白字；
+深色：纸 `#191919` / 板 `#222` / 墨 `#EDEDED` / trace 用黄 / 稀释小牌灰底 `#3F3F3F` / 容量偏低沿用红底白字。
+切角只在可点元素上；红色只给删除与「容量偏低」状态牌（2.2 需求例外）；无圆角、投影、发光、装饰渐变；右下角不再有浮动提示。
 
 ## 测试
 
-`tests/unit/core`：稀释 / 调漆分摊 / 液位 / 色块 / 不变量 / 分组 / 撤销栈；
-`tests/unit/data`：补丁事务、撤销回滚、目录归一化（真实 gsi.json）、数据重置；
-`tests/unit/components`：色卡与瓶身；`tests/unit/features`：五页交互。
-
-本轮新增/重写：
-- `tests/unit/core/blend.test.ts`（13 条）：再稀释、原浆占比、目标容量分摊、缺口。
-- `tests/unit/features/mix.test.tsx`（13 条）：稀释正/反算、再稀释、调漆分摊、稀释剂缺失、
-  使用 / 入库 / 开涂、空状态。
-- 术语与数据断言同步更新：workbench / procure / catalog / schemas 等。
-
 ```
-npx tsc --noEmit   → 0 error
-npx vitest run     → 24 files / 323 tests passed
-npx vite build     → ✓ built（JS 625 KB → gzip 197 KB）
-npm run check      → verify 0 error（34 warning：primer/wash 语义提示）
+npx tsc --noEmit        → 0 error
+npx vitest run          → 34 文件 / 388 用例通过
+npx vite build          → ✓（PWA）
+npx vite build --mode desktop → ✓（无 sw.js）
 ```
 
-## 目录
+2.2.0 新增/改写用例：
 
-```
-public/catalog/      运行时目录包（gsi / jy / index）
-scripts/             import-paintlab / verify-catalog / build-catalog / make-launcher
-src/core/            领域层（types / schemas / math / render / rules / history）
-src/data/            db（Dexie v2）/ repos / catalog
-src/store/           切片 + hydrateApp
-src/components/      ui / paint / bottle
-src/features/        procure / depot / mix / workbench / settings
-src/app/             Shell / TopBar / SideNav / App
-docs/                设计书 / 交班文档 / 改版说明 / seed
-tests/unit/          core · data · components · features
-```
+- `tests/unit/core/formula.test.ts`（9 条）：配方签名比例归一、顺序无关、不同比例 / `sourceKey` 区分、组分 ml 合并、旧数据签名退化、说明截断。
+- `tests/unit/core/low-volume.test.ts`（5 条）：20% / 10 ml 边界、0 ml 不算偏低、提示去重、文案原文。
+- `tests/unit/data/mix-stockin.test.ts`（8 条）：稀释自动入库 + 同配方合并、不同比例不合并、偏低 / 归零删除与撤销、调漆合并、调漆产物作组分、盘点归零、工作台归零、旧 bottle 迁移与工作台引用迁移。
+- `tests/unit/features/mix.test.tsx`（13 条）：自动入库、二次稀释合并、两种调漆算法、调漆产物作组分、库存不足阻断、稀释剂缺失、偏低红牌 + `lowVolumeAlert`、归零删除、无使用 / 清空 / 入库键。
+- `tests/unit/features/low-volume.test.tsx`（2 条）：全局弹窗展示需求原文 + 条目，点「知道了」关闭。
+- `tests/unit/features/dilution-flow.test.tsx`：仍是三边流转，最后一个用例改成 2.2 自动入库断言。
+- 保留并通过：`core/batch`、`core/decompose`、`data/decompose`、`data/bottle-color`、`features/depot-decompose` 等旧用例（旧 `repos/bottle.ts` 流程仍被直接测试）。
 
-## 已知缺口与偏差（声明项，不是隐藏缺陷）
+## 已知缺口（声明项）
 
-1. **465 条色值按色名推定**（`hexEstimated`，界面「≈ 推定色」）：未取到厂商官方色卡。
-2. **7 条匠域珍珠色名称待补**（GC004–GC010 官网不可达）。
-3. **自动快照未实现**（P1）：设置页标注，提供导出全量替代。
-4. **Playwright E2E 未接入**：回归靠单测 + 人工走查。
-5. **ESLint 未接入**：闸门为 `tsc --noEmit` + `vitest` + `vite build`。
-6. 打包单 chunk 约 625 KB（gzip 197 KB，预算 250 KB 内），未做 manualChunks。
-7. 品牌代号仍是「PD」：改名会影响启动器与 PWA 缓存，留到后续统一处理。
+1. 485 条色值按色名推定 / 官方色卡图取样（`hexEstimated`），未按实物色卡核验；7 条珍珠色名称待补。
+2. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
+3. 自动快照未实现（桌面版也是手动导出留档）；设置页如实标注。
+4. Playwright E2E 未接入；桌面实机走查覆盖：启动/五页导航/稀释批次/调漆批次改名改色/删除分解/撤销/导入导出/窗口记忆。
+5. 单 chunk 654 KB（gzip 206 KB），未拆包。
+6. 桌面壳依赖本机 Electron 运行时缓存；未做签名与自动更新。

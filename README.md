@@ -1,88 +1,148 @@
-# PAINTLAB 1.1 · 漆料资产与调漆工作台
+# PAINTLAB 2.2.0 · 漆料资产与调漆工作台
 
-> 工程代号 **PAINTLAB**。交班与工程描述：`docs/PAINTLAB-1.0-交班总结与工程描述.md`；
-> 本轮改版说明（术语 / 数据 / 调漆台双模式）见 `docs/PAINTLAB-1.1-改版说明.md`；
+> 面向模型涂装玩家的**漆料资产与调漆工作台**：采购入库 → 仓库管理 → 调漆台（稀释 / 调漆）→ 工作台开涂。
+> 本地优先、离线可用；2.0 起提供**独立桌面应用**（Electron + 固定 origin），视觉为「终末地风味」纸面工业界面。
+> 2.1：删掉右下角浮动操作提示（回执收进状态条一行）、稀释漆料按原浆名称/色值显示并加「(1:N)稀释」小牌、稀释漆料在仓库 / 调漆台 / 工作台三边互通（原浆只走仓库 ⇄ 调漆台）、工作台新增「从仓库调取」侧栏。
+> 2.1.1：辅料采购不再问「原浆 / 稀释」；删除稀释漆料 / 调漆产物可以选择**分解回仓库**（原浆 + 辅料 / 调漆前的稀释漆料）。
+> 2.1.2：按 GSI Creos 官方产品页与色卡补录**郡士 CL 系列（LASCIVUS 肤色 CL01~09 + AURA 发色 CL101~111）共 20 条**，目录 617 → 637。
+> 2.2.0：调漆台**确认即自动入库**（去掉批次的「使用 / 清空 / 入库」动作）；**同配方自动合并容量**，仓库里始终一个瓶；任何扣减后余量 **< 原有容量 20% 或 < 10 ml** 会弹窗提醒并在名称前挂红底白字「容量偏低」，**余量 0 ml 自动删除**；调漆台改为「左取料 + 右上操作 / 右下紧凑配方」，调漆 SOP 支持**总量÷配比**与**各组分用量**两种算法，组分可用调漆产物。
+>
+> 设计规格：`docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`；2.1 变更：`docs/PAINTLAB-2.1-改版说明.md`；2.1.1 变更：`docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录：`docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 变更：`docs/PAINTLAB-2.2-改版说明.md`；
 > 分层与脚本速查：`IMPLEMENTATION.md`。
-> 单文件启动器：`release/PAINTLAB.exe`（`npm run launcher` 重建）。
-
-面向模型涂装玩家的**漆料资产与调漆工作台**：采购入库 → 仓库管理 → 调漆台（稀释 / 调漆）→ 工作台开涂，
-本地优先、离线可用，视觉走「明日方舟式工业实用主义 × 包豪斯构成」。
 
 ---
+
+## 桌面版（推荐）
+
+```bash
+npm install --ignore-scripts
+npm run desktop        # 构建桌面前端 + 安装到本机 + 建快捷方式
+```
+
+- 安装位置：`%LOCALAPPDATA%\Programs\PAINTLAB\PAINTLAB.exe`（桌面与开始菜单会自动创建 `PAINTLAB` 快捷方式）。
+- 数据目录：`%APPDATA%\PAINTLAB`（IndexedDB 绑定固定 origin `app://paintlab`，换版本不换库）。
+- 再次构建：`npm run desktop`（或只重建前端后 `npm run desktop:pack`）；应用正在运行时会提示先关闭。
+- 桌面壳源码：`desktop/electron/`（main / preload / package.json）；安装脚本：`scripts/make-desktop.mjs`。
+- 原生能力：导出走系统保存框（取消不报错）、导入支持系统打开框、单实例、窗口尺寸与位置记忆、标题栏按钮走系统原生。
+- 浏览器版启动器 `release/PAINTLAB.exe` 仍保留，但已改为**固定端口 8787**；端口占用时提示关闭旧实例，避免换端口导致 IndexedDB 换库。
+
+## 浏览器版
+
+```bash
+npm run dev            # http://localhost:5175
+npm run build          # PWA 构建
+npm run launcher       # 重建 release/PAINTLAB.exe（固定端口 8787）
+```
 
 ## 四个动词，全站统一
 
 | 动线 | 统一叫法 | 说明 |
 |---|---|---|
-| 任何进入仓库的动作 | **入库** | 采购页入库、工作台放回、调漆台批次入库 |
+| 任何进入仓库的动作 | **入库** | 采购页入库、工作台放回、调漆台稀释 / 调漆确认后自动入库 |
 | 任何进入调漆台的动作 | **调漆** | 仓库行点「调漆」→ 选中该条并进入调漆台 |
-| 任何进入工作台的动作 | **开涂** | 仓库多选开涂、调漆台批次开涂 |
-| 调漆台内的产出 | **稀释 / 调漆** | 两种模式，见下 |
+| 任何进入工作台的动作 | **开涂** | 仓库多选开涂、调漆台「最近产出」开涂 |
+| 调漆台内的产出 | **稀释 / 调漆** | 两种模式；确认即扣库存并入库 |
 
-## 调漆台（本轮重做）
+## 平台流转（2.1）
 
-- **稀释模式**：原浆 + 稀释剂按 1:N 直接产出「已稀释漆料」批次；**不再选择调漆瓶容量**。
-  也支持取用仓库里的已稀释漆料继续再稀释（填取用 ml + 目标比例）。
-- **调漆模式**：多组分（原浆 / 已稀释漆料）按 ml 或按**目标总容量分摊**混合，
-  每组按自身比例折算原浆，得出等效比例。
-- 批次动作：**入库**（变成仓库条目）/ **开涂**（送到工作台）/ 使用 / 清空；可切换历史批次。
+| 漆料 | 仓库 | 调漆台 | 工作台 |
+|---|---|---|---|
+| **稀释漆料**（含调漆产物） | ⇄ | ⇄ | ⇄ |
+| **原浆**（采购入库） | ⇄ | ⇄ | ✕ 不可上工作台 |
 
-## 快速开始
+- 工作台左栏「从仓库调取」只列稀释 / 调漆产物，点一下即加入当前工作台。
+- 工作台选中的产物可「去调漆台」继续稀释 / 调漆；仓库行对原浆不再显示「开涂」，详情页的「开涂」为禁用态并说明原因。
+- 数据层兜底：`openCoat` 拒绝 `state === 'neat'` 的库存条目。
 
-需要 Node.js ≥ 18。
+## 调漆台（2.2）
 
-```bash
-npm install --ignore-scripts     # 沙箱里 esbuild 的 postinstall 会被拦，平台包已随可选依赖装好
-npm run dev                      # http://localhost:5175
-npm run typecheck                # tsc --noEmit，期望 0 错
-npm test                         # vitest run，24 文件 / 323 用例
-npm run build                    # tsc --noEmit && vite build（PWA 壳）
-npm run check                    # 目录核验 + 重建 public/catalog
-npm run launcher                 # 重建 release/PAINTLAB.exe
-```
+- 布局：左「取用漆料」→ 右上操作区（SOP + 计算 + 确认）→ 右下紧凑配方条（真实体积占比，不再画大瓶身）→ 底部最近配方。
+- **稀释模式**：原浆 / 已稀释漆料 + 稀释剂 → 已稀释漆料。可填「原浆量 A」或「目标总量 V」，比例 1:N 0–10；确认**自动扣减库存并入库**。
+- **调漆模式 · 两种算法**：
+  - **按总量 ÷ 配比**：填目标总容量 V + 各组分配比权重 → 自动算各组分 ml（合计严格等于 V）；
+  - **按各组分用量**：填各组分 ml → 自动算占比、合计与等效比例。
+  - 组分可以是原浆、已稀释漆料或库里的调漆产物；确认后自动扣减各组分并入库。
+- **自动入库 / 同配方合并（2.2）**：确认后不再产生「调漆台批次」，产物直接写进仓库；按组分身份 + 稀释状态 + 比例 + 体积占比生成配方签名（`StockItem.mixKey`），签名相同就把容量并进同一瓶（`initialMl` 同步累加）。2.1.x 入库的旧条目用 `parts` 现算签名，同样参与合并。
+- **容量偏低 / 归零删除（2.2）**：任何扣减（稀释、调漆、工作台用量、盘点）后，若某条余量 **< 原有容量 20% 或 < 10 ml**：
+  - 全局弹窗「此操作后容量偏低，为防止影响你的涂装请注意。」并列出受影响条目；
+  - 该条目名称栏最前面出现红底白字「容量偏低」小牌；
+  - 余量 **0 ml** 的条目直接从仓库删除（连同工作台引用），整单可撤销；升级到 2.2 时也会清理历史遗留的 0 ml 条目。
+- **稀释批次（2.1）**：名称沿用原浆名称、色值沿用原浆目录色（不透明），名称前挂灰底白字的「(1:N)稀释」小牌；不单独命名、不单独改色、不占调漆序号。
+- **调漆产物**：自动命名 `调漆1`、`调漆2`……（序号只增不减）；色值按各组分原浆量加权混色，入库即为真实颜色。
+- **删除条目（2.1.1）**：稀释漆料 / 调漆产物入库时记下组分快照（`StockItem.parts`）。删除时弹层给两个出口：
+  - **确认删除**：直接丢掉（原行为，可撤销）；
+  - **分解为原浆和辅料 / 分解为调漆前的组分**：按当前余量等比还原成多条库存（原浆、稀释剂、调漆前的稀释漆料）回仓库，整单可撤销。
+  - 2.1.0 及更早入库、没有组分快照的条目只能直接删除，弹层会说明原因。
 
-## 数据（paintlab 合并表重建）
+## 采购（2.1.1）
+
+- 稀释剂 / 缓干剂 / 脱漆剂等**辅料**的入库弹层不再出现「原浆 / 稀释」与稀释比例，固定按未稀释记账，界面给一句说明。
+- 颜色漆仍是「原浆 / 稀释」二选一 + 稀释比例；同一弹层混选颜色与辅料时保持原样。
+
+
+## 界面（终末地风味）
+
+- 变体卡：`yellow / neutral / standard / grid / standard / calm`——唯一强调色 `#FFFA00`、纸面 `#F4F4F2`、切角 7/8px、32px 网格、标准密度、机械短动效。
+- 浅色为默认主题；深色是一套完整主题（设置页或命令栏右侧切换）。
+- 命令栏（40px，兼作桌面标题栏）+ 三色条 + 状态条（36px）+ 内容区；一级导航 1–5 快捷键。
+- 按钮 44/40/32 三档（主要操作 44），输入 40 / 主参数 44，列表行 68；图标按钮命中区 44。切角 = 可点击，正文/色样直角；无圆角、无投影、无装饰渐变；红色只给删除与「容量偏低」状态牌（2.2 用户明确要求红底白字，属唯一例外）。
+- **不回浮动提示（2.1）**：右下角提示条已删除；回执 / 错误只在状态条（36px）上显示一行原文，4.2 s 自动收起，撤销统一走状态条的撤销栈。
+- 稀释小牌：灰底 `(1:N)稀释` + 白字，直角、无圆角；只出现在名称前，不参与点击。
+
+## 数据（paintlab 合并表 + 官方色卡手补）
 
 | 品牌 | 产品线 | 条数 |
 |---|---|---|
-| 郡士 GSI Creos（`gsi`） | 23 条系列 | 448 |
+| 郡士 GSI Creos（`gsi`） | 25 条系列（含 2.1.2 新增 CL 肤色 / CL1xx 发色） | 468 |
 | 匠域 Jumpwind（`jy`） | 11 条系列 | 169 |
-| **合计** | 34 条 | **617** |
+| **合计** | 36 条 | **637** |
 
-- 漆类：实色 531 / 透明 55 / 辅助 31
-- 色值：121 条按色号复用既有目录已核验色值；465 条按色名推定，界面标 **≈ 推定色**（不谎报）
-- 数据管线（一条命令）：
+- 漆类：实色 546 / 透明 60 / 辅助 31
+- 色值：121 条按色号复用既有目录已核验色值；465 条按色名推定 + 20 条按 GSI 官方色卡图取样，界面标 **≈ 推定色**（不谎报）
+- 数据管线：`npm run import:catalog`（CSV + `docs/seed/paint-catalog.extra.json` 手补）→ `npm run check`（校验 + 拆成 `public/catalog/*.json`）
+
+## 质量
 
 ```bash
-npm run import:catalog    # paintlab CSV → docs/seed/paint-catalog.seed.json
-npm run check             # 核验 + 拆成 public/catalog/*.json
+npm run typecheck      # tsc --noEmit，0 错
+npm test              # 34 文件 / 388 用例
+npm run build         # PWA 构建
+npm run build:desktop # 桌面构建（关闭 SW）
 ```
 
-**数据换代**：数据库版本升到 v2，升级时清空全部旧表（旧目录 4 品牌 267 条 + 旧库存 / 分组 /
-批次 / 工作台 / 记录 / 撤销栈），即「原有数据清除，重新入库」。
+## 版本号规则
 
-来源与许可：型号 / 容量 / 来源列来自 paintlab 的《郡士_匠域_油性漆_合并》表；
-色值沿用既有目录（modkit-swatch MIT 等）或由色名推定，逐条记录在 `paint.source`。
+> **未经用户明确指示，不得修改版本号。**
+> 包括 `package.json` 的 `version` 与 `src/platform.ts` 的 `APP_VERSION` 兜底值；
+> 发版或改版本必须先得到用户明确许可，并同步 `README.md` / `IMPLEMENTATION.md` / 交班文件与 `docs/` 版本说明。
 
 ## 目录结构
 
 ```
+desktop/electron/    桌面壳（main / preload / package.json）
+scripts/             make-desktop / make-launcher / 目录管线 / devtools-shot（调试）
+src/styles/          tokens（终末地 token）/ base（基础与部件）/ texture（网点、网格、斜线）
+src/app/             Shell / CommandBar / StatusBar / 路由
 src/core/            领域层（types / schemas / math：dilution + blend / render / rules / history）
 src/data/            db（Dexie v2）/ repos / catalog
-src/store/           切片 + hydrateApp（ui / settings / catalog / inventory / mix / workbench / history）
+src/store/           切片 + hydrateApp
 src/components/      ui / paint / bottle
 src/features/        procure / depot / mix / workbench / settings
-src/app/             Shell / TopBar / SideNav / App
-tests/unit/          core · data · components · features（24 文件 / 323 用例）
-public/catalog/      运行时品牌包（gsi.json / jy.json / index.json）
-scripts/             import-paintlab / verify-catalog / build-catalog / make-launcher
-docs/                设计书 + 交班文档 + 种子数据
+tests/unit/          core · data · components · features
 ```
 
 ## 已知缺口
 
-1. 465 条色值为**按色名推定**（`hexEstimated: true`，界面 ≈ 推定色）—— 建议后续按厂商官网色卡回填。
-2. 7 条匠域珍珠色（GC004–GC010）官网不可达，名称待补（`source` 已标注）。
-3. 自动快照（`snapshots`）仍未实现；设置页标注 P1 未实现并提供导出替代。
-4. Playwright E2E 未接入；回归靠 323 条单测 + 人工走查。
-5. 打包单 chunk 约 625 KB（gzip 197 KB），未做 manualChunks 拆分。
+1. 485 条色值为推定 / 色卡取样（`hexEstimated: true`，界面 ≈ 推定色），未按实物色卡核验。
+2. 7 条匠域珍珠色（GC004–GC010）官网不可达，名称待补。
+3. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
+4. 自动快照仍未实现（设置页如实标注并提供导出替代）；桌面版目前依赖手动导出留档。
+5. Playwright E2E 未接入；回归靠 388 条单测 + 桌面实机走查。
+6. 打包单 chunk 约 654 KB（gzip 206 KB），未做 manualChunks 拆分。
+7. 桌面壳复用本机 Electron 运行时（`desktop/electron-runtime`，首次构建从 `%LOCALAPPDATA%\electron\Cache` 解压）；换机时需先缓存 Electron 43 的 win32-x64 包。
+
+## 字体与许可
+
+- 界面字体 **Saira**（可变字体，SIL OFL 1.1），随包放在 `public/fonts/Saira.ttf`，许可证 `public/fonts/Saira-OFL.txt`。
+- 代码 MIT；第三方目录数据来源见 `docs/seed/README.md`。
+- 未使用任何游戏官方素材（字体、标志、图标、立绘、截图）。
