@@ -333,6 +333,34 @@
       "defaultFinish": "other",
       "thinnerFamily": "Mr.COLOR 稀释剂",
       "defaultRatioN": 2
+    },
+    {
+      "id": "gsi-lascivus",
+      "brandId": "gsi",
+      "name": "Mr.COLOR LASCIVUS (CL)",
+      "nameZh": "肤色系列 (CL)",
+      "packaging": "bottle",
+      "defaultVolumeMl": 18,
+      "kind": "lacquer",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "gloss",
+      "thinnerFamily": "Mr.COLOR 稀释剂",
+      "defaultRatioN": 2
+    },
+    {
+      "id": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "name": "Mr.COLOR LASCIVUS AURA (CL1xx)",
+      "nameZh": "发色系列 (CL1xx)",
+      "packaging": "bottle",
+      "defaultVolumeMl": 10,
+      "kind": "lacquer",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "gloss",
+      "thinnerFamily": "Mr.COLOR 稀释剂",
+      "defaultRatioN": 2
     }
   ],
   "paints": [
@@ -350,7 +378,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -368,7 +396,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -386,7 +414,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -404,7 +432,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -422,7 +450,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -440,7 +468,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -458,7 +486,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -476,7 +504,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -494,7 +522,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -512,7 +540,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -530,7 +558,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -548,7 +576,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -566,7 +594,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -584,7 +612,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -602,7 +630,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -620,7 +648,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -638,7 +666,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -656,7 +684,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -674,7 +702,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -692,7 +720,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -710,7 +738,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -728,7 +756,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -746,7 +774,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -764,7 +792,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -782,7 +810,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -800,7 +828,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -818,7 +846,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -836,7 +864,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -854,7 +882,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -872,7 +900,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -890,7 +918,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -908,7 +936,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -926,7 +954,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -944,7 +972,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -962,7 +990,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -980,7 +1008,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -998,7 +1026,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1016,7 +1044,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1034,7 +1062,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1052,7 +1080,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1070,7 +1098,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1088,7 +1116,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1106,7 +1134,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1124,7 +1152,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1142,7 +1170,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1160,7 +1188,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1178,7 +1206,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1196,7 +1224,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1214,7 +1242,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1232,7 +1260,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1250,7 +1278,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1268,7 +1296,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1286,7 +1314,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1304,7 +1332,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1322,7 +1350,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1340,7 +1368,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1358,7 +1386,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1376,7 +1404,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1394,7 +1422,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1412,7 +1440,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1430,7 +1458,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1448,7 +1476,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1466,7 +1494,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1484,7 +1512,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1502,7 +1530,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1520,7 +1548,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1538,7 +1566,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1556,7 +1584,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1574,7 +1602,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1592,7 +1620,7 @@
       "volumeMl": 170,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1610,7 +1638,7 @@
       "volumeMl": 170,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1628,7 +1656,7 @@
       "volumeMl": 170,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1646,7 +1674,7 @@
       "volumeMl": 170,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1664,7 +1692,7 @@
       "volumeMl": 170,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1682,7 +1710,7 @@
       "volumeMl": 170,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1700,7 +1728,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -1888,7 +1916,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -2450,7 +2478,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -2553,7 +2581,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -2690,7 +2718,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -2793,7 +2821,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3100,7 +3128,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3373,7 +3401,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3544,7 +3572,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3579,7 +3607,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3648,7 +3676,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3666,7 +3694,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3684,7 +3712,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3702,7 +3730,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3720,7 +3748,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3738,7 +3766,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3756,7 +3784,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3774,7 +3802,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3792,7 +3820,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3810,7 +3838,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3828,7 +3856,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3846,7 +3874,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3864,7 +3892,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3916,7 +3944,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3934,7 +3962,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -3952,7 +3980,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4055,7 +4083,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4073,7 +4101,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4227,7 +4255,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4245,7 +4273,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4263,7 +4291,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4281,7 +4309,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4299,7 +4327,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4317,7 +4345,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4335,7 +4363,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4353,7 +4381,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4371,7 +4399,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4389,7 +4417,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4407,7 +4435,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4425,7 +4453,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4443,7 +4471,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4461,7 +4489,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4530,7 +4558,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4548,7 +4576,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4600,7 +4628,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4618,7 +4646,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4636,7 +4664,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4654,7 +4682,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4672,7 +4700,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4690,7 +4718,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4708,7 +4736,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4726,7 +4754,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4744,7 +4772,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4762,7 +4790,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4780,7 +4808,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4798,7 +4826,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4816,7 +4844,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4834,7 +4862,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4852,7 +4880,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4870,7 +4898,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4888,7 +4916,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4906,7 +4934,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4924,7 +4952,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4942,7 +4970,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4960,7 +4988,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4978,7 +5006,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -4996,7 +5024,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5014,7 +5042,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5032,7 +5060,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5050,7 +5078,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5068,7 +5096,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5086,7 +5114,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5104,7 +5132,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5122,7 +5150,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5140,7 +5168,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5158,7 +5186,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5176,7 +5204,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5194,7 +5222,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5212,7 +5240,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5230,7 +5258,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5248,7 +5276,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5266,7 +5294,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5284,7 +5312,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5302,7 +5330,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5320,7 +5348,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5338,7 +5366,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5356,7 +5384,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5374,7 +5402,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5392,7 +5420,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5410,7 +5438,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5428,7 +5456,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5446,7 +5474,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5464,7 +5492,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5482,7 +5510,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5500,7 +5528,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5518,7 +5546,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5536,7 +5564,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5554,7 +5582,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5572,7 +5600,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5590,7 +5618,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5608,7 +5636,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5626,7 +5654,367 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl01",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL01",
+      "name": "ホワイトピーチ",
+      "nameZh": "白桃色",
+      "hex": "#fbd7bd",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 18,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl02",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL02",
+      "name": "ココアミルク",
+      "nameZh": "可可奶色",
+      "hex": "#a97f71",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 18,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl03",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL03",
+      "name": "クリアベールレッド",
+      "nameZh": "清透罩染红",
+      "hex": "#fadbd4",
+      "paintClass": "clear",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样（薄涂罩染，色值按底纸上的呈现推定）",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl04",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL04",
+      "name": "クリアベールオレンジ",
+      "nameZh": "清透罩染橙",
+      "hex": "#fbdbb2",
+      "paintClass": "clear",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样（薄涂罩染，色值按底纸上的呈现推定）",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl05",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL05",
+      "name": "クリアベールブラウン",
+      "nameZh": "清透罩染棕",
+      "hex": "#f6b480",
+      "paintClass": "clear",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样（薄涂罩染，色值按底纸上的呈现推定）",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl06",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL06",
+      "name": "クリアホワイト",
+      "nameZh": "清透白",
+      "hex": "#ffffff",
+      "paintClass": "clear",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 18,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl07",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL07",
+      "name": "鴇羽色（ときいろ）",
+      "nameZh": "鴇羽色",
+      "hex": "#f7bcb4",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 18,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl08",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL08",
+      "name": "ナッツホワイト",
+      "nameZh": "坚果白",
+      "hex": "#fffcf7",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 18,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl09",
+      "lineId": "gsi-lascivus",
+      "brandId": "gsi",
+      "code": "CL09",
+      "name": "スムースパールコート",
+      "nameZh": "平滑珍珠罩光",
+      "hex": "#ffffff",
+      "paintClass": "clear",
+      "finish": "pearl",
+      "category": "varnish",
+      "volumeMl": 18,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/5",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/5 色卡图（透明珍珠罩光，色值取白色底）",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl101",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL101",
+      "name": "ブロンド",
+      "nameZh": "金发色",
+      "hex": "#f3f298",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl102",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL102",
+      "name": "栗毛色",
+      "nameZh": "栗色",
+      "hex": "#c4532b",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl103",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL103",
+      "name": "濡烏（ぬれがらす）",
+      "nameZh": "濡乌色",
+      "hex": "#3c3c3e",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl104",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL104",
+      "name": "ピンクパープル",
+      "nameZh": "粉紫",
+      "hex": "#e799c0",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl105",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL105",
+      "name": "ライラック",
+      "nameZh": "丁香紫",
+      "hex": "#c9a0ca",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl106",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL106",
+      "name": "白雪色",
+      "nameZh": "雪白",
+      "hex": "#ffffff",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl107",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL107",
+      "name": "亜麻色",
+      "nameZh": "亚麻色",
+      "hex": "#aba692",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl108",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL108",
+      "name": "浅葱色",
+      "nameZh": "浅葱色",
+      "hex": "#009fad",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl109",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL109",
+      "name": "ライムグリーン",
+      "nameZh": "青柠绿",
+      "hex": "#9ccb61",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl110",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL110",
+      "name": "緋色",
+      "nameZh": "绯红",
+      "hex": "#e82663",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
+      "origin": "seed",
+      "hexEstimated": true
+    },
+    {
+      "id": "gsi-cl111",
+      "lineId": "gsi-lascivus-aura",
+      "brandId": "gsi",
+      "code": "CL111",
+      "name": "空色",
+      "nameZh": "天空蓝",
+      "hex": "#6ec2ee",
+      "paintClass": "solid",
+      "finish": "gloss",
+      "category": "color",
+      "volumeMl": 10,
+      "sourceUrl": "https://www.mr-hobby.com/ja/products/detail/6",
+      "verifiedAt": "2026-11-18",
+      "source": "GSI Creos 官方产品页 detail/6 色卡图取样；色值按色卡图推定",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5644,7 +6032,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5662,7 +6050,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5680,7 +6068,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5698,7 +6086,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5716,7 +6104,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5734,7 +6122,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5752,7 +6140,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5770,7 +6158,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5788,7 +6176,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5806,7 +6194,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5824,7 +6212,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5842,7 +6230,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5860,7 +6248,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5895,7 +6283,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5913,7 +6301,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5931,7 +6319,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5949,7 +6337,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5967,7 +6355,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -5985,7 +6373,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6003,7 +6391,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6021,7 +6409,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6039,7 +6427,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6057,7 +6445,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6075,7 +6463,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6093,7 +6481,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6111,7 +6499,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6129,7 +6517,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6147,7 +6535,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6165,7 +6553,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6183,7 +6571,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6201,7 +6589,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6219,7 +6607,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6237,7 +6625,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6255,7 +6643,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6273,7 +6661,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6291,7 +6679,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6309,7 +6697,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6327,7 +6715,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6345,7 +6733,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6363,7 +6751,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6381,7 +6769,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6399,7 +6787,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6417,7 +6805,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6435,7 +6823,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6453,7 +6841,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6471,7 +6859,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6489,7 +6877,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6507,7 +6895,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6525,7 +6913,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6543,7 +6931,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6561,7 +6949,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6579,7 +6967,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6597,7 +6985,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6615,7 +7003,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6633,7 +7021,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6651,7 +7039,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6669,7 +7057,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6687,7 +7075,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6705,7 +7093,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6723,7 +7111,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6741,7 +7129,7 @@
       "volumeMl": 60,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6759,7 +7147,7 @@
       "volumeMl": 60,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6777,7 +7165,7 @@
       "volumeMl": 60,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6795,7 +7183,7 @@
       "volumeMl": 60,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6813,7 +7201,7 @@
       "volumeMl": 60,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6831,7 +7219,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6849,7 +7237,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6867,7 +7255,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6885,7 +7273,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6903,7 +7291,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6921,7 +7309,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6939,7 +7327,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6957,7 +7345,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6975,7 +7363,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -6993,7 +7381,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7011,7 +7399,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7029,7 +7417,7 @@
       "volumeMl": 100,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7047,7 +7435,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7065,7 +7453,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7083,7 +7471,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7101,7 +7489,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7119,7 +7507,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7137,7 +7525,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7155,7 +7543,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7173,7 +7561,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7191,7 +7579,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7209,7 +7597,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7227,7 +7615,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7245,7 +7633,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7484,7 +7872,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7502,7 +7890,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7520,7 +7908,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7538,7 +7926,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7556,7 +7944,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7574,7 +7962,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7592,7 +7980,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7610,7 +7998,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7628,7 +8016,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7646,7 +8034,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7664,7 +8052,7 @@
       "volumeMl": 10,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7682,7 +8070,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7700,7 +8088,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7718,7 +8106,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7736,7 +8124,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7754,7 +8142,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7772,7 +8160,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7790,7 +8178,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7808,7 +8196,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7826,7 +8214,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7844,7 +8232,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7862,7 +8250,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7880,7 +8268,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7898,7 +8286,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7916,7 +8304,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7934,7 +8322,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7952,7 +8340,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7970,7 +8358,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -7988,7 +8376,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8040,7 +8428,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8058,7 +8446,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8076,7 +8464,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8094,7 +8482,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8112,7 +8500,7 @@
       "volumeMl": 40,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8130,7 +8518,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8148,7 +8536,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8166,7 +8554,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8184,7 +8572,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8202,7 +8590,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8220,7 +8608,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8238,7 +8626,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     },
@@ -8256,7 +8644,7 @@
       "volumeMl": 18,
       "sourceUrl": "https://www.mr-hobby.com/ja/dl/catalog",
       "verifiedAt": "2026-11-17",
-      "source": "paintlab 合并表（型号/容量/来源）；色值按色名推定",
+      "source": "paintlab 合并表（型号/容量/来源）；色值沿用既有目录（按色名推定）",
       "origin": "seed",
       "hexEstimated": true
     }

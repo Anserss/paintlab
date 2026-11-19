@@ -4,15 +4,19 @@
  *
  * 用法：
  *   node scripts/import-paintlab.mjs [--csv <合并表.csv>] [--out docs/seed/paint-catalog.seed.json]
+ *                                   [--extra docs/seed/paint-catalog.extra.json] [--no-extra]
  *
- * 数据来源（唯一）：
- *   H:/AI/DEEPSEEK/harmess/paintlab/郡士_匠域_油性漆_合并.csv
- *   列：序号,品牌,系列,类别,名称（中文）,原名 / 英文名,厂商代号,色号,特性,容量,参考价(日元含税),备注,来源
+ * 数据来源：
+ *   1) H:/AI/DEEPSEEK/harmess/paintlab/郡士_匠域_油性漆_合并.csv
+ *      列：序号,品牌,系列,类别,名称（中文）,原名 / 英文名,厂商代号,色号,特性,容量,参考价(日元含税),备注,来源
+ *   2) docs/seed/paint-catalog.extra.json（手补，可选）
+ *      CSV 管线没有、或色值必须按官方色卡取样的条目（如郡士 CL 系列）。
  *
  * 色值规则（数据纪律）：
  *   1) 先按 (brandId, 色号) 复用旧目录里已核验过的色值（旧目录的 #ffffff 是辅料占位，不复用）；
  *   2) 未命中时按「色名 + 特性」推定近似色，写入 hexEstimated: true，界面以 ≈ 标注；
- *   3) 辅料（aux）按项目约定统一 #ffffff（色块由 paintClass 渲染为白色 70%）。
+ *   3) 辅料（aux）按项目约定统一 #ffffff（色块由 paintClass 渲染为白色 70%）；
+ *   4) 手补条目自带 hex（色卡取样），原样保留。
  *
  * 零依赖，Node ESM。
  */
@@ -29,6 +33,12 @@ function arg(name, fallback = null) {
 const ROOT = process.cwd();
 const CSV_PATH = resolve(arg('csv', 'H:/AI/DEEPSEEK/harmess/paintlab/郡士_匠域_油性漆_合并.csv'));
 const OUT_PATH = resolve(arg('out', 'docs/seed/paint-catalog.seed.json'));
+/**
+ * 手补目录（可选）：CSV 管线没有、或色值必须按官方色卡取样的条目。
+ * 默认读取 docs/seed/paint-catalog.extra.json；--extra <file> 覆盖，--no-extra 跳过。
+ */
+const SKIP_EXTRA = process.argv.includes('--no-extra');
+const EXTRA_PATH = SKIP_EXTRA ? null : resolve(arg('extra', 'docs/seed/paint-catalog.extra.json'));
 
 /* ------------------------------------------------------------------ */
 /* CSV                                                                */
@@ -215,6 +225,10 @@ const normalizeCode = (code) => {
   return match ? `${match[1]}${Number(match[2])}` : text;
 };
 
+/**
+ * 旧目录里的色值：只读 public/catalog 里构建好的品牌包。
+ * 连同 hexEstimated 一起带回 —— 否则重跑导入会把「推定色」洗成「已核验色」。
+ */
 function loadOldHex() {
   const map = new Map();
   for (const brand of ['gsi', 'jy']) {
@@ -226,7 +240,10 @@ function loadOldHex() {
         const hex = String(paint.hex ?? '').toLowerCase();
         if (!/^#[0-9a-f]{6}$/.test(hex) || hex === '#ffffff') continue;
         if (paint.paintClass === 'aux') continue;
-        map.set(`${brand}|${normalizeCode(paint.code)}`, hex);
+        map.set(`${brand}|${normalizeCode(paint.code)}`, {
+          hex,
+          hexEstimated: Boolean(paint.hexEstimated),
+        });
       }
     } catch {
       /* 单个品牌包损坏不影响导入 */
@@ -393,9 +410,16 @@ for (const line of lineMap.values()) {
     } else {
       const reused = oldHex.get(`${line.brandId}|${normalizeCode(row.code)}`);
       if (reused) {
-        hex = reused;
-        reusedHex += 1;
-        sourceNote += '；色值沿用既有目录';
+        hex = reused.hex;
+        if (reused.hexEstimated) {
+          // 旧目录本身就是按色名推定的，重跑时必须保留「≈ 推定色」标记
+          hexEstimated = true;
+          estimatedHex += 1;
+          sourceNote += '；色值沿用既有目录（按色名推定）';
+        } else {
+          reusedHex += 1;
+          sourceNote += '；色值沿用既有目录';
+        }
       } else {
         const estimate = estimateHex(row);
         hex = estimate.hex;
@@ -430,6 +454,38 @@ for (const line of lineMap.values()) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* 手补目录合并（官方色卡取样等 CSV 无法表达的条目）                     */
+/* ------------------------------------------------------------------ */
+let extraLines = 0;
+let extraPaints = 0;
+let extraEstimated = 0;
+if (EXTRA_PATH && existsSync(EXTRA_PATH)) {
+  const extra = JSON.parse(readFileSync(EXTRA_PATH, 'utf8'));
+  const lineIds = new Set(lines.map((l) => l.id));
+  for (const line of extra.lines ?? []) {
+    if (!line?.id || lineIds.has(line.id)) continue;
+    lines.push(line);
+    lineIds.add(line.id);
+    extraLines += 1;
+  }
+  const paintIds = new Set(paints.map((p) => p.id));
+  const brandIds = new Set(BRANDS.map((b) => b.id));
+  for (const paint of extra.paints ?? []) {
+    if (!paint?.id || paintIds.has(paint.id)) continue;
+    if (!brandIds.has(paint.brandId) || !lineIds.has(paint.lineId)) {
+      throw new Error(`手补条目 ${paint.id}: brandId/lineId 未定义`);
+    }
+    paints.push(paint);
+    paintIds.add(paint.id);
+    extraPaints += 1;
+    if (paint.hexEstimated) extraEstimated += 1;
+  }
+  if (extraPaints > 0) {
+    console.log(`   ↳ 手补目录 ${EXTRA_PATH}：产品线 ${extraLines} / 漆料 ${extraPaints}`);
+  }
+}
+
 const stats = {
   brands: BRANDS.length,
   lines: lines.length,
@@ -439,7 +495,7 @@ const stats = {
     return acc;
   }, {}),
   hexReused: reusedHex,
-  hexEstimated: estimatedHex,
+  hexEstimated: estimatedHex + extraEstimated,
 };
 
 const doc = {
