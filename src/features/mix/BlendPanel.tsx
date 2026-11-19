@@ -153,7 +153,7 @@ export function BlendPanel({
                       <span className="flex min-w-0 items-center gap-1.5">
                         {row.dilutionRatioN !== null && <DilutionTag ratioN={row.dilutionRatioN} />}
                         <span className="truncate text-[13px] font-medium text-text-1">
-                          {row.code} {row.name}
+                          {row.mixed ? row.name : row.code + ' ' + row.name}
                         </span>
                         {row.mixed && (
                           <span className="ef-tag shrink-0" title="库里的调漆产物">
@@ -172,7 +172,7 @@ export function BlendPanel({
                     <label className="flex shrink-0 items-center gap-1.5">
                       <span className="ef-eyebrow">{ratioMode ? '配比' : '用量'}</span>
                       <input
-                        aria-label={(ratioMode ? '配比 ' : '用量 ') + row.code}
+                        aria-label={(ratioMode ? '配比 ' : '用量 ') + (row.mixed ? row.name : row.code)}
                         data-part-ml={row.id}
                         data-part-mode={logic}
                         inputMode="decimal"
@@ -190,7 +190,7 @@ export function BlendPanel({
                     </span>
                     <button
                       type="button"
-                      aria-label={'移除组分 ' + row.code}
+                      aria-label={'移除组分 ' + (row.mixed ? row.name : row.code)}
                       data-part-remove={row.id}
                       onClick={() => onRemove(row.id)}
                       className="h-9 w-9 shrink-0 border text-[14px] text-text-2 hover:text-danger"

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { MixRecord, Paint, PaintState, StockItem } from '@/core/model/types';
 import { codeOrDash } from '@/core/render/label';
-import { stockLook } from '@/core/render/batch';
+import { isMixedProduct, stockLook } from '@/core/render/batch';
 import { getStore } from '@/data/db';
 import { useAppStore } from '@/store';
 
@@ -21,6 +21,8 @@ export interface StockRow {
   ratioN: number;
   /** 稀释漆料：名称前「(1:N)稀释」小牌的比例（2.1） */
   dilutionRatioN: number | null;
+  /** 2.2.1：调漆产物（只显示名称，不再显示基础漆号） */
+  mixed: boolean;
 }
 
 /**
@@ -47,6 +49,7 @@ export function useStockRows(): StockRow[] {
           state: item.state,
           ratioN: item.ratioN ?? 0,
           dilutionRatioN: null,
+          mixed: isMixedProduct(item),
         };
       }
       const look = stockLook(item, paint);
@@ -62,6 +65,7 @@ export function useStockRows(): StockRow[] {
         state: item.state,
         ratioN: item.ratioN ?? 0,
         dilutionRatioN: look.dilutionRatioN,
+        mixed: isMixedProduct(item),
       };
       if (typeof look.alpha === 'number') row.alpha = look.alpha;
       return row;

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Group } from '@/core/model/types';
 import { formatMl, formatRatio } from '@/core/math/quantity';
 import { codeOrDash, paintDescription, paintOriginLine, paintTitle } from '@/core/render/label';
-import { canEnterWorkbench, WORKBENCH_NEAT_BLOCK } from '@/core/render/batch';
+import { canEnterWorkbench, isMixedProduct, WORKBENCH_NEAT_BLOCK } from '@/core/render/batch';
 import { UNGROUPED_ID } from '@/core/rules/groups';
 import { isLowVolume } from '@/core/rules/low-volume';
 import { DilutionTag, LowVolumeTag, PaintSwatch, StockBar } from '@/components/paint';
@@ -57,6 +57,7 @@ export function PaintDetail({
   const desc = paintDescription(row.paint, row.line);
   const origin = paintOriginLine(brandLabel(row.brand), row.line.name);
   const currentGroup = row.item.groupId ?? UNGROUPED_ID;
+  const mixedProduct = isMixedProduct(row.item);
 
   return (
     <aside
@@ -108,20 +109,22 @@ export function PaintDetail({
           )}
         </div>
 
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="ef-field text-[28px] font-bold text-text-1" data-paint-code="">
-            {codeOrDash(row.paint.code)}
-          </span>
-          <span className="ef-field text-[11px] text-text-2">{row.line.name}</span>
-        </div>
+        {!mixedProduct && (
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="ef-field text-[28px] font-bold text-text-1" data-paint-code="">
+              {codeOrDash(row.paint.code)}
+            </span>
+            <span className="ef-field text-[11px] text-text-2">{row.line.name}</span>
+          </div>
+        )}
 
         {row.dilutionRatioN ? (
           <p className="ef-field text-[11px] text-text-2" data-dilution-note="">
             {'稀释漆料 · ' + formatRatio(row.dilutionRatioN) + ' 稀释（名称与色值沿用原浆 ' + codeOrDash(row.paint.code) + '）'}
           </p>
-        ) : row.customMixed ? (
+        ) : mixedProduct ? (
           <p className="ef-field text-[11px] text-text-2" data-custom-mixed="">
-            {'调漆产物 · 配方：' + (row.item.mixLabel ?? '未记录') + '（原漆 ' + codeOrDash(row.paint.code) + '）'}
+            {'调漆产物 · 配方：' + (row.item.mixLabel ?? '未记录')}
           </p>
         ) : null}
 
@@ -243,7 +246,7 @@ export function PaintDetail({
         <Button variant="secondary" size="sm" data-detail-action="mix" onClick={() => onUse(row)}>
           调漆
         </Button>
-        {row.customMixed && row.dilutionRatioN === undefined && (
+        {mixedProduct && (
           <Button variant="secondary" size="sm" data-detail-action="rename" onClick={() => onRename(row)}>
             改名
           </Button>

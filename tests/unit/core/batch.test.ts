@@ -7,6 +7,7 @@ import {
   canEnterWorkbench,
   dilutionTagText,
   isDiluteBatch,
+  isMixedProduct,
   stockDilutionRatio,
   stockLook,
   WORKBENCH_NEAT_BLOCK,
@@ -121,6 +122,15 @@ describe('仓库条目：稀释沿用原浆名称/色值', () => {
     expect(look.hex).toBe('#2E5E9F');
     expect(look.dilutionRatioN).toBeNull();
     expect(look.undefinedColor).toBe(false);
+  });
+});
+
+describe('2.2.1 调漆产物不显示基础漆号', () => {
+  it('有自定义名称且没有稀释比例 → 调漆产物；稀释漆料 / 原浆不是', () => {
+    expect(isMixedProduct({ customName: 'A', dilutionRatioN: undefined })).toBe(true);
+    expect(isMixedProduct({ customName: '调漆14' })).toBe(true);
+    expect(isMixedProduct({ customName: '钴蓝', dilutionRatioN: 2 })).toBe(false);
+    expect(isMixedProduct({ customName: undefined })).toBe(false);
   });
 });
 

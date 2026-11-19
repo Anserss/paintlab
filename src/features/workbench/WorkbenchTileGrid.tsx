@@ -45,6 +45,7 @@ function DraggableTile({
           swatchAlpha={entry.swatchAlpha}
           swatchUndefined={entry.swatchUndefined}
           dilutionRatioN={entry.dilutionRatioN}
+          hideCode={entry.mixed}
           onSelect={(_paint: unknown, _event?: MouseEvent<HTMLElement>) => onToggle(entry.id)}
         />
       ) : (

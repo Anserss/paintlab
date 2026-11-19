@@ -103,7 +103,7 @@ export function RecipePreview({ parts, totalMl, ratioN, modeLabel, lastResult }:
                 className="h-2.5 w-2.5 shrink-0 border"
                 style={{ background: part.hex, borderColor: 'var(--ef-swatch-ring)' }}
               />
-              <span className="ef-field shrink-0 text-[10px]">{part.code ?? '—'}</span>
+              {part.code && <span className="ef-field shrink-0 text-[10px]">{part.code}</span>}
               <span className="max-w-[160px] truncate text-text-1">{part.label}</span>
               <span className="ef-field shrink-0">{formatMl(part.ml) + ' ml'}</span>
               <span className={cn('ef-field shrink-0', part.aux ? 'text-text-2' : 'text-text-1')}>

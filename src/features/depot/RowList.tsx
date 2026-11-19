@@ -59,6 +59,7 @@ function DepotRowItem({ row, draggable, selected, actions, onSelect }: RowItemPr
         swatchAlpha={row.displayAlpha}
         swatchUndefined={isUndefinedColor(row.item.customHex ?? row.paint.hex, row.item.customAlpha)}
         dilutionRatioN={row.dilutionRatioN}
+        hideCode={row.mixedProduct}
         onSelect={() => onSelect(row)}
         onDetail={() => actions.onOpen?.(row)}
         actions={{

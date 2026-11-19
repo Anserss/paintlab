@@ -33,6 +33,8 @@ export interface PaintRowProps {
   swatchUndefined?: boolean;
   /** 稀释漆料：名称前的「(1:N)稀释」小牌 */
   dilutionRatioN?: number | null;
+  /** 2.2.1：调漆产物只显示名称，不显示基础漆号 */
+  hideCode?: boolean;
   actions?: PaintRowActions;
   onSelect?: (paint: Paint, e?: MouseEvent<HTMLElement>) => void;
   /** Space / 单击行的"详情"出口 */
@@ -59,6 +61,7 @@ export const PaintRow = memo(function PaintRow({
   swatchAlpha,
   swatchUndefined,
   dilutionRatioN,
+  hideCode = false,
   actions,
   onSelect,
   onDetail,
@@ -72,7 +75,7 @@ export const PaintRow = memo(function PaintRow({
     dilutionRatioN ? dilutionTagText(dilutionRatioN) : null,
     title.primary,
     title.secondary,
-    codeOrDash(paint.code),
+    hideCode ? null : codeOrDash(paint.code),
     paintDescription(paint, line),
     stock ? '余量 ' + formatMl(stock.volumeMl) + '/' + formatMl(stock.initialMl) + ' ml' : null,
     empty ? '空瓶' : null,
@@ -130,6 +133,7 @@ export const PaintRow = memo(function PaintRow({
         stock={stock}
         compact={compact}
         dilutionRatioN={dilutionRatioN}
+        hideCode={hideCode}
         className="flex-1"
       />
 

@@ -33,6 +33,17 @@ export function stockDilutionRatio(item: Pick<StockItem, 'dilutionRatioN'>): num
 }
 
 /**
+ * 2.2.1：调漆产物（混合漆）= 有自定义名称且不是稀释漆料。
+ * 这类条目的基础漆号没有意义（它由多支漆调成），界面只显示名称，
+ * 不再显示 JW020 之类的原漆号。
+ */
+export function isMixedProduct(
+  item: Pick<StockItem, 'customName' | 'dilutionRatioN'>,
+): boolean {
+  return Boolean(item.customName) && item.dilutionRatioN == null;
+}
+
+/**
  * 平台流转规则（2.1）：
  * - 稀释漆料：仓库 ⇄ 调漆台 ⇄ 工作台 三边互通；
  * - 原浆：采购 → 仓库后只能在仓库与调漆台之间流转，不能上工作台。

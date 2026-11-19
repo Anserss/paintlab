@@ -371,6 +371,35 @@ describe('调漆模式 · 两种算法', () => {
     expect(mixedItems().some((item) => item.customName === '调漆1')).toBe(true);
   });
 
+  it('调漆产物在取料行 / 取用行只显示名称，不显示基础漆号', async () => {
+    await seedStocks();
+    const mixed = await createStockItem(store, {
+      paint: BLUE,
+      initialMl: 30,
+      state: 'thinned',
+      ratioN: 2,
+      groupId: null,
+    });
+    if (!mixed.ok) throw new Error(mixed.error);
+    await store.stockItems.put({ ...mixed.data.item, customName: 'A', customHex: '#667893' });
+    await useAppStore.getState().refreshInventory();
+
+    render(
+      <MemoryRouter>
+        <MixPage />
+      </MemoryRouter>,
+    );
+    await waitForPage();
+    const row = document.querySelector('[data-stock-item="' + mixed.data.item.id + '"]') as HTMLElement | null;
+    expect(row).not.toBeNull();
+    expect(row?.textContent).toContain('A');
+    expect(row?.textContent).not.toContain('C80');
+
+    fireEvent.click(row as HTMLElement);
+    await waitFor(() => expect(document.querySelector('[data-source-line]')?.textContent).toContain('取用：A'));
+    expect(document.querySelector('[data-source-line]')?.textContent).not.toContain('C80');
+  });
+
   it('按各组分用量：10 + 20 → 合计 30、原浆 16.7 / 稀释剂 13.3、等效 1:0.8', async () => {
     const seeded = await seedStocks();
     const thinnedId = await seedThinned(WHITE, 40, 2);
@@ -449,7 +478,7 @@ describe('调漆模式 · 两种算法', () => {
     await switchMode('调漆');
     setBlendSelection([pre.data.item.id, seeded.whiteId]);
     fireEvent.click(screen.getByLabelText('按各组分用量'));
-    fireEvent.change(screen.getByLabelText('用量 C80'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('用量 旧调漆'), { target: { value: '10' } });
     fireEvent.change(screen.getByLabelText('用量 C1'), { target: { value: '10' } });
 
     fireEvent.click(screen.getByRole('button', { name: '调漆并入库' }));

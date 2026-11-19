@@ -88,6 +88,19 @@ describe('AC-15 中文属性行', () => {
   });
 });
 
+describe('2.2.1 调漆产物隐藏基础漆号', () => {
+  it('PaintTile / PaintRow 传 hideCode 时只显示名称，不显示 C80', () => {
+    const tile = render(<PaintTile paint={solid} line={mrColor} brand={brand} hideCode />);
+    expect(tile.container.textContent ?? '').not.toContain('C80');
+    expect(tile.container.textContent ?? '').toContain('钴蓝');
+    expect(tile.container.textContent ?? '').toContain('调漆');
+
+    const row = render(<PaintRow paint={solid} line={mrColor} brand={brand} stock={stock} hideCode />);
+    expect(row.container.textContent ?? '').not.toContain('C80');
+    expect(row.container.textContent ?? '').toContain('钴蓝');
+  });
+});
+
 describe('AC-06 三档透明度', () => {
   it('solid / clear / aux 计算样式为 1、0.4、0.7，aux 背景为 #FFF', () => {
     const { container } = render(

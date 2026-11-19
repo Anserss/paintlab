@@ -124,7 +124,7 @@ export function DilutePanel({
   busy = false,
 }: DilutePanelProps) {
   const thinned = source?.state === 'thinned';
-  const sourceLabel = source ? source.code + ' ' + source.name : '未选择漆料';
+  const sourceLabel = source ? (source.mixed ? source.name : source.code + ' ' + source.name) : '未选择漆料';
   const fromRatioN = source?.ratioN ?? 0;
   const ratioInvalid = thinned && ratioN <= fromRatioN;
 

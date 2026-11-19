@@ -380,3 +380,22 @@ describe('批量操作（spec 3.5 / 3.10 拖拽矩阵的菜单路径）', () => 
     await waitFor(() => expect(useAppStore.getState().workbenchItems[0]?.plannedUseMl).toBe(7.5));
   });
 });
+
+describe('2.2.1 调漆产物隐藏基础漆号', () => {
+  it('工作台磁贴只显示自定义名称 A，不显示 C80', async () => {
+    const workbench = await createWorkbench('混合台');
+    const { stockId, workbenchItemId } = await seedWorkbenchItem(workbench.id, 30, 2);
+    const item = await store.stockItems.get(stockId);
+    if (!item) throw new Error('missing');
+    await store.stockItems.put({ ...item, customName: 'A', customHex: '#667893' });
+    await useAppStore.getState().refreshInventory();
+    await useAppStore.getState().refreshWorkbenches();
+
+    const { container } = await renderPage();
+    const tile = container.querySelector('[data-workbench-tile="' + workbenchItemId + '"]') as HTMLElement | null;
+    expect(tile).not.toBeNull();
+    expect(tile?.textContent).toContain('A');
+    expect(tile?.textContent).not.toContain('C80');
+    expect(tile?.textContent).toContain('调漆');
+  });
+});

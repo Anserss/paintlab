@@ -25,6 +25,8 @@ export interface PaintTileProps {
   swatchUndefined?: boolean;
   /** 稀释漆料：名称前的「(1:N)稀释」小牌 */
   dilutionRatioN?: number | null;
+  /** 2.2.1：调漆产物只显示名称，不显示基础漆号 */
+  hideCode?: boolean;
   onSelect?: (paint: Paint, e?: MouseEvent<HTMLElement>) => void;
   className?: string;
 }
@@ -40,6 +42,7 @@ export const PaintTile = memo(function PaintTile({
   swatchAlpha,
   swatchUndefined,
   dilutionRatioN,
+  hideCode = false,
   onSelect,
   className,
 }: PaintTileProps) {
@@ -49,9 +52,10 @@ export const PaintTile = memo(function PaintTile({
   const low = stock ? isLowVolume(stock.volumeMl, stock.initialMl) : false;
   const label = [
     low ? '容量偏低' : null,
+    hideCode ? '调漆产物' : null,
     diluted ? dilutionTagText(dilutionRatioN) : null,
     title.primary,
-    codeOrDash(paint.code),
+    hideCode ? null : codeOrDash(paint.code),
     desc,
   ]
     .filter(Boolean)
@@ -103,8 +107,13 @@ export const PaintTile = memo(function PaintTile({
           {low && <LowVolumeTag />}
           {diluted && <DilutionTag ratioN={dilutionRatioN} />}
           <span className="truncate text-[15px] font-semibold leading-tight text-text-1">{title.primary}</span>
+          {hideCode && (
+            <span className="ef-tag shrink-0" title="调漆产物：只按名称显示">
+              调漆
+            </span>
+          )}
         </div>
-        <div className="ef-field truncate text-[13px] text-text-2">{codeOrDash(paint.code)}</div>
+        {!hideCode && <div className="ef-field truncate text-[13px] text-text-2">{codeOrDash(paint.code)}</div>}
         <div data-paint-desc="" className="truncate text-[11px] text-text-2">
           {desc}
         </div>

@@ -65,7 +65,7 @@ export function UsagePanel({ entry, selectedCount, onCommit, onApplyToSelected, 
               <span className="truncate">{entry.title}</span>
             </div>
             <div className="t-readout mt-0.5 flex items-center justify-between text-[10px] text-text-3">
-              <span>{entry.code}</span>
+              <span>{entry.mixed ? '调漆产物' : entry.code}</span>
               <span>余量 {formatMl(entry.remainingMl)} ml</span>
             </div>
           </div>

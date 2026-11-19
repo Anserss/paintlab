@@ -1,6 +1,6 @@
 import type { Brand, Bottle, Paint, PaintClass, PaintLine, StockItem, WorkbenchItem } from '@/core/model/types';
 import { formatMl, r1 } from '@/core/math/quantity';
-import { bottleLook, canEnterWorkbench, stockLook, stockOriginNote } from '@/core/render/batch';
+import { bottleLook, canEnterWorkbench, isMixedProduct, stockLook, stockOriginNote } from '@/core/render/batch';
 import { codeOrDash } from '@/core/render/label';
 
 /** 用量面板的取值域（spec 3.5：滑块 0–20 ml、步进 0.5） */
@@ -30,6 +30,8 @@ export interface WorkbenchEntry {
   swatchUndefined?: boolean;
   /** 稀释漆料：名称前的「(1:N)稀释」小牌（2.1） */
   dilutionRatioN: number | null;
+  /** 2.2.1：调漆产物（只显示名称，不显示基础漆号） */
+  mixed: boolean;
 }
 
 export interface WorkbenchLookups {
@@ -110,6 +112,7 @@ export function resolveEntries(items: WorkbenchItem[], lookups: WorkbenchLookups
         ...(typeof look?.alpha === 'number' ? { swatchAlpha: look.alpha } : {}),
         ...(look?.undefinedColor ? { swatchUndefined: true } : {}),
         dilutionRatioN: look?.dilutionRatioN ?? null,
+        mixed: isMixedProduct(stock),
       });
       continue;
     }
@@ -133,6 +136,7 @@ export function resolveEntries(items: WorkbenchItem[], lookups: WorkbenchLookups
       ...(typeof look.alpha === 'number' ? { swatchAlpha: look.alpha } : {}),
       ...(look.undefinedColor ? { swatchUndefined: true } : {}),
       dilutionRatioN: look.dilutionRatioN,
+      mixed: false,
     });
   }
   return result;
@@ -151,6 +155,8 @@ export interface WorkbenchStockRow {
   alpha?: number;
   undefinedColor: boolean;
   dilutionRatioN: number | null;
+  /** 2.2.1：调漆产物（只显示名称，不显示基础漆号） */
+  mixed: boolean;
   /** 稀释 / 调漆产物：用来说明为什么可以上工作台 */
   originNote: string | null;
   /** 已在当前工作台内（禁用重复加入） */
@@ -178,6 +184,7 @@ export function buildStockLane(
       hex: look.hex,
       undefinedColor: look.undefinedColor,
       dilutionRatioN: look.dilutionRatioN,
+      mixed: isMixedProduct(item),
       originNote: stockOriginNote(item),
       alreadyIn:
         workbenchId !== null &&

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Brand, Paint, PaintLine, StockItem } from '@/core/model/types';
+import { isMixedProduct } from '@/core/render/batch';
 import { createMemoryStore, setStore } from '@/data/db';
 import type { DepotStore } from '@/data/db';
 import { ensureSystemGroup } from '@/data/repos/group';
@@ -91,7 +92,14 @@ function dilutedItem(patch: Partial<StockItem> = {}): StockItem {
 }
 
 function rowOf(item: StockItem): DepotRow {
-  return { item, paint: BLUE, line: LINE, brand: BRAND, customMixed: true };
+  return {
+    item,
+    paint: BLUE,
+    line: LINE,
+    brand: BRAND,
+    customMixed: true,
+    mixedProduct: isMixedProduct(item),
+  };
 }
 
 /** 一支调漆产物：默认名「调漆14」，有组分快照但没有稀释比例 */

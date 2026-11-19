@@ -2,7 +2,7 @@ import type { Brand, Group, Paint, PaintClass, PaintLine, StockItem } from '@/co
 import { canCreateChild, canMoveGroup, UNGROUPED_ID } from '@/core/rules/groups';
 import { hueBucket, isAchromatic, lightnessBucket } from '@/core/math/color';
 import { r1 } from '@/core/math/quantity';
-import { stockDilutionRatio } from '@/core/render/batch';
+import { isMixedProduct, stockDilutionRatio } from '@/core/render/batch';
 
 /** 仓库三视图（spec 3.3:384-390） */
 export type DepotView = 'brand' | 'hue' | 'group';
@@ -25,6 +25,8 @@ export interface DepotRow {
   customMixed?: boolean;
   /** 稀释漆料：名称前的「(1:N)稀释」小牌（2.1） */
   dilutionRatioN?: number;
+  /** 2.2.1：调漆产物（只显示名称，不显示基础漆号） */
+  mixedProduct: boolean;
 }
 
 export interface CatalogLookup {
@@ -70,7 +72,7 @@ export function buildRows(stockItems: StockItem[], lookup: CatalogLookup): Depot
           ...(item.customHex ? { hex: item.customHex } : {}),
         }
       : basePaint;
-    const row: DepotRow = { item, paint, line, customMixed };
+    const row: DepotRow = { item, paint, line, customMixed, mixedProduct: isMixedProduct(item) };
     if (brand) row.brand = brand;
     if (dilutionRatioN !== null) row.dilutionRatioN = dilutionRatioN;
     if (typeof item.customAlpha === 'number' && dilutionRatioN === null) row.displayAlpha = item.customAlpha;

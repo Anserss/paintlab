@@ -55,10 +55,11 @@ export function StockPicker({ rows, multiple, selectedIds, onToggle }: StockPick
                     type="button"
                     role={multiple ? 'checkbox' : 'radio'}
                     aria-checked={checked}
-                    aria-label={(low ? '容量偏低，' : '') + row.code + ' ' + row.name}
+                    aria-label={(low ? '容量偏低，' : '') + (row.mixed ? row.name : row.code + ' ' + row.name)}
                     data-stock-item={row.item.id}
                     data-code={row.code}
                     data-state={row.state}
+                    data-mixed={row.mixed ? '' : undefined}
                     data-dilution={row.dilutionRatioN ?? undefined}
                     data-low-volume={low ? '' : undefined}
                     onClick={() => onToggle(row.item.id)}
@@ -83,15 +84,15 @@ export function StockPicker({ rows, multiple, selectedIds, onToggle }: StockPick
                     )}
                     <span className="min-w-0 flex-1">
                       <span className="ef-field flex items-baseline justify-between gap-2 text-[12px] text-text-1">
-                        <span className="truncate">{row.code}</span>
+                        <span className="truncate">{row.mixed ? row.name : row.code}</span>
                         <span className="shrink-0 text-[11px] text-text-2">{formatMl(row.volumeMl) + ' ml'}</span>
                       </span>
                       <span className="mt-0.5 flex items-center gap-1.5">
                         {low && <LowVolumeTag />}
                         {row.dilutionRatioN !== null && <DilutionTag ratioN={row.dilutionRatioN} />}
-                        <span className="truncate text-[13px] text-text-1">{row.name}</span>
-                        {row.item.customName && row.dilutionRatioN === null ? (
-                          <span className="ef-tag shrink-0" title="库里的调漆产物，可直接作为组分">
+                        {!row.mixed && <span className="truncate text-[13px] text-text-1">{row.name}</span>}
+                        {row.mixed ? (
+                          <span className="ef-tag shrink-0" title="库里的调漆产物，只按自定义名称显示">
                             调漆
                           </span>
                         ) : row.state === 'thinned' && row.dilutionRatioN === null ? (

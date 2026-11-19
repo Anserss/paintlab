@@ -20,6 +20,8 @@ export interface PaintMetaProps {
   compact?: boolean;
   /** 稀释漆料：名称前的「(1:N)稀释」灰底白字小牌 */
   dilutionRatioN?: number | null;
+  /** 2.2.1：调漆产物不显示基础漆号（只显示名称） */
+  hideCode?: boolean;
   className?: string;
 }
 
@@ -38,6 +40,7 @@ export function PaintMeta({
   stock,
   compact = false,
   dilutionRatioN,
+  hideCode = false,
   className,
 }: PaintMetaProps) {
   const title = paintTitle(paint);
@@ -59,9 +62,11 @@ export function PaintMeta({
           {title.secondary}
         </span>
       )}
-      <span className="ef-field ml-auto shrink-0 pl-2 text-[13px] text-text-1">
-        {codeOrDash(paint.code)}
-      </span>
+      {!hideCode && (
+        <span className="ef-field ml-auto shrink-0 pl-2 text-[13px] text-text-1">
+          {codeOrDash(paint.code)}
+        </span>
+      )}
     </div>
   );
 

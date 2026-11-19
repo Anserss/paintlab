@@ -212,7 +212,7 @@ export function MixPage() {
     if (sourceRow.volumeMl + 1e-6 < dilutionPlan.takenMl) {
       list.push(
         stockShortText(
-          sourceRow.code === '—' ? sourceRow.name : sourceRow.code,
+          sourceRow.mixed || sourceRow.code === '—' ? sourceRow.name : sourceRow.code,
           sourceRow.volumeMl,
           dilutionPlan.takenMl,
         ),
@@ -240,7 +240,13 @@ export function MixPage() {
     if (blendPlan.totalMl <= 0) list.push('产物体积必须大于 0');
     for (const shortfall of blendPlan.shortfalls) {
       const row = partRows.find((part) => part.id === shortfall.id);
-      list.push(stockShortText(row?.code ?? shortfall.id, shortfall.availableMl, shortfall.needMl));
+      list.push(
+        stockShortText(
+          row?.mixed ? row.name : (row?.code ?? shortfall.id),
+          shortfall.availableMl,
+          shortfall.needMl,
+        ),
+      );
     }
     return list;
   }, [mode, partRows, selectedRows, blendPlan, blendLogic, targetText]);
@@ -410,7 +416,7 @@ export function MixPage() {
         parts.push({
           key: 'neat',
           label: sourceRow.name,
-          code: sourceRow.code,
+          code: sourceRow.mixed ? undefined : sourceRow.code,
           hex: sourceRow.hex,
           ml: dilutionPlan.neatMl,
           share: dilutionPlan.neatMl / total,
@@ -437,7 +443,7 @@ export function MixPage() {
         return {
           key: row.item.id,
           label: row.name,
-          code: row.code,
+          code: row.mixed ? undefined : row.code,
           hex: row.hex,
           ml: share.ml,
           share: share.ml / blendPlan.totalMl,

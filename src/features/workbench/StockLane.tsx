@@ -57,7 +57,9 @@ export function StockLane({ rows, neatBlocked, canAdd, onPick, className }: Stoc
                   data-code={row.code}
                   data-dilution={row.dilutionRatioN ?? undefined}
                   data-in-workbench={row.alreadyIn ? '' : undefined}
-                  aria-label={row.code + ' ' + row.name + '，' + disabledReason}
+                  aria-label={
+                    (row.mixed ? row.name : row.code + ' ' + row.name) + '，' + disabledReason
+                  }
                   disabled={disabled}
                   title={disabledReason}
                   onClick={() => onPick(row.item.id)}
@@ -78,12 +80,17 @@ export function StockLane({ rows, neatBlocked, canAdd, onPick, className }: Stoc
                   />
                   <span className="min-w-0 flex-1">
                     <span className="ef-field flex items-baseline justify-between gap-2 text-[12px] text-text-1">
-                      <span className="truncate">{row.code}</span>
+                      <span className="truncate">{row.mixed ? row.name : row.code}</span>
                       <span className="shrink-0 text-[11px] text-text-2">{formatMl(row.item.volumeMl) + ' ml'}</span>
                     </span>
                     <span className="mt-0.5 flex items-center gap-1.5">
                       {row.dilutionRatioN !== null && <DilutionTag ratioN={row.dilutionRatioN} />}
-                      <span className="truncate text-[13px] text-text-1">{row.name}</span>
+                      {!row.mixed && <span className="truncate text-[13px] text-text-1">{row.name}</span>}
+                      {row.mixed && (
+                        <span className="ef-tag shrink-0" title="调漆产物：只按名称显示">
+                          调漆
+                        </span>
+                      )}
                       {row.alreadyIn && <span className="ef-eyebrow shrink-0">已加入</span>}
                     </span>
                   </span>
