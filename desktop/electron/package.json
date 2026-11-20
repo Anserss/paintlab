@@ -1,7 +1,7 @@
 {
   "name": "paintlab",
   "productName": "PAINTLAB",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "PAINTLAB 漆料资产与调漆工作台（桌面版）",
   "main": "main.cjs",
   "private": true,

@@ -388,6 +388,7 @@ export function GroupView({
 
       <div className="min-w-0 flex-1 overflow-y-auto" data-group-list="">
         <RowList
+          key={selectedGroupId}
           rows={visible}
           actions={actions}
           selectedIds={selectedIds}

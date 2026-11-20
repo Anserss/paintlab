@@ -27,12 +27,12 @@ export function Dialog({
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
         <RadixDialog.Overlay
-          className="fixed inset-0 z-[var(--ef-z-modal)]"
+          className="ef-dialog__overlay fixed inset-0 z-[var(--ef-z-modal)]"
           style={{ background: 'var(--ef-scrim)' }}
         />
         <RadixDialog.Content
           className={cn(
-            'fixed left-1/2 top-1/2 z-[var(--ef-z-modal)] max-h-[86vh] w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-auto',
+            'ef-dialog fixed left-1/2 top-1/2 z-[var(--ef-z-modal)] max-h-[86vh] w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-auto',
             'border bg-surface p-6',
           )}
           style={{

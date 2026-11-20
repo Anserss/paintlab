@@ -93,6 +93,7 @@ export function BrandView({
 
       <div className="min-w-0 flex-1 overflow-y-auto">
         <RowList
+          key={activeKey}
           rows={filtered}
           grouped
           actions={actions}

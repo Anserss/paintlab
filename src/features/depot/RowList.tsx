@@ -103,7 +103,7 @@ export function RowList({
     : [{ key: 'flat', heading: null as string | null, meta: null as string | null, rows }];
 
   return (
-    <div data-depot-list="" className={cn('min-w-0 divide-y divide-line', className)}>
+    <div data-depot-list="" className={cn('ef-in-power min-w-0 divide-y divide-line', className)}>
       {sections.map((section) => (
         <section key={section.key} className="min-w-0">
           {section.heading && (

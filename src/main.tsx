@@ -6,6 +6,7 @@ import { isDesktop } from './platform';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/texture.css';
+import './styles/motion.css';
 
 const container = document.getElementById('root');
 if (!container) throw new Error('#root not found');

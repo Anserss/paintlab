@@ -14,6 +14,8 @@ import { ledgerTimeLabel, useRecentLedger } from './useDepotData';
 export interface PaintDetailProps {
   row: DepotRow | null;
   groups: Group[];
+  /** 2.3.0：退出动效进行中（父级保留 DOM 到推回结束） */
+  closing?: boolean;
   onClose: () => void;
   onOpenCoat: (row: DepotRow) => void;
   onUse: (row: DepotRow) => void;
@@ -27,6 +29,7 @@ export interface PaintDetailProps {
 export function PaintDetail({
   row,
   groups,
+  closing = false,
   onClose,
   onOpenCoat,
   onUse,
@@ -65,7 +68,10 @@ export function PaintDetail({
       aria-modal="true"
       aria-label="漆料详情"
       data-paint-detail=""
-      className="fixed bottom-0 right-0 z-[var(--ef-z-drawer)] flex w-[420px] max-w-[92vw] flex-col overflow-y-auto border-l bg-surface"
+      className={
+        'ef-drawer fixed bottom-0 right-0 z-[var(--ef-z-drawer)] flex w-[420px] max-w-[92vw] flex-col overflow-y-auto border-l bg-surface' +
+        (closing ? ' is-closing' : '')
+      }
       style={{
         top: 'calc(var(--ef-cmd-h) + 3px + var(--ef-status-h))',
         borderColor: 'var(--ef-ink)',

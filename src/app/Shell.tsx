@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { hydrateApp, useAppStore } from '@/store';
 import { CommandBar } from './CommandBar';
 import { LowVolumeDialog } from './LowVolumeDialog';
+import { shutter } from './motion';
 import { NAV_ITEMS } from './nav';
 import { StatusBar } from './StatusBar';
 
@@ -36,7 +37,7 @@ export function Shell() {
       if (!withMeta && !event.altKey) {
         const index = Number(event.key) - 1;
         if (Number.isInteger(index) && index >= 0 && index < NAV_ITEMS.length) {
-          navigate(NAV_ITEMS[index].to);
+          shutter(() => navigate(NAV_ITEMS[index].to));
         }
       }
     };
@@ -47,13 +48,13 @@ export function Shell() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-bg-0 text-text-1">
       <CommandBar />
-      <div className="ef-tristrip" aria-hidden="true">
+      <div className="ef-tristrip ef-in-sweep" aria-hidden="true">
         <span style={{ background: 'var(--ef-tri-a)' }} />
         <span style={{ background: 'var(--ef-tri-b)' }} />
         <span style={{ background: 'var(--ef-tri-c)' }} />
       </div>
       <StatusBar />
-      <main className="min-h-0 flex-1 overflow-auto">
+      <main className="ef-page-boot min-h-0 flex-1 overflow-auto">
         <Outlet />
       </main>
       <LowVolumeDialog />

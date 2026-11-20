@@ -49,6 +49,7 @@ export function Segmented<T extends string>({
             aria-selected={active}
             type="button"
             tabIndex={active ? 0 : -1}
+            data-seg=""
             onClick={() => onChange(opt.value)}
             className={cn(
               'ef-btn !h-10 !border-0 !px-4 !text-[13px] transition-none',

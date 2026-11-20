@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { revealTheme } from '@/app/motion';
 import { Segmented } from '@/components/ui';
 import type { Density, LevelMode, Settings, ThemeMode } from '@/core/model/types';
 import { useAppStore } from '@/store';
@@ -31,11 +33,23 @@ export function SettingsItemsPanel() {
   const updateSetting = useAppStore((state) => state.updateSetting);
   const pushToast = useAppStore((state) => state.pushToast);
   const hydrateHistoryState = useAppStore((state) => state.hydrateHistoryState);
+  const themeBoxRef = useRef<HTMLSpanElement | null>(null);
 
   const commit = async <K extends keyof Settings,>(key: K, value: Settings[K], display: string): Promise<void> => {
     const result = await updateSetting(key, value);
     if (!result.ok) return;
     pushToast({ message: '已更新「' + SETTING_LABELS[key] + '」→ ' + display, tone: 'ok' });
+  };
+
+  /** 主题从控件中心扩散揭开（2.3.0）；其余设置项直接生效 */
+  const commitTheme = (value: ThemeMode): void => {
+    const box = themeBoxRef.current?.getBoundingClientRect();
+    const update = () => commit('theme', value, THEME_LABEL[value]);
+    if (!box) {
+      void update();
+      return;
+    }
+    void revealTheme({ x: box.left + box.width / 2, y: box.top + box.height / 2 }, update);
   };
 
   const commitUndoDepth = async (next: number): Promise<void> => {
@@ -57,7 +71,16 @@ export function SettingsItemsPanel() {
         value={settings.theme}
         label="主题"
         hint="工业暗色为主；浅色只替换基底与文字层"
-        control={<Segmented options={THEME_OPTIONS} value={settings.theme} ariaLabel="主题" onChange={(value) => void commit('theme', value, THEME_LABEL[value])} />}
+        control={
+          <span ref={themeBoxRef} className="inline-flex">
+            <Segmented
+              options={THEME_OPTIONS}
+              value={settings.theme}
+              ariaLabel="主题"
+              onChange={commitTheme}
+            />
+          </span>
+        }
       />
       <SettingRow
         setting="density"

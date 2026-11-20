@@ -314,6 +314,7 @@ export function DilutePanel({
           variant="primary"
           size="lg"
           className="min-w-[180px]"
+          aria-busy={busy || undefined}
           disabled={!canCommit || busy}
           onClick={onCommit}
         >

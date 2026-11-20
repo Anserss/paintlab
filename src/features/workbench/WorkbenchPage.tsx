@@ -8,7 +8,7 @@ import {
 } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useShutterNavigate } from '@/app/useShutterNavigate';
 import { Button, Empty, Toolbar } from '@/components/ui';
 import { MAX_WORKBENCHES } from '@/core/rules/invariants';
 import { useAppStore } from '@/store';
@@ -26,7 +26,7 @@ type DialogKind = 'none' | 'create' | 'edit' | 'delete' | 'return';
 /** 工作台页（spec 3.5）：左侧从仓库调取 + Tab + 磁贴网格 + 用量面板 + 批量操作条 + 统计 */
 export function WorkbenchPage() {
   const state = useAppStore();
-  const navigate = useNavigate();
+  const go = useShutterNavigate();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
@@ -161,10 +161,10 @@ export function WorkbenchPage() {
     const entry = entries.find((row) => selectedIds.includes(row.id));
     if (!entry) return;
     if (entry.refType === 'bottle') {
-      navigate('/mix', { state: { bottleId: entry.item.refId } });
+      go('/mix', { state: { bottleId: entry.item.refId } });
       return;
     }
-    navigate('/mix', { state: { stockItemId: entry.item.refId } });
+    go('/mix', { state: { stockItemId: entry.item.refId } });
   }
 
   return (
@@ -228,7 +228,7 @@ export function WorkbenchPage() {
                 action={<Button data-action="new-workbench-empty" onClick={openCreate}>＋ 新建工作台</Button>}
               />
             ) : (
-              <WorkbenchTileGrid entries={entries} selectedIds={selectedIds} onToggle={handleToggle} />
+              <WorkbenchTileGrid key={active.id} entries={entries} selectedIds={selectedIds} onToggle={handleToggle} />
             )}
           </div>
 

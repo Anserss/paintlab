@@ -259,6 +259,14 @@ export function ProcurePage() {
 
   const loading = brandId !== ALL_BRANDS && brandId !== '' && brandState[brandId] === 'loading';
   const failed = brandId !== ALL_BRANDS && brandId !== '' && brandState[brandId] === 'error';
+  /*
+   * 2.3.0：换品牌 / 换货架 / 换产品线 / 换排序时重建结果区，
+   * 让第一屏的行按 38ms 逐行亮起（搜索输入不重建，避免打字时闪）。
+   * 单品牌把「品牌包已加载的件数」也算进 key：数据到了那一刻才亮，
+   * 而不是先亮一个「正在加载」的空列表。
+   */
+  const loadedCount = brandId === ALL_BRANDS ? 0 : (bundles[brandId]?.paints.length ?? 0);
+  const resultsKey = [brandId, filters.kind, filters.lineId, filters.sort, loadedCount].join('|');
 
   return (
     <section className="flex h-full min-h-0" data-page="procure">
@@ -286,11 +294,20 @@ export function ProcurePage() {
           onChange={(patch) => setFilters((prev) => ({ ...prev, ...patch }))}
         />
 
-        <div role="listbox" aria-label="色号列表" className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          key={'results:' + resultsKey}
+          role="listbox"
+          aria-label="色号列表"
+          className="ef-rows-enter min-h-0 flex-1 overflow-y-auto"
+        >
           {loading && (
-            <p data-procure-loading="" className="border-b border-line px-3 py-2 text-xs text-text-2">
+            <div
+              data-procure-loading=""
+              className="relative overflow-hidden border-b border-line px-3 py-2 text-xs text-text-2"
+            >
               正在加载品牌包…
-            </p>
+              <span aria-hidden="true" className="ef-scan" />
+            </div>
           )}
 
           {failed && (

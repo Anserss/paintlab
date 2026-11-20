@@ -127,7 +127,14 @@ export function RegisterDialog({
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button variant="primary" size="sm" chamfer disabled={!canSubmit} onClick={submit}>
+          <Button
+            variant="primary"
+            size="sm"
+            chamfer
+            aria-busy={busy || undefined}
+            disabled={!canSubmit}
+            onClick={submit}
+          >
             {busy ? '入库中…' : '确认入库'}
           </Button>
         </>

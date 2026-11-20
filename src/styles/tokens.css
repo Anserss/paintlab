@@ -104,7 +104,11 @@
   --ef-drawer-w: 420px;
   --ef-density: 1;
 
-  /* 动效 */
+  /*
+   * 动效（2.3.0 按终末地 motion 清单补全）：
+   * 短、硬、机械；回应 100–400ms，单个入场 ≤ 650ms，整段入场 ≤ 1s；
+   * 错开只用 38ms / 100ms 两档。曲线只有三条：snap 出现、mech 擦入与退出、ease 普通过渡。
+   */
   --ef-snap: cubic-bezier(0.16, 1, 0.3, 1);
   --ef-mech: cubic-bezier(0.7, 0, 0.2, 1);
   --ef-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
@@ -113,6 +117,14 @@
   --ef-dur-wipe: 280ms;
   --ef-dur-panel: 360ms;
   --ef-dur-liquid: 450ms;
+  --ef-dur-come: 320ms; /* 逐行亮起 */
+  --ef-dur-power: 520ms; /* 通电（页面 / 列表从顶部展开） */
+  --ef-dur-sweep: 600ms; /* 三色条扫过 */
+  --ef-dur-shutter: 360ms; /* 换页快门 */
+  --ef-dur-edge: 300ms; /* 按钮亮边扫过 */
+  --ef-dur-exit: 180ms; /* 退出 ≈ 进入的 2/3 */
+  --ef-stagger-row: 38ms;
+  --ef-stagger-block: 100ms;
 
   /* 层级 */
   --ef-z-command: 30;
@@ -214,5 +226,13 @@
     --ef-dur-wipe: 0ms;
     --ef-dur-panel: 0ms;
     --ef-dur-liquid: 0ms;
+    --ef-dur-come: 0ms;
+    --ef-dur-power: 0ms;
+    --ef-dur-sweep: 0ms;
+    --ef-dur-shutter: 0ms;
+    --ef-dur-edge: 0ms;
+    --ef-dur-exit: 0ms;
+    --ef-stagger-row: 0ms;
+    --ef-stagger-block: 0ms;
   }
 }

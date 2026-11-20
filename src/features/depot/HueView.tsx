@@ -285,6 +285,7 @@ export function HueView({
       </div>
 
       <RowList
+        key={activeKey ?? 'all'}
         rows={filtered}
         actions={actions}
         selectedIds={selectedIds}

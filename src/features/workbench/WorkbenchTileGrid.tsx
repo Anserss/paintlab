@@ -75,7 +75,7 @@ export function WorkbenchTileGrid({ entries, selectedIds, onToggle }: WorkbenchT
       aria-multiselectable="true"
       aria-label="工作台条目"
       data-grid="workbench"
-      className="flex flex-wrap content-start gap-3"
+      className="ef-rows-enter flex flex-wrap content-start gap-3"
     >
       {entries.map((entry) => (
         <DraggableTile

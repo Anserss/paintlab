@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { motionAllowed } from '@/app/motion';
+import { useShutterNavigate } from '@/app/useShutterNavigate';
 import {
   DndContext,
   DragOverlay,
@@ -39,7 +40,7 @@ function overDragData(event: DragEndEvent): DragData | undefined {
 
 /** 仓库页（spec 3.3）：品牌 / 色环 / 分组三视图 + 行式色卡 + 详情抽屉 */
 export function DepotPage() {
-  const navigate = useNavigate();
+  const go = useShutterNavigate();
   const rows = useDepotRows();
   const { groups, tree } = useDepotGroups();
 
@@ -69,6 +70,16 @@ export function DepotPage() {
   const [workbenchRows, setWorkbenchRows] = useState<DepotRow[]>([]);
   const [dragLabel, setDragLabel] = useState<string | null>(null);
   const [rowMenu, setRowMenu] = useState<{ stockItemId: string; x: number; y: number } | null>(null);
+  /* 2.3.0：详情抽屉的退出动效（240ms）播完再卸载 */
+  const [detailClosing, setDetailClosing] = useState(false);
+  const detailTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (detailTimer.current !== null) window.clearTimeout(detailTimer.current);
+    },
+    [],
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -194,11 +205,35 @@ export function DepotPage() {
   };
 
   const sendToMix = (row: DepotRow) => {
-    navigate('/mix', { state: { paintId: row.paint.id, stockItemId: row.item.id } });
+    go('/mix', { state: { paintId: row.paint.id, stockItemId: row.item.id } });
     pushToast({ message: '已选择 ' + codeOrDash(row.paint.code) + '，前往调漆台', tone: 'neutral' });
   };
 
-  const openDetail = (row: DepotRow) => setDetailId(row.item.id);
+  const openDetail = (row: DepotRow) => {
+    if (detailTimer.current !== null) {
+      window.clearTimeout(detailTimer.current);
+      detailTimer.current = null;
+    }
+    setDetailClosing(false);
+    setDetailId(row.item.id);
+  };
+
+  /** 关闭抽屉：先播 240ms 推回，再卸载；减少动效时立即消失 */
+  const closeDetail = () => {
+    if (detailTimer.current !== null) return;
+    if (!motionAllowed()) {
+      setDetailId(null);
+      setDetailClosing(false);
+      return;
+    }
+    setDetailClosing(true);
+    detailTimer.current = window.setTimeout(() => {
+      detailTimer.current = null;
+      setDetailClosing(false);
+      setDetailId(null);
+    }, 240);
+  };
+
   const detailRow = rows.find((row) => row.item.id === detailId) ?? null;
   const selectedRows = rows.filter((row) => selected.includes(row.item.id));
 
@@ -306,7 +341,7 @@ export function DepotPage() {
               title="DEPOT // 空仓"
               description="还没有漆料。前往采购大厅入库你的第一支漆。"
               action={
-                <Button variant="primary" onClick={() => navigate('/procure')}>
+                <Button variant="primary" onClick={() => go('/procure')}>
                   去采购
                 </Button>
               }
@@ -358,7 +393,8 @@ export function DepotPage() {
         <PaintDetail
           row={detailRow}
           groups={groups}
-          onClose={() => setDetailId(null)}
+          closing={detailClosing}
+          onClose={closeDetail}
           onOpenCoat={(row) => requestWorkbench([row])}
           onUse={sendToMix}
           onAdjust={(row) => setAdjustRow(row)}
