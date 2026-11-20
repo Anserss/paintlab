@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { formatMl } from '@/core/math/quantity';
 import { useAppStore } from '@/store';
 import type { Toast } from '@/store';
-import { settleReadout } from './motion';
+import { settleReadout, motionAllowed } from './motion';
 import { ROUTE_LABELS } from './nav';
 
 const pad = (value: number): string => (value < 10 ? '0' + value : String(value));
@@ -64,6 +64,11 @@ export function StatusBar() {
       return;
     }
     if (!visibleMessage) return;
+    if (!motionAllowed()) {
+      setVisibleMessage(null);
+      setMessageLeaving(false);
+      return;
+    }
     setMessageLeaving(true);
     const timer = window.setTimeout(() => {
       setVisibleMessage(null);

@@ -131,7 +131,7 @@
 | 命令 | 结果 |
 |---|---|
 | `npx tsc --noEmit` | 0 错 |
-| `npx vitest run` | **37 文件 / 420 用例通过**（2.2.2 为 35 / 411） |
+| `npx vitest run` | **38 文件 / 422 用例通过**（2.2.2 为 35 / 411） |
 | `npm run build:desktop` | 成功；CSS 38.83 kB / JS 666.14 kB（gzip 210.12 kB） |
 | `npm run verify:motion` | **24 / 24 通过**（需要先 `npm run dev`，Playwright 驱动真实点击 / 键盘 / 滚轮） |
 | `npm run desktop` | **已执行**：安装 2.3.0（`version.txt` / app package / 角标一致；`resources/app/dist` 与仓库构建产物 SHA256 一致），并用 Explorer 实机启动验证（7 品牌 1038 条、真实数据已加载；截图 `reports/shots/2-3-0-desktop-installed.png`） |
@@ -139,6 +139,7 @@
 新增用例：
 
 - `tests/unit/app/motion.test.ts`（6 条）：减少动态效果判定；不支持 View Transitions 时 `shutter` / `revealTheme` 直接执行；支持时进入 `startViewTransition` 并在 `finished` 后清理 `data-ef-vt`；`settleReadout` 在减少动态效果时不动文本，在可用时经历乱码态后落定回真实读数并移除临时 `aria-label`。
+- `tests/unit/app/status-bar.test.tsx`（2 条）：回执擦入后保留、清空时先进入 `ef-out-wipe` 退出态；减少动态效果时清空立即卸载，不保留退出帧。
 - `tests/unit/data/brand-order.test.ts`（2 条）：见 §4。
 - `tests/unit/data/shell.test.tsx`：新增一条，锁住 `ef-tristrip.ef-in-sweep` 与 `main.ef-page-boot` 挂在正确的外壳元素上。
 
@@ -170,6 +171,7 @@ src/app/motion.ts                快门 / 揭幕 / 读数落定 / 回退
 src/app/useShutterNavigate.ts    同源换页统一走快门
 scripts/verify-motion.mjs        真实浏览器动效验收（24 项）
 tests/unit/app/motion.test.ts    6 条
+tests/unit/app/status-bar.test.tsx  2 条
 tests/unit/data/brand-order.test.ts  2 条
 ```
 

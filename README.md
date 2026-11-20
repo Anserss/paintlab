@@ -117,7 +117,7 @@ npm run launcher       # 重建 release/PAINTLAB.exe（固定端口 8787）
 
 ```bash
 npm run typecheck      # tsc --noEmit，0 错
-npm test              # 37 文件 / 420 用例
+npm test              # 38 文件 / 422 用例
 npm run verify:motion # 动效 24 项（需另开 npm run dev）
 npm run build         # PWA 构建
 npm run build:desktop # 桌面构建（关闭 SW）
@@ -153,7 +153,7 @@ tests/unit/          app · core · data · components · features
 5. 新增 5 个品牌没有中文漆名（沿用 modkit 上游的日文 / 英文名），中文检索只能命中色号与类目。
 6. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
 7. 自动快照仍未实现（设置页如实标注并提供导出替代）；桌面版目前依赖手动导出留档。
-8. Playwright E2E 未接入；回归靠 420 条单测 + `verify:motion`（真实浏览器 24 项）+ 桌面实机走查。
+8. Playwright E2E 未接入；回归靠 422 条单测 + `verify:motion`（真实浏览器 24 项）+ 桌面实机走查。
 9. 打包单 chunk 约 666 KB（gzip 210 KB），未做 manualChunks 拆分。
 10. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局：390 宽没有文档横向滚动，但左栏 + 工具栏会裁切；本项目定位桌面应用，未做移动端版式。
 11. 换页 / 深浅切换的 View Transition 需要 Chromium 111+（Electron 43 / Chrome / Edge 有）；Firefox 直接切换、不补动画。
