@@ -158,6 +158,7 @@ tests/unit/          app · core · data · components · features
 10. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局：390 宽没有文档横向滚动，但左栏 + 工具栏会裁切；本项目定位桌面应用，未做移动端版式。
 11. 换页 / 深浅切换的 View Transition 需要 Chromium 111+（Electron 43 / Chrome / Edge 有）；Firefox 直接切换、不补动画。
 12. 桌面壳复用本机 Electron 运行时（`desktop/electron-runtime`，首次构建从 `%LOCALAPPDATA%\electron\Cache` 解压）；换机时需先缓存 Electron 43 的 win32-x64 包。
+13. 安装版在 150% 缩放下窗口右侧被裁（旧问题：2.2.2 安装版截图同样；同尺寸浏览器版完整）。下一轮单独查桌面壳的窗口尺寸 / DPI，非最大化 1280×800 可暂时绕开。
 
 ## 字体与许可
 

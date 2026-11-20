@@ -276,3 +276,4 @@ npm run verify:motion   → 24 / 24（Playwright；dev server 5175）
 10. 桌面壳依赖本机 Electron 运行时缓存；未做签名与自动更新。
 11. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局（无移动端版式）；390 宽无文档横向滚动，但左栏 / 工具栏会裁切。
 12. View Transitions（换页快门 / 主题揭幕）需要 Chromium 111+；Firefox 直接切换，不补动画。
+13. 安装版在 150% 缩放下窗口右侧被裁（旧问题，2.2.2 安装版截图同样；同尺寸浏览器版完整）。下一轮单独查 `desktop/electron/main.cjs` 的窗口尺寸 / DPI，非最大化 1280×800 可暂时绕开。

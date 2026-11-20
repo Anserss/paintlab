@@ -134,7 +134,7 @@
 | `npx vitest run` | **37 文件 / 420 用例通过**（2.2.2 为 35 / 411） |
 | `npm run build:desktop` | 成功；CSS 38.83 kB / JS 666.14 kB（gzip 210.12 kB） |
 | `npm run verify:motion` | **24 / 24 通过**（需要先 `npm run dev`，Playwright 驱动真实点击 / 键盘 / 滚轮） |
-| `npm run desktop` | **未执行**（本轮没重装桌面版；版本角标已在浏览器版验证） |
+| `npm run desktop` | **已执行**：安装 2.3.0（`version.txt` / app package / 角标一致；`resources/app/dist` 与仓库构建产物 SHA256 一致），并用 Explorer 实机启动验证（7 品牌 1038 条、真实数据已加载；截图 `reports/shots/2-3-0-desktop-installed.png`） |
 
 新增用例：
 
@@ -183,7 +183,7 @@ tests/unit/data/brand-order.test.ts  2 条
 4. **动效依赖 `@tailwind components` 指令**：`motion.css` 里必须保留，否则 Tailwind 会报「`@layer components` 无匹配指令」；如果以后把动效并进 `base.css`，可以删掉这条指令。
 5. **测试环境没有 View Transitions**：`shutter` / `revealTheme` 在 jsdom 里走「直接执行」分支；动画本身靠 `verify:motion` 在真实浏览器里验。
 6. **快速连续换页**：用 serial 保证上一场的 `finished` 不清掉下一场的 `data-ef-vt`；但如果浏览器直接取消了前一场，前一场的 `finished` 会 reject，回调仍会触发清理，不会留下死标记。
-7. **桌面安装版未重装**：本轮只跑 `npm run build:desktop` 与浏览器版验收；`npm run desktop` 需要用户确认后执行（会覆盖 `%LOCALAPPDATA%\Programs\PAINTLAB`）。
+7. **安装版窗口在 150% 缩放下右侧被裁（旧问题）**：本机 1707×960 / DPI 144，Electron 渲染视口比窗口客户区宽——工具栏第二行、行尾「+入库」、状态条右侧看不到；同尺寸 Playwright（Chromium）截图完整，2.2.2 安装版截图同样被裁，**不是 2.3.0 动效引入**。下一轮单独查 `desktop/electron/main.cjs` 的窗口尺寸 / DPI，非最大化 1280×800 可暂时绕开。
 
 ## 9. 常用命令
 
