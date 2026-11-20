@@ -38,7 +38,17 @@ function mergeBrands(current: Brand[], incoming: Brand[]): Brand[] {
   const map = new Map(current.map((brand) => [brand.id, brand]));
   for (const brand of incoming) {
     const previous = map.get(brand.id);
-    map.set(brand.id, previous ? { ...brand, displayAlias: previous.displayAlias ?? brand.displayAlias } : brand);
+    /*
+     * 2.3.0：排序以「第一次见到的品牌」为准。index.json 只给顺序（sort = 0…6），
+     * 品牌包里的 brand.sort 是 10…70；如果加载品牌包时覆盖掉 index 的 sort，
+     * 左栏会随着品牌包陆续到达而重排（点一个品牌，它就跳到队尾）。
+     */
+    map.set(
+      brand.id,
+      previous
+        ? { ...brand, sort: previous.sort, displayAlias: previous.displayAlias ?? brand.displayAlias }
+        : brand,
+    );
   }
   return Array.from(map.values()).sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name));
 }
