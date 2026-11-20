@@ -113,7 +113,7 @@ describe('采购大厅 · 辅料货架（稀释剂 / 缓干剂）', () => {
     expect(DEFAULT_PROCURE_FILTERS.kind).toBe('color');
   });
 
-  it('默认颜色货架不显示稀释剂；切到辅料货架后出现 T-103，属性行为「油性 · — · 辅助」且规格为 250 ml', async () => {
+  it('默认颜色货架不显示稀释剂；切到辅料货架后出现 T-103，属性行为「油性 · 稀释剂」且规格为 250 ml', async () => {
     const { container } = render(<ProcurePage />);
     await waitFor(() => expect(rowsOf(container)).toHaveLength(1));
     expect(container.querySelector('[data-paint-row][data-code="C80"]')).not.toBeNull();
@@ -128,8 +128,8 @@ describe('采购大厅 · 辅料货架（稀释剂 / 缓干剂）', () => {
     expect(rowsOf(container)).toHaveLength(1);
 
     const row = container.querySelector<HTMLElement>('[data-paint-row][data-code="T-103"]') as HTMLElement;
-    // AC-15 兼容规则：aux 的光泽位用「—」占位，不得出现「光泽」
-    expect(row.querySelector('[data-paint-desc]')?.textContent).toBe('油性 · — · 辅助');
+    // 2.2.2：辅料行第二行改为「油性 · 类目」，不再用光泽位「—」占位
+    expect(row.querySelector('[data-paint-desc]')?.textContent).toBe('油性 · 稀释剂');
     expect(row.textContent).not.toContain('光泽');
     // 规格优先取 paint.volumeMl（250），而不是产品线默认 110
     expect(row.textContent).toContain('250 ml');
