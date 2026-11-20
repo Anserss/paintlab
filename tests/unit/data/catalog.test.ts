@@ -170,7 +170,12 @@ describe('2.2.2 · 七个品牌包都能被 normalizeBrandBundle 吃下', () => 
     expect(jumpwind.ok).toBe(true);
     if (!jumpwind.ok) return;
     expect(jumpwind.data.paints).toHaveLength(193); // 169 + 24 条 AQUEOUS（JW-A）
-    expect(jumpwind.data.lines.some((line) => line.id === 'jy-aqueous')).toBe(true);
+    const aqueous = jumpwind.data.lines.find((line) => line.id === 'jy-aqueous');
+    expect(aqueous).toBeTruthy();
+    // 2.2.2 用户确认：JW-A 按水性建模（不是 modkit 标的 lacquer）
+    expect(aqueous?.solvent).toBe('water');
+    expect(aqueous?.resin).toBe('acrylic');
+    expect(aqueous?.kind).toBe('acrylic');
     // MC51 与既有 JWMC51 是同一支漆，不允许出现两条
     const meka = jumpwind.data.paints.filter((paint) => paint.code === 'JWMC51');
     expect(meka).toHaveLength(1);

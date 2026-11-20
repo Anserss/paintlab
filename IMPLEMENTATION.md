@@ -183,7 +183,7 @@ public/catalog/{gaia,gsi,hobbymio,jy,qnc,sunin7,tamiya}.json + index.json
 - **`procureDescription()`**：只给辅料行返回「油性 · 类目」，色漆行返回 `undefined` 交给 core 的 `paintDescription()`；AC-15 文案不动。`PaintMeta/PaintRow` 新增可选 `descOverride`。
 - **「全部」分段**：`ProcurePage` 在 `brandId === ALL_BRANDS` 时按品牌 `sort` 切段渲染（`data-procure-group`），单品牌保持平铺。
 - **提示降噪**：`PaintRow` 的「≈ 推定色」改成行内 `data-hex-estimated` 记号；「待核验」只留在辅料行；池级计数走 `summarizePool()` → 工具栏 `data-procure-estimated` / `data-procure-unverified`。
-- **`JW-A` 冲突**：modkit 标 lacquer、本地另一份目录（gk-mixer）叫 Aqueous。按用户指定参考数据（modkit）建模 = 油性，产品线名只写「AQUEOUS 系列（JW-A）」，改口径只需改脚本里 `jy-aqueous` 的 `solvent/resin` 再重跑。
+- **`JW-A` 口径**：modkit 标 lacquer、本地另一份目录（gk-mixer）叫 Aqueous；**2026-11-20 用户确认按水性建模** → `jy-aqueous` 的 `kind/resin/solvent` = `acrylic/acrylic/water`，界面描述「水性 · 光泽 · 实色」。改口径只需改脚本 `LINES.jy` 里那一条再重跑（脚本会把已有 `jy-aqueous` 的元数据一并同步）。
 
 ## 视觉 token（唯一真相）
 

@@ -100,13 +100,18 @@ const LINES = {
   gsi: [{ id: 'gsi-mr-color', name: 'Mr.COLOR 实色', nameZh: '实色', match: () => true, line: lacquerLine({}) }],
   jy: [
     /*
-     * AQUEOUS 系列（JW-A01…JW-A24）：上游 modkit-swatch 把这 24 条标成 lacquer、
-     * suitableFor.handPainting=false；另一份本地目录（analysis/PaintCatalog.json，
-     * 经 gk-mixer）把这个 code 段命名为「Aqueous 水性」。两份本地数据冲突，
-     * 本轮按用户指定的参考数据（modkit-swatch）建模 = 油性硝基，产品线名里不写「水性」，
-     * 留待拿到厂方页面后再改 solvent/resin。
+     * AQUEOUS 系列（JW-A01…JW-A24）：按「水性」建模（2026-11-20 用户确认）。
+     * 依据：这一 code 段的产品线名就是 Aqueous（水性），本地 analysis/PaintCatalog.json
+     * 也把它单独归为 Aqueous set；modkit-swatch 的 type 字段写 lacquer 属简化。
+     * 因此 solvent=water、resin=acrylic、kind=acrylic，界面描述为「水性 · 光泽 · 实色」。
      */
-    { id: 'jy-aqueous', name: 'AQUEOUS 系列（JW-A）', nameZh: 'A 系列', match: (c) => /^JW-A/i.test(c), line: lacquerLine({ defaultVolumeMl: 18 }) },
+    {
+      id: 'jy-aqueous',
+      name: 'AQUEOUS 水性色（JW-A）',
+      nameZh: '水性色（A 系列）',
+      match: (c) => /^JW-A/i.test(c),
+      line: { packaging: 'bottle', defaultVolumeMl: 18, kind: 'acrylic', resin: 'acrylic', solvent: 'water', defaultFinish: 'gloss' },
+    },
     { id: 'jy-meka', name: 'MEKA COLOR 机甲色', nameZh: '机甲色', match: (c) => /^JWMC/i.test(c), line: lacquerLine({ defaultVolumeMl: 18 }) },
     { id: 'jy-neo', name: 'NEO COLOR 基本色', nameZh: '基本色', match: () => true, line: lacquerLine({ defaultVolumeMl: 18 }) },
   ],
@@ -237,14 +242,22 @@ for (const brandId of ['gsi', 'jy']) {
   }
 
   /*
-   * 脚本自建的辅线：名字以本脚本为准（重跑也能同步改名）。
+   * 脚本自建的辅线：整条产品线元数据都以本脚本为准（重跑也能同步改口径）。
    * 郡士 / 匠域已有的厂线名不动，避免覆盖 2.1.2 的官方口径。
    */
   const aqueous = LINES[brandId].find((rule) => rule.id === 'jy-aqueous');
   const aqueousLine = aqueous ? bundle.lines.find((line) => line.id === aqueous.id) : undefined;
   if (aqueous && aqueousLine) {
-    aqueousLine.name = aqueous.name;
-    aqueousLine.nameZh = aqueous.nameZh;
+    Object.assign(aqueousLine, {
+      name: aqueous.name,
+      nameZh: aqueous.nameZh,
+      packaging: aqueous.line.packaging,
+      defaultVolumeMl: aqueous.line.defaultVolumeMl,
+      kind: aqueous.line.kind,
+      resin: aqueous.line.resin,
+      solvent: aqueous.line.solvent,
+      defaultFinish: aqueous.line.defaultFinish,
+    });
   }
 
   report.push(`${brandId.padEnd(9)} ${String(bundle.paints.length).padStart(4)} 条  （补号 ${added}，校正推定色 ${upgradedHex}）`);

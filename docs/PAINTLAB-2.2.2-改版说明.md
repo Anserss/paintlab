@@ -41,14 +41,24 @@
   - 匠域：82 条推定色按 modkit 校正，`source` 追加「色值校正自 modkit-swatch（MIT）」。
 - **同漆合并**：modkit 的 `MC51` 与既有的 `JWMC51` 名称一致（Cool White / 冷白），按 `JWMC` 归一，避免一支漆两条记录。
 
-### 1.4 建模冲突的记录（不隐藏）
+### 1.4 建模口径的判定：`JW-A` 按水性
 
 `JW-A01…JW-A24` 两份本地数据说法不同：
 
 - `modkit-swatch`（用户指定的参考数据）：`type: lacquer`、`suitableFor.handPainting: false`；
-- `analysis/PaintCatalog.json`（经 gk-mixer）：把这个 code 段命名为 `Aqueous`（水性）。
+- `analysis/PaintCatalog.json`（经 gk-mixer）：把这个 code 段单独归为 `Aqueous`（水性）。
 
-本轮**按用户指定的参考数据建模 = 油性硝基**，产品线名只写「AQUEOUS 系列（JW-A）」，不写「水性」，避免界面出现「水性 · 油性」自相矛盾。拿到厂方页面后只需改 `scripts/build-catalog-2.2.2.mjs` 里 `jy-aqueous` 的 `solvent/resin` 再重跑。
+**2026-11-20 用户确认：按水性建模。** 实现口径：
+
+| 字段 | 值 |
+|---|---|
+| 产品线 | `jy-aqueous`「AQUEOUS 水性色（JW-A）」/ 中文名「水性色（A 系列）」 |
+| `kind` / `resin` / `solvent` | `acrylic` / `acrylic` / **`water`** |
+| 容量 | 18 ml |
+| 界面描述 | `水性 · 光泽 · 实色`（不再是 `油性 · 光泽 · 实色`） |
+
+- 这段口径写在 `scripts/build-catalog-2.2.2.mjs` 的 `LINES.jy` 里；脚本重跑会把已有 `jy-aqueous` 的 `solvent/resin/kind` 一并同步，**不需要手工改 JSON**。
+- `tests/unit/data/catalog.test.ts` 已加断言锁住：`jy-aqueous` 的 `solvent === 'water'`、`resin/kind === 'acrylic'`。
 
 ## 2. 辅料补充（需求 2）
 
@@ -199,5 +209,5 @@ public/catalog/{gaia,gsi,hobbymio,jy,qnc,sunin7,tamiya}.json + index.json
 2. **田宫 / 盖亚的辅料型号待核验**（`source` 已写「待核验」、`verifiedAt` 留空）：拿到官网页后补 `sourceUrl` 精确商品页 + `verifiedAt` 即可。
 3. **新品牌没有中文漆名**：盖亚沿用上游日文名、田宫 / 喵酱 / 星影 / 青鸟川沿用英文名；中文检索只能命中色号与类目词，要补中文名需逐条对齐（不要机翻）。
 4. **modkit 色值只是社区色值库**：872 条仍标 `hexEstimated`，未按实物色卡核验；要做色卡核验得逐条取厂方 swatch。
-5. **`JW-A` 的油性 / 水性冲突**（§1.4）需厂方页面定夺。
+5. **`JW-A` 按水性建模是用户 2026-11-20 确认的口径**（§1.4）。若厂方页面确认它其实是 lacquer，改 `scripts/build-catalog-2.2.2.mjs` 里 `jy-aqueous` 的 `solvent/resin/kind` 再重跑即可（脚本会同步已有产品线）。
 6. 采购页单行仍只显示「品牌 · 产品线」一行来源，没有价格 / 库存深度列——如果后续要按「库存够不够」排序，需要在 `StockBar` 之外再加一列。

@@ -15,13 +15,13 @@
     {
       "id": "jy-aqueous",
       "brandId": "jy",
-      "name": "AQUEOUS 系列（JW-A）",
-      "nameZh": "A 系列",
+      "name": "AQUEOUS 水性色（JW-A）",
+      "nameZh": "水性色（A 系列）",
       "packaging": "bottle",
       "defaultVolumeMl": 18,
-      "kind": "lacquer",
-      "resin": "lacquer",
-      "solvent": "oil",
+      "kind": "acrylic",
+      "resin": "acrylic",
+      "solvent": "water",
       "defaultFinish": "gloss"
     },
     {
