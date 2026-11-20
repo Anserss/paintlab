@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import type { MouseEvent } from 'react';
-import type { Paint } from '@/core/model/types';
+import type { Brand, Paint } from '@/core/model/types';
 import { Badge, Button, Dialog, Empty, Toolbar } from '@/components/ui';
 import { PaintRow } from '@/components/paint';
 import { useAppStore } from '@/store';
@@ -14,8 +14,12 @@ import {
   DEFAULT_PROCURE_FILTERS,
   filterOptionsOf,
   filterPaints,
+  isAuxPaint,
+  lineLabelOf,
   paintsOfKind,
+  procureDescription,
   sortPaints,
+  summarizePool,
 } from './procureFilters';
 import type { ProcureFilters } from './procureFilters';
 
@@ -81,7 +85,10 @@ export function ProcurePage() {
     return brand ? brand.nameZh || brand.name : '';
   }, [brandId, brands]);
 
-  const lineName = filters.lineId ? linesById[filters.lineId]?.name : undefined;
+  const lineName = useMemo(() => {
+    const line = filters.lineId ? linesById[filters.lineId] : undefined;
+    return line ? lineLabelOf(line) : undefined;
+  }, [filters.lineId, linesById]);
 
   /* 面包屑：采购 / 郡士 / Mr.Color；离开本页时清空，避免顶部栏残留上一页的面包屑 */
   useEffect(() => {
@@ -116,10 +123,32 @@ export function ProcurePage() {
     return sortPaints(filtered, filters.sort);
   }, [pool, linesById, filters, stockAggregate]);
 
+  const summary = useMemo(() => summarizePool(pool), [pool]);
+
   const options = useMemo(
     () => filterOptionsOf(paintsOfKind(pool, filters.kind), linesById),
     [pool, linesById, filters.kind],
   );
+
+  /*
+   * 2.2.2：选「全部」时按品牌分段，而不是把 7 个品牌的色号按色号字母序打散；
+   * 单品牌仍是平铺列表（测试与既有走查都按平铺断言行数）。
+   */
+  const grouped = brandId === ALL_BRANDS;
+  const sections = useMemo<{ id: string; brand?: Brand; paints: Paint[] }[]>(() => {
+    if (!grouped) {
+      return [{ id: brandId, brand: brands.find((entry) => entry.id === brandId), paints: visible }];
+    }
+    const buckets = new Map<string, Paint[]>();
+    for (const paint of visible) {
+      const list = buckets.get(paint.brandId);
+      if (list) list.push(paint);
+      else buckets.set(paint.brandId, [paint]);
+    }
+    return brands
+      .filter((brand) => buckets.has(brand.id))
+      .map((brand) => ({ id: brand.id, brand, paints: buckets.get(brand.id) ?? [] }));
+  }, [grouped, brandId, brands, visible]);
 
   const brandRows = useMemo<BrandRowModel[]>(() => {
     const loadedCount = (id: string): number | undefined => bundles[id]?.paints.length;
@@ -135,7 +164,7 @@ export function ProcurePage() {
       const lines = bundle
         ? bundle.lines.map((line) => ({
             id: line.id,
-            name: line.name,
+            name: lineLabelOf(line),
             count: bundle.paints.filter((paint) => paint.lineId === line.id).length,
           }))
         : [];
@@ -253,6 +282,7 @@ export function ProcurePage() {
           filters={filters}
           options={options}
           total={visible.length}
+          summary={summary}
           onChange={(patch) => setFilters((prev) => ({ ...prev, ...patch }))}
         />
 
@@ -282,66 +312,96 @@ export function ProcurePage() {
           )}
 
           {!loading && !failed && visible.length === 0 && (
-            <Empty
-              className="border-0"
-              title="没有匹配的色号"
-              description="换个色号、色值或属性词试试，例如 C80 / #1838a8 / 消光。"
-            />
+            filters.kind === 'aux' ? (
+              <Empty
+                className="border-0"
+                title="该品牌还没有辅料数据"
+                description="目录里还没有这个品牌的稀释剂 / 缓干剂 / 底漆条目。辅料按厂商型号逐个录入，缺的可以直接反馈补充。"
+              />
+            ) : (
+              <Empty
+                className="border-0"
+                title="没有匹配的色号"
+                description="换个色号、色值或属性词试试，例如 C80 / #1838a8 / 消光。"
+              />
+            )
           )}
 
           {!failed &&
-            visible.map((paint) => {
-              const line = linesById[paint.lineId];
-              if (!line) return null;
-              const brand = brands.find((entry) => entry.id === paint.brandId);
-              const registered = stockAggregate[paint.id]?.count ?? 0;
-              return (
-                <div
-                  key={paint.id}
-                  className="flex items-stretch border-b border-line"
-                  data-paint-line={paint.lineId}
-                >
-                  <PaintRow
-                    paint={paint}
-                    line={line}
-                    brand={brand}
-                    selected={selection.includes(paint.id)}
-                    onSelect={togglePaint}
-                    badges={
-                      <>
-                        {registered > 0 && <Badge tone="accent">已入库 ×{registered}</Badge>}
-                        {!paint.verifiedAt && (
-                          <Badge
-                            tone="warn"
-                            title={
-                              '该规格尚未核验，按 ' +
-                              (paint.volumeMl ?? line.defaultVolumeMl) +
-                              ' ml 记账' +
-                              (paint.source ? '（来源：' + paint.source + '）' : '')
-                            }
-                          >
-                            ⚠ 待核验
-                          </Badge>
-                        )}
-                      </>
-                    }
-                    className="flex-1"
-                  />
-                  <div className="flex shrink-0 items-center pr-2">
-                    <Button
-                      size="sm"
-                      variant={registered > 0 ? 'secondary' : 'primary'}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openRegister([paint]);
-                      }}
-                    >
-                      {registered > 0 ? '再入库一份' : '+ 入库'}
-                    </Button>
+            sections.map((section) => (
+              <Fragment key={'section:' + section.id}>
+                {grouped && (
+                  <div
+                    data-procure-group={section.id}
+                    className="sticky top-0 z-[1] flex items-center gap-2 border-b bg-surface-2 px-3 py-1.5"
+                    style={{ borderColor: 'var(--ef-rule)' }}
+                  >
+                    <span className="ef-eyebrow">{section.brand?.shortName ?? section.id}</span>
+                    <span className="text-[12px] font-semibold text-text-1">
+                      {section.brand?.nameZh || section.brand?.name || section.id}
+                    </span>
+                    <span className="ef-field ml-auto text-[11px] text-text-3">
+                      {section.paints.length} 条
+                    </span>
                   </div>
-                </div>
-              );
-            })}
+                )}
+                {section.paints.map((paint) => {
+                  const line = linesById[paint.lineId];
+                  if (!line) return null;
+                  const brand = brands.find((entry) => entry.id === paint.brandId);
+                  const registered = stockAggregate[paint.id]?.count ?? 0;
+                  const aux = isAuxPaint(paint);
+                  return (
+                    <div
+                      key={paint.id}
+                      className="flex items-stretch border-b border-line"
+                      data-paint-line={paint.lineId}
+                    >
+                      <PaintRow
+                        paint={paint}
+                        line={line}
+                        brand={brand}
+                        selected={selection.includes(paint.id)}
+                        onSelect={togglePaint}
+                        descOverride={procureDescription(paint, line)}
+                        badges={
+                          <>
+                            {registered > 0 && <Badge tone="accent">已入库 ×{registered}</Badge>}
+                            {/* 2.2.2：核验提示只留在「买之前要看规格」的辅料行；颜色行的近似值由工具栏汇总 + 色块旁 ≈ 记号承担 */}
+                            {aux && !paint.verifiedAt && (
+                              <Badge
+                                tone="warn"
+                                title={
+                                  '该规格尚未核验，按 ' +
+                                  (paint.volumeMl ?? line.defaultVolumeMl) +
+                                  ' ml 记账' +
+                                  (paint.source ? '（来源：' + paint.source + '）' : '')
+                                }
+                              >
+                                待核验
+                              </Badge>
+                            )}
+                          </>
+                        }
+                        className="flex-1"
+                      />
+                      <div className="flex shrink-0 items-center pr-2">
+                        <Button
+                          size="sm"
+                          variant={registered > 0 ? 'secondary' : 'primary'}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openRegister([paint]);
+                          }}
+                        >
+                          {registered > 0 ? '再入库一份' : '+ 入库'}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </Fragment>
+            ))}
         </div>
 
         <Toolbar count={selection.length}>

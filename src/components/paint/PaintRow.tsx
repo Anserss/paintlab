@@ -35,6 +35,8 @@ export interface PaintRowProps {
   dilutionRatioN?: number | null;
   /** 2.2.1：调漆产物只显示名称，不显示基础漆号 */
   hideCode?: boolean;
+  /** 2.2.2：第二行属性文案覆盖（采购页辅料行用「油性 · 稀释剂」） */
+  descOverride?: string;
   actions?: PaintRowActions;
   onSelect?: (paint: Paint, e?: MouseEvent<HTMLElement>) => void;
   /** Space / 单击行的"详情"出口 */
@@ -62,6 +64,7 @@ export const PaintRow = memo(function PaintRow({
   swatchUndefined,
   dilutionRatioN,
   hideCode = false,
+  descOverride,
   actions,
   onSelect,
   onDetail,
@@ -76,7 +79,7 @@ export const PaintRow = memo(function PaintRow({
     title.primary,
     title.secondary,
     hideCode ? null : codeOrDash(paint.code),
-    paintDescription(paint, line),
+    descOverride ?? paintDescription(paint, line),
     stock ? '余量 ' + formatMl(stock.volumeMl) + '/' + formatMl(stock.initialMl) + ' ml' : null,
     empty ? '空瓶' : null,
   ]
@@ -134,6 +137,7 @@ export const PaintRow = memo(function PaintRow({
         compact={compact}
         dilutionRatioN={dilutionRatioN}
         hideCode={hideCode}
+        descOverride={descOverride}
         className="flex-1"
       />
 
@@ -142,9 +146,15 @@ export const PaintRow = memo(function PaintRow({
           <div className="flex items-center gap-1.5">
             {badges}
             {paint.hexEstimated && (
-              <Badge tone="warn" title="色值为按色名推定的近似值，尚未按厂商官方色卡核验">
-                ≈ 推定色
-              </Badge>
+              /* 2.2.2：推定色从完整小牌收成一个 ≈ 记号，避免整列表被同一个提示刷满 */
+              <span
+                data-hex-estimated=""
+                aria-label="近似色值"
+                title="色值为近似值（按色名或社区色库推定），尚未按厂商官方色卡核验"
+                className="ef-field shrink-0 cursor-help text-[12px] leading-none text-text-3"
+              >
+                ≈
+              </span>
             )}
             {typeof registeredCount === 'number' && registeredCount > 0 && (
               <Badge>已入库×{registeredCount}</Badge>

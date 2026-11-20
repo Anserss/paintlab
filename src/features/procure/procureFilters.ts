@@ -1,6 +1,6 @@
 import { hueBucket } from '@/core/math/color';
-import type { Finish, Paint, PaintClass, PaintLine } from '@/core/model/types';
-import { paintDescription } from '@/core/render/label';
+import type { Finish, Paint, PaintCategory, PaintClass, PaintLine } from '@/core/model/types';
+import { CATEGORY_ZH, paintDescription, solventZh } from '@/core/render/label';
 
 /** 采购大厅的搜索 / 筛选 / 排序（spec 3.2）——纯函数，单独可测。 */
 
@@ -50,6 +50,30 @@ const FINISH_ORDER: Finish[] = [
   'other',
 ];
 
+/**
+ * 2.2.2：辅料货架的归类不再只看 `paintClass === 'aux'`。
+ * 底漆 / 补土（例如郡士 Mr.SURFACER SF283–SF292、匠域 MP01）在目录里按厂线记成
+ * `paintClass: 'solid'` + `category: 'primer'`，但它们同样是「涂装前先买的那一瓶」，
+ * 放在颜色货架里会挤掉真正的色漆，所以按类目一并归到辅料。
+ */
+const AUX_CATEGORIES: ReadonlySet<PaintCategory> = new Set<PaintCategory>([
+  'thinner',
+  'retarder',
+  'primer',
+  'surfacer',
+]);
+
+export function isAuxPaint(paint: Pick<Paint, 'paintClass' | 'category'>): boolean {
+  return paint.paintClass === 'aux' || AUX_CATEGORIES.has(paint.category);
+}
+
+/** 辅料行的第二行文案：油性 · 稀释剂（颜色行仍由 core 的 paintDescription 负责） */
+export function procureDescription(paint: Paint, line: PaintLine | undefined): string | undefined {
+  if (!isAuxPaint(paint)) return undefined;
+  const category = CATEGORY_ZH[paint.category] ?? '辅料';
+  return [solventZh(line?.solvent), category].join(' · ');
+}
+
 const lower = (value: string | undefined): string => (value ?? '').trim().toLowerCase();
 
 /** 有效光泽：paint 覆盖 line 默认（与 core/render/label 一致） */
@@ -67,6 +91,9 @@ export function matchesQuery(paint: Paint, line: PaintLine | undefined, query: s
   const hex = lower(paint.hex).replace(/^#/, '');
   const bare = q.replace(/^#/, '');
   if (bare.length >= 3 && hex.includes(bare)) return true;
+  // 2.2.2：辅料按类目检索（「稀释剂」「缓干剂」「底漆」都能搜到）
+  const category = CATEGORY_ZH[paint.category];
+  if (category && category.toLowerCase().includes(q)) return true;
   if (!line) return false;
   if (lower(paintDescription(paint, line)).includes(q)) return true;
   return lower(line.name).includes(q) || lower(line.nameZh).includes(q);
@@ -109,7 +136,7 @@ export function sortPaints(paints: readonly Paint[], sort: ProcureSort): Paint[]
 
 /** 按货架（颜色 / 辅料）切分品牌池，下拉候选项也据此收敛 */
 export function paintsOfKind(paints: readonly Paint[], kind: ProcureKind): Paint[] {
-  return paints.filter((paint) => (kind === 'aux' ? paint.paintClass === 'aux' : paint.paintClass !== 'aux'));
+  return paints.filter((paint) => (kind === 'aux' ? isAuxPaint(paint) : !isAuxPaint(paint)));
 }
 
 export function filterPaints(
@@ -119,7 +146,7 @@ export function filterPaints(
   registeredOf: (paint: Paint) => number,
 ): Paint[] {
   return paints
-    .filter((paint) => (filters.kind === 'aux' ? paint.paintClass === 'aux' : paint.paintClass !== 'aux'))
+    .filter((paint) => (filters.kind === 'aux' ? isAuxPaint(paint) : !isAuxPaint(paint)))
     .filter((paint) =>
       matchesFilters(paint, linesById[paint.lineId], filters, registeredOf(paint)),
     );
@@ -148,10 +175,39 @@ export function filterOptionsOf(
   const lines = Array.from(lineIds)
     .map((id) => linesById[id])
     .filter((line): line is PaintLine => Boolean(line))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => (a.nameZh ?? a.name).localeCompare(b.nameZh ?? b.name));
   return {
     lines,
     classes: CLASS_ORDER.filter((value) => classes.has(value)),
     finishes: FINISH_ORDER.filter((value) => finishes.has(value)),
   };
+}
+
+/** 产品线的显示名：中文优先（2.2.2），没有中文名回退厂线原名 */
+export function lineLabelOf(line: PaintLine): string {
+  return line.nameZh || line.name;
+}
+
+export interface ProcureSummary {
+  color: number;
+  aux: number;
+  /** 色值按色名/社区色库推定的条目数（列表只在工具栏汇总，不再逐行挂牌） */
+  estimated: number;
+  /** 目录里尚未核验的条目数（辅料规格还没对过官方页） */
+  unverified: number;
+}
+
+/** 当前品牌池的货架与核验摘要（2.2.2：替代原来的逐行「待核验 / ≈推定色」小牌） */
+export function summarizePool(paints: readonly Paint[]): ProcureSummary {
+  let color = 0;
+  let aux = 0;
+  let estimated = 0;
+  let unverified = 0;
+  for (const paint of paints) {
+    if (isAuxPaint(paint)) aux += 1;
+    else color += 1;
+    if (paint.hexEstimated) estimated += 1;
+    if (!paint.verifiedAt) unverified += 1;
+  }
+  return { color, aux, estimated, unverified };
 }

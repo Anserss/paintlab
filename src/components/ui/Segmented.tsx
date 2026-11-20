@@ -52,13 +52,18 @@ export function Segmented<T extends string>({
             onClick={() => onChange(opt.value)}
             className={cn(
               'ef-btn !h-10 !border-0 !px-4 !text-[13px] transition-none',
-              active ? '!bg-ink !text-panel' : '!bg-transparent !text-ink-2 hover:!text-ink',
+              active ? '!bg-ink !text-panel hover:!text-[color:var(--ef-ink)]' : '!bg-transparent !text-ink-2 hover:!text-ink',
             )}
             style={{ clipPath: 'none' }}
           >
-            {opt.label}
+            {/*
+             * 2.2.2：标签必须包一层 z 轴元素。`.ef-btn::before` 是 hover 时扫过的
+             * 黄色斜切层（z-index:0），裸文本节点没有层叠上下文，会被盖住 →
+             * 选中页签在鼠标下变成「黄底看不见字」。
+             */}
+            <span className="relative z-[1]">{opt.label}</span>
             {typeof opt.count === 'number' && (
-              <span className="ef-field ml-1.5 opacity-70">{opt.count}</span>
+              <span className="ef-field relative z-[1] ml-1.5 opacity-70">{opt.count}</span>
             )}
           </button>
         );

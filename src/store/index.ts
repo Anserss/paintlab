@@ -56,7 +56,7 @@ export async function hydrateApp(): Promise<void> {
   }
   /**
    * 一旦本工作区已有库存或工作台，各页面都需要解析 paintId → Paint/Line/Brand
-   * （仓库行、工作台磁贴、调漆）。品牌包只有 4 个静态 JSON，这里统一预热，
+   * （仓库行、工作台磁贴、调漆）。品牌包是 7 个静态 JSON（2.2.2 起），这里统一预热，
    * 避免每个页面各自实现「按需补包」而漏掉一条路径。
    */
   try {

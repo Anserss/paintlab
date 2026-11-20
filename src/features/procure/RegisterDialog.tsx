@@ -4,6 +4,7 @@ import type { Group, Paint, PaintLine, PaintState } from '@/core/model/types';
 import { r1 } from '@/core/math/quantity';
 import { codeOrDash, paintTitle } from '@/core/render/label';
 import { Button, Dialog, Segmented, Stepper } from '@/components/ui';
+import { isAuxPaint } from './procureFilters';
 
 export type CapacityMode = 'whole' | 'half' | 'custom';
 
@@ -60,8 +61,9 @@ export function RegisterDialog({
   /**
    * 2.1.1：稀释剂 / 缓干剂等辅料不区分「原浆 / 稀释」——
    * 它们本身不是漆，采购入库时固定按未稀释（neat）记账，界面上不出现状态选项。
+   * 2.2.2：底漆 / 补土（paintClass=solid + category=primer）同样归辅料，一并走这条分支。
    */
-  const isAuxOnly = paints.length > 0 && paints.every((paint) => paint.paintClass === 'aux');
+  const isAuxOnly = paints.length > 0 && paints.every((paint) => isAuxPaint(paint));
 
   const [mode, setMode] = useState<CapacityMode>('whole');
   const [customMl, setCustomMl] = useState(lineVolume);
@@ -162,7 +164,7 @@ export function RegisterDialog({
           <div>
             <span className={FIELD_LABEL}>初始状态</span>
             <p data-aux-no-state="" className="text-[12px] leading-relaxed text-text-2">
-              稀释剂 / 缓干剂等辅料直接入库，不分原浆与稀释。
+              稀释剂 / 缓干剂 / 底漆等辅料直接入库，不分原浆与稀释。
             </p>
           </div>
         ) : (

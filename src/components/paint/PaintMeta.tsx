@@ -22,6 +22,8 @@ export interface PaintMetaProps {
   dilutionRatioN?: number | null;
   /** 2.2.1：调漆产物不显示基础漆号（只显示名称） */
   hideCode?: boolean;
+  /** 2.2.2：第二行属性文案覆盖（采购页的辅料行显示「油性 · 稀释剂」） */
+  descOverride?: string;
   className?: string;
 }
 
@@ -41,10 +43,11 @@ export function PaintMeta({
   compact = false,
   dilutionRatioN,
   hideCode = false,
+  descOverride,
   className,
 }: PaintMetaProps) {
   const title = paintTitle(paint);
-  const desc = paintDescription(paint, line);
+  const desc = descOverride ?? paintDescription(paint, line);
   const origin = paintOriginLine(brandNameOf(brand), line.name);
   const spec = (paint.volumeMl ?? line.defaultVolumeMl) + ' ml';
   const reading = stock ? formatMl(stock.volumeMl) + '/' + formatMl(stock.initialMl) + ' ml' : null;
