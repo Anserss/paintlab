@@ -1,6 +1,7 @@
 {
   "format": "pigment-depot/catalog/v1",
-  "generatedAt": "2026-11-18T12:35:32.528Z",
+  "version": "2.2.2",
+  "generatedAt": "2026-11-20T10:53:49.964Z",
   "brands": [
     {
       "id": "gsi",
@@ -8,7 +9,8 @@
       "nameZh": "郡士",
       "shortName": "GSI",
       "accentHex": "#1B4FA0",
-      "count": 468,
+      "count": 476,
+      "auxCount": 19,
       "file": "gsi.json"
     },
     {
@@ -17,8 +19,59 @@
       "nameZh": "匠域",
       "shortName": "JW",
       "accentHex": "#C0453A",
-      "count": 169,
+      "count": 193,
+      "auxCount": 12,
       "file": "jy.json"
+    },
+    {
+      "id": "gaia",
+      "name": "Gaianotes",
+      "nameZh": "盖亚",
+      "shortName": "GAIA",
+      "accentHex": "#E4572E",
+      "count": 158,
+      "auxCount": 2,
+      "file": "gaia.json"
+    },
+    {
+      "id": "tamiya",
+      "name": "Tamiya",
+      "nameZh": "田宫",
+      "shortName": "TAMIYA",
+      "accentHex": "#00539B",
+      "count": 115,
+      "auxCount": 4,
+      "file": "tamiya.json"
+    },
+    {
+      "id": "hobbymio",
+      "name": "Hobby Mio",
+      "nameZh": "喵酱",
+      "shortName": "HM",
+      "accentHex": "#D64550",
+      "count": 45,
+      "auxCount": 0,
+      "file": "hobbymio.json"
+    },
+    {
+      "id": "sunin7",
+      "name": "Sunin7",
+      "nameZh": "星影",
+      "shortName": "SUNIN7",
+      "accentHex": "#6A4C93",
+      "count": 32,
+      "auxCount": 0,
+      "file": "sunin7.json"
+    },
+    {
+      "id": "qnc",
+      "name": "QNC",
+      "nameZh": "青鸟川",
+      "shortName": "QNC",
+      "accentHex": "#2A9D8F",
+      "count": 11,
+      "auxCount": 0,
+      "file": "qnc.json"
     }
   ]
 }
