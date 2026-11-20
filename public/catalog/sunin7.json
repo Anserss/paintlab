@@ -14,6 +14,20 @@
   "verifiedAt": null,
   "lines": [
     {
+      "id": "sunin7-aux",
+      "brandId": "sunin7",
+      "name": "Sunin7 涂装辅料",
+      "nameZh": "涂装辅料（油性稀释液 / 脱漆剂）",
+      "packaging": "bottle",
+      "defaultVolumeMl": 250,
+      "kind": "auxiliary",
+      "resin": "lacquer",
+      "solvent": "oil",
+      "defaultFinish": "additive",
+      "thinnerFamily": "星影 TH-01 稀释液",
+      "defaultRatioN": 2
+    },
+    {
       "id": "sunin7-color",
       "brandId": "sunin7",
       "name": "数字系列",
@@ -518,6 +532,69 @@
       "source": "modkit-swatch 色值库（MIT，上游 591 条）",
       "sourceUrl": "https://github.com/afzafri/modkit-swatch",
       "hexEstimated": true
+    },
+    {
+      "id": "sunin7-th-01",
+      "lineId": "sunin7-aux",
+      "brandId": "sunin7",
+      "code": "TH-01",
+      "name": "TH-01 Lacquer Thinner",
+      "nameZh": "油性稀释液（通用型）250 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "category": "thinner",
+      "finish": "additive",
+      "volumeMl": 250,
+      "sourceUrl": "https://panzershop.com.ua/rozchynnyk-dlia-lakovykh-farb-sunin7-th-01m-500-ml/",
+      "source": "星影 TH-01 系列（经销商页：可稀释硝基漆 / 油性丙烯酸漆，兼容郡士、田宫、盖亚）；官方站不可达，按经销商品名与规格记账",
+      "origin": "seed"
+    },
+    {
+      "id": "sunin7-th-01sf",
+      "lineId": "sunin7-aux",
+      "brandId": "sunin7",
+      "code": "TH-01sf",
+      "name": "TH-01sf Fast-Drying Thinner",
+      "nameZh": "快干型稀释液（Fast Drying）250 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "category": "thinner",
+      "finish": "additive",
+      "volumeMl": 250,
+      "sourceUrl": "https://panzershop.com.ua/rozchynnyk-shvydkovysykhaiuchyi-dlia-lakovykh-farb-sunin7-th-01sf-250-ml/",
+      "source": "星影 TH-01sf（快干型，经销商页；货号 XY-TH01SF）",
+      "origin": "seed"
+    },
+    {
+      "id": "sunin7-th-01ss",
+      "lineId": "sunin7-aux",
+      "brandId": "sunin7",
+      "code": "TH-01ss",
+      "name": "TH-01ss Retarder-Type Thinner",
+      "nameZh": "缓干型稀释液（Slow Drying）250 ml",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "category": "thinner",
+      "finish": "additive",
+      "volumeMl": 250,
+      "sourceUrl": "https://panzershop.com.ua/rozchynnyk-dlia-lakovykh-farb-z-retarderom-sunin7-th-01ss-250-ml/",
+      "source": "星影 TH-01ss（含缓干剂 / 慢干型，经销商页）",
+      "origin": "seed"
+    },
+    {
+      "id": "sunin7-th-100",
+      "lineId": "sunin7-aux",
+      "brandId": "sunin7",
+      "code": "TH-100",
+      "name": "TH-100 Paint Remover",
+      "nameZh": "脱漆剂（涂层清除液）",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "category": "other",
+      "finish": "additive",
+      "sourceUrl": "https://guangtao.taobao.com/product-99f91689c6b7d9035e2c6780a2017d52.html",
+      "source": "待核验：星影脱漆剂（渠道常见 TH-100S/TH-100M 两支，规格未确认，本行不写容量）",
+      "origin": "seed"
     }
   ]
 }

@@ -14,6 +14,20 @@
   "verifiedAt": null,
   "lines": [
     {
+      "id": "qnc-aux",
+      "brandId": "qnc",
+      "name": "QNC 涂装辅料",
+      "nameZh": "涂装辅料（水性稀释液）",
+      "packaging": "bottle",
+      "defaultVolumeMl": 60,
+      "kind": "auxiliary",
+      "resin": "acrylic",
+      "solvent": "water",
+      "defaultFinish": "additive",
+      "thinnerFamily": "青鸟川 水性稀释液",
+      "defaultRatioN": 2
+    },
+    {
       "id": "qnc-water",
       "brandId": "qnc",
       "name": "QNC 水性色",
@@ -27,6 +41,20 @@
     }
   ],
   "paints": [
+    {
+      "id": "qnc-thinner",
+      "lineId": "qnc-aux",
+      "brandId": "qnc",
+      "name": "Water-Based Paint Thinner",
+      "nameZh": "水性漆专用稀释液",
+      "hex": "#ffffff",
+      "paintClass": "aux",
+      "category": "thinner",
+      "finish": "additive",
+      "sourceUrl": "https://world.taobao.com/dianpu/151266749.htm",
+      "source": "待核验：青鸟川有「专用稀释液」但官方未公开型号与容量；社区普遍做法为纯净水 / 95% 酒精稀释，官方缓干剂仅随漆赠品",
+      "origin": "seed"
+    },
     {
       "id": "qnc-qnc03",
       "lineId": "qnc-water",

@@ -191,7 +191,19 @@ describe('2.2.2 · 七个品牌包都能被 normalizeBrandBundle 吃下', () => 
       expect(typeof paint.volumeMl).toBe('number');
       expect(paint.source).toBeTruthy();
       expect(paint.sourceUrl).toMatch(/^https?:\/\//);
-      expect(paint.category).toBe('thinner');
+      // 2.2.2：87198 是缓干剂（retarder），87077 / X-20 / X-20A 是稀释剂（thinner）
+      expect(['thinner', 'retarder']).toContain(paint.category);
+    }
+    // 官方商品页核对到的两条必须带 verifiedAt
+    expect(aux.find((paint) => paint.code === '87077')?.verifiedAt).toBeTruthy();
+    expect(aux.find((paint) => paint.code === '87198')?.category).toBe('retarder');
+    expect(aux.find((paint) => paint.code === '87198')?.volumeMl).toBe(40);
+    // 其余品牌辅料也都补齐了（2.2.2 第二轮：联网补录）
+    for (const file of ['gaia.json', 'hobbymio.json', 'sunin7.json', 'qnc.json']) {
+      const result = normalizeBrandBundle(readCatalog(file));
+      expect(result.ok, file + ' 校验失败').toBe(true);
+      if (!result.ok) continue;
+      expect(result.data.paints.filter((paint) => paint.paintClass === 'aux').length).toBeGreaterThan(0);
     }
   });
 });

@@ -1,7 +1,7 @@
 {
   "format": "pigment-depot/catalog/v1",
   "version": "2.2.2",
-  "generatedAt": "2026-11-20T11:07:26.843Z",
+  "generatedAt": "2026-11-20T11:22:26.958Z",
   "brands": [
     {
       "id": "gsi",
@@ -49,8 +49,8 @@
       "nameZh": "喵酱",
       "shortName": "HM",
       "accentHex": "#D64550",
-      "count": 45,
-      "auxCount": 0,
+      "count": 48,
+      "auxCount": 3,
       "file": "hobbymio.json"
     },
     {
@@ -59,8 +59,8 @@
       "nameZh": "星影",
       "shortName": "SUNIN7",
       "accentHex": "#6A4C93",
-      "count": 32,
-      "auxCount": 0,
+      "count": 36,
+      "auxCount": 4,
       "file": "sunin7.json"
     },
     {
@@ -69,8 +69,8 @@
       "nameZh": "青鸟川",
       "shortName": "QNC",
       "accentHex": "#2A9D8F",
-      "count": 11,
-      "auxCount": 0,
+      "count": 12,
+      "auxCount": 1,
       "file": "qnc.json"
     }
   ]
