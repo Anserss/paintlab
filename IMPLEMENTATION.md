@@ -230,7 +230,7 @@ src/app/motion.ts
 npx tsc --noEmit        → 0 error
 npx vitest run          → 38 文件 / 422 用例通过（2.3.0）
 npx vite build          → ✓（PWA）
-npx vite build --mode desktop → ✓（无 sw.js；CSS 38.83 kB / JS 666.14 kB，gzip 210.12 kB）
+npx vite build --mode desktop → ✓（无 sw.js；CSS 38.83 kB / JS 666.17 kB，gzip 210.12 kB）
 npm run verify:motion   → 24 / 24（Playwright；dev server 5175）
 ```
 
@@ -272,7 +272,7 @@ npm run verify:motion   → 24 / 24（Playwright；dev server 5175）
 6. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
 7. 自动快照未实现（桌面版也是手动导出留档）；设置页如实标注。
 8. Playwright E2E 仍未接入五页业务回归；**2.3.0 只接入了 `verify:motion` 的动效验收（24 项）**，业务回归仍靠 422 条单测 + 桌面实机走查。
-9. 单 chunk 666.14 kB（gzip 210.12 kB），未拆包；2.3.0 动效层使 CSS 增加约 5.6 kB。
+9. 单 chunk 666.17 kB（gzip 210.12 kB），未拆包；2.3.0 动效层使 CSS 增加约 5.6 kB。
 10. 桌面壳依赖本机 Electron 运行时缓存；未做签名与自动更新。
 11. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局（无移动端版式）；390 宽无文档横向滚动，但左栏 / 工具栏会裁切。
 12. View Transitions（换页快门 / 主题揭幕）需要 Chromium 111+；Firefox 直接切换，不补动画。

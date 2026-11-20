@@ -132,7 +132,7 @@
 |---|---|
 | `npx tsc --noEmit` | 0 错 |
 | `npx vitest run` | **38 文件 / 422 用例通过**（2.2.2 为 35 / 411） |
-| `npm run build:desktop` | 成功；CSS 38.83 kB / JS 666.14 kB（gzip 210.12 kB） |
+| `npm run build:desktop` | 成功；CSS 38.83 kB / JS 666.17 kB（gzip 210.12 kB） |
 | `npm run verify:motion` | **24 / 24 通过**（需要先 `npm run dev`，Playwright 驱动真实点击 / 键盘 / 滚轮） |
 | `npm run desktop` | **已执行**：安装 2.3.0（`version.txt` / app package / 角标一致；`resources/app/dist` 与仓库构建产物 SHA256 一致），并用 Explorer 实机启动验证（7 品牌 1038 条、真实数据已加载；截图 `reports/shots/2-3-0-desktop-installed.png`） |
 
