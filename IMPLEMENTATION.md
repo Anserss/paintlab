@@ -1,6 +1,6 @@
-# PAINTLAB 2.2.2 · 实现说明
+# PAINTLAB 2.3.0 · 实现说明
 
-> 2.1 变更清单见 `docs/PAINTLAB-2.1-改版说明.md`；2.1.1 见 `docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录见 `docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 见 `docs/PAINTLAB-2.2-改版说明.md`；2.2.1 见 `docs/PAINTLAB-2.2.1-改版说明.md`；2.2.2 见 `docs/PAINTLAB-2.2.2-改版说明.md`；视觉与交互规格见 `docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`。
+> 2.1 变更清单见 `docs/PAINTLAB-2.1-改版说明.md`；2.1.1 见 `docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录见 `docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 见 `docs/PAINTLAB-2.2-改版说明.md`；2.2.1 见 `docs/PAINTLAB-2.2.1-改版说明.md`；2.2.2 见 `docs/PAINTLAB-2.2.2-改版说明.md`；2.3.0（动效层）见 `docs/PAINTLAB-2.3.0-改版说明.md`；视觉与交互规格见 `docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`。
 > 本文件偏目录、分层、脚本与验收命令。
 >
 > **版本号规则：未经用户明确指示，不得修改版本号**（`package.json` 的 `version` 与 `src/platform.ts` 的兜底值）；改版本前必须先得到用户明确许可。
@@ -17,7 +17,8 @@ npm run build          # PWA 构建
 npm run build:desktop  # 桌面构建（关闭 Service Worker）
 npm run desktop        # 构建 + 安装到 %LOCALAPPDATA%\Programs\PAINTLAB + 快捷方式
 npm run typecheck      # tsc --noEmit，期望 0 错
-npm test               # vitest run，35 文件 / 411 用例（2.2.2 实测）
+npm test               # vitest run，37 文件 / 420 用例（2.3.0 实测）
+npm run verify:motion  # 动效验收（先 npm run dev）：Playwright，24 项
 npm run check          # 目录核验 + 重建 public/catalog（旧 CSV 口径）
 node scripts/build-catalog-2.2.2.mjs   # 2.2.2 目录：modkit-swatch + 手补辅料
 npm run launcher       # 浏览器版单文件启动器（固定端口 8787）
@@ -29,15 +30,16 @@ npm run launcher       # 浏览器版单文件启动器（固定端口 8787）
 features → store → data → core
 ```
 
-| 层 | 目录 | 2.2.x 变化 |
+| 层 | 目录 | 2.2.x–2.3.0 变化 |
 |---|---|---|
 | core | `src/core/**` | 新增 `rules/low-volume.ts`（20% / 10 ml 判定、红牌文案、通知结构）与 `rules/formula.ts`（配方签名 / 合并 / 说明）；`StockItem.mixKey/mixLabel`、`BatchPart.sourceKey/sourceLabel`、`MixRecord.stockItemId`（`bottleId` 转可选） |
 | data | `src/data/**` | 新增 `repos/mix.ts`：`diluteAndStockIn` / `blendAndStockIn`（一事务一 Command：扣组分 + 零量删除 + 同配方合并 + 自动入库）、`migrateLegacyBottles`（升级搬家，不写 Command）；`adjustStockVolume` / `recordUsageAndStockIn` 支持 0 ml 删除与 lowVolume 回传；2.2.1 新增 `renameStockItem`（调漆产物改名可撤销） |
 | store | `src/store/**` | `ui.lowVolumeAlert` + `showLowVolumeAlert/dismissLowVolumeAlert`；`diluteBatch/blendBatch` 改用新 repo 并弹提示；`migrateLegacyBottles` 进 `hydrateApp` |
 | features | `src/features/**` | 调漆台重做：`MixPage` + `DilutePanel` + `BlendPanel`（两种算法 + 2.2.1 产物名称输入）+ `RecipePreview`（紧凑配方条）+ `StockPicker`（调漆产物 / 容量偏低标记）；仓库详情 2.2.1 增加「改名」；调漆产物全链路只显示名称（2.2.1）；删除 `BottleStage.tsx` / `ColorEditor.tsx`（批次动作与批次改色下线）；2.2.2 采购页重排（`procureFilters` 的 `isAuxPaint` / `procureDescription` / `summarizePool` / `lineLabelOf`、品牌分段、工具栏摘要、辅料空状态） |
-| components | `src/components/**` | 新增 `paint/LowVolumeTag.tsx`；`PaintMeta/PaintRow/PaintTile` 名称栏最前面挂「容量偏低」；2.2.1 增加 `hideCode`（调漆产物不显示基础漆号）；2.2.2 增加 `descOverride`，并把「≈ 推定色」小牌收成行内 `≈` 记号 |
-| app | `src/app/**` | 新增全局 `LowVolumeDialog`（Shell 挂载），显示需求原文 + 受影响条目 |
-| desktop | `desktop/electron/**` | 无结构变化；`package.json` 版本随根版本（2.2.2） |
+| components | `src/components/**` | 新增 `paint/LowVolumeTag.tsx`；`PaintMeta/PaintRow/PaintTile` 名称栏最前面挂「容量偏低」；2.2.1 增加 `hideCode`（调漆产物不显示基础漆号）；2.2.2 增加 `descOverride`，并把「≈ 推定色」小牌收成行内 `≈` 记号；2.3.0 给 Dialog / Segmented 加动效挂点（`ef-dialog` / `data-seg`） |
+| app | `src/app/**` | 新增全局 `LowVolumeDialog`（Shell 挂载），显示需求原文 + 受影响条目；2.3.0 新增 `motion.ts`（换页快门 / 主题揭幕 / 读数落定 / 减少动效回退）与 `useShutterNavigate.ts`，Shell / CommandBar / StatusBar 接入 |
+| styles | `src/styles/**` | 2.3.0 新增 `motion.css`：动效层（keyframes、逐行亮起、按钮亮边、弹层 / 抽屉 / 回执、加载条、View Transition 伪元素）；`tokens.css` 增加 2.3.0 动效 token |
+| desktop | `desktop/electron/**` | 无结构变化；`package.json` 版本随根版本（2.3.0） |
 
 ## 桌面化要点
 
@@ -194,14 +196,50 @@ Tailwind 颜色键保留旧名但值全部指向 `--ef-*`；组件不再硬编�
 深色：纸 `#191919` / 板 `#222` / 墨 `#EDEDED` / trace 用黄 / 稀释小牌灰底 `#3F3F3F` / 容量偏低沿用红底白字。
 切角只在可点元素上；红色只给删除与「容量偏低」状态牌（2.2 需求例外）；无圆角、投影、发光、装饰渐变；右下角不再有浮动提示。
 
+## 动效层（2.3.0）
+
+```
+规则（endfield-ui motion 清单）
+  ├─ 每个动效对应一次操作 / 状态变化；无循环装饰（例外：未知进度加载条，元素移除即停）
+  ├─ 出现 snap；擦入 / 快门 / 所有退出 mech；普通过渡 ease
+  ├─ 回应 100–400ms；单个入场 ≤ 650ms；整段入场 ≤ 1000ms
+  └─ 错开只有 38ms（行）/ 100ms（块）两档
+
+src/styles/motion.css
+  ├─ @tailwind components; @layer components { … }   （工具类仍可覆盖组件动效）
+  ├─ 入场：.ef-tristrip.ef-in-sweep / main.ef-page-boot / .ef-rows-enter / .ef-in-power
+  ├─ 回应：.ef-btn::after 亮边 / :active 缩 1.5% / [aria-busy] 斜线纹 / .ef-scan
+  ├─ 进出：.ef-dialog[data-state] / .ef-dialog__overlay / .ef-drawer(.is-closing) / .ef-status__message.ef-in-wipe|ef-out-wipe
+  └─ 伪元素：html[data-ef-vt='page']::view-transition-new(root) 快门 360ms
+
+src/app/motion.ts
+  ├─ motionAllowed() / supportsViewTransition()        减少动效 & 兼容回退
+  ├─ shutter(update)                                   同源换页：View Transition + flushSync
+  ├─ revealTheme(origin, update)                       主题：WAAPI 圆形 clip-path 240–600ms
+  └─ settleReadout(el, finalText)                      读数乱码后落定（只改现有 text node）
+```
+
+- **接入点**：Shell（三色条 / 页面通电 / 键盘 1–5 换页）、CommandBar（导航快门 / 主题揭幕）、StatusBar（回执进出 / 库存读数）、ProcurePage（结果区重建 + 逐行亮起 + 加载扫描条）、Workbench（切 Tab 磁贴逐行亮起）、Depot（视图通电 / 详情抽屉推入与退出）、Dialog（Radix `data-state` 驱动）/ Segmented（`data-seg` 排除按钮动效）/ 提交按钮（`aria-busy`）。
+- **减少动态效果**：`motion.css` 的动画全部写在 `@media (prefers-reduced-motion: no-preference)`；`tokens.css` 里 2.3.0 token 在 `reduce` 下归零；`motionAllowed()` 为 false 时快门 / 揭幕 / 落定直接执行最终动作。
+- **兼容**：没有 `startViewTransition` 时换页 / 换主题直接切换，不补假动画；连续换页用 serial 防止旧 `finished` 清掉新标记。
+- **验收**：`npm run verify:motion`（Playwright，需 dev server）24 项；检查真实动画事件（`animationstart`）、View Transition 调用、`data-ef-vt` 清理、弹层 / 抽屉退出时长、回执进出、减少动效与 390 宽。截图 `reports/shots/2-3-0-*.png`。
+
 ## 测试
 
 ```
 npx tsc --noEmit        → 0 error
-npx vitest run          → 35 文件 / 411 用例通过（2.2.2）
+npx vitest run          → 37 文件 / 420 用例通过（2.3.0）
 npx vite build          → ✓（PWA）
-npx vite build --mode desktop → ✓（无 sw.js；CSS 33.23 kB / JS 661.81 kB，gzip 208.53 kB）
+npx vite build --mode desktop → ✓（无 sw.js；CSS 38.83 kB / JS 666.14 kB，gzip 210.12 kB）
+npm run verify:motion   → 24 / 24（Playwright；dev server 5175）
 ```
+
+2.3.0 新增 / 改写用例：
+
+- `tests/unit/app/motion.test.ts`（6 条）：减少动态效果判定；不支持 View Transitions 时 `shutter` / `revealTheme` 直接执行；支持时进入 `startViewTransition` 并在 `finished` 后清理 `data-ef-vt`；`settleReadout` 在 reduce 下不动文本、可用时经历乱码态后落定回真实读数并移除临时 `aria-label`。
+- `tests/unit/data/brand-order.test.ts`（2 条）：品牌包懒加载不再改变左栏顺序（index 顺序稳定；品牌包元数据仍合并）。
+- `tests/unit/data/shell.test.tsx`：新增 1 条，锁住 `ef-tristrip.ef-in-sweep` 与 `main.ef-page-boot`。
+- `scripts/verify-motion.mjs`（不计入 vitest）：真实浏览器的 24 项动效验收，覆盖 jsdom 看不到的动画事件、View Transition、Radix 退出等待与减少动效。
 
 2.2.2 新增/改写用例：
 
@@ -230,9 +268,11 @@ npx vite build --mode desktop → ✓（无 sw.js；CSS 33.23 kB / JS 661.81 kB�
 3. 青鸟川仅有 1 条辅料且**无型号**（官方未公开专用稀释液型号/容量）；社区普遍用纯净水或 95% 酒精稀释。
    第二轮的更正：田宫 87198 官方页是「ペイントリターダー 40 ml」（缓干剂，不是缓干型稀释剂）；盖亚 T-02 是アクリル溶剤，缓干型稀释剂是 T-06，故只保留 T-01S 250 ml / T-01M 500 ml。
 4. 新增 5 个品牌没有中文漆名（盖亚沿用上游日文名），中文检索只能命中色号与类目。
-5. `JW-A01…A24` 的油性 / 水性冲突未定；当前按 modkit 建模 = 油性。
+5. `JW-A01…A24` 的建模口径已按用户 2026-11-20 拍板为**水性**（`acrylic/acrylic/water`），modkit 上游写的 lacquer 未采纳；若厂方页面确认是 lacquer，改 `scripts/build-catalog-2.2.2.mjs` 的 `LINES.jy` 再重跑即可。
 6. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
 7. 自动快照未实现（桌面版也是手动导出留档）；设置页如实标注。
-8. Playwright E2E 未接入；桌面实机走查覆盖：启动/五页导航/稀释批次/调漆批次改名改色/删除分解/撤销/导入导出/窗口记忆。
-9. 单 chunk 661.81 kB（gzip 208.53 kB），未拆包。
+8. Playwright E2E 仍未接入五页业务回归；**2.3.0 只接入了 `verify:motion` 的动效验收（24 项）**，业务回归仍靠 420 条单测 + 桌面实机走查。
+9. 单 chunk 666.14 kB（gzip 210.12 kB），未拆包；2.3.0 动效层使 CSS 增加约 5.6 kB。
 10. 桌面壳依赖本机 Electron 运行时缓存；未做签名与自动更新。
+11. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局（无移动端版式）；390 宽无文档横向滚动，但左栏 / 工具栏会裁切。
+12. View Transitions（换页快门 / 主题揭幕）需要 Chromium 111+；Firefox 直接切换，不补动画。

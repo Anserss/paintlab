@@ -50,6 +50,16 @@ describe('应用外壳（spec 3.1 / AC-16）', () => {
     expect(container.querySelectorAll('img')).toHaveLength(0);
   });
 
+  it('2.3.0：打开应用时三色条扫过、内容区通电（动效类挂在正确的外壳元素上）', () => {
+    const { container } = renderShell('/procure');
+    const tristrip = container.querySelector('.ef-tristrip');
+    const main = container.querySelector('main');
+    expect(tristrip?.classList.contains('ef-in-sweep')).toBe(true);
+    expect(main?.classList.contains('ef-page-boot')).toBe(true);
+    expect(container.querySelector('.ef-cmd')).not.toBeNull();
+    expect(container.querySelector('.ef-status')).not.toBeNull();
+  });
+
   it('顶部状态栏：撤销/反撤销带 (n/3) 计数，n=0 时禁用并带 title', () => {
     const { container } = renderShell('/procure');
     const undo = container.querySelector('[data-action="undo"]') as HTMLButtonElement | null;

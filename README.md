@@ -1,4 +1,4 @@
-# PAINTLAB 2.2.2 · 漆料资产与调漆工作台
+# PAINTLAB 2.3.0 · 漆料资产与调漆工作台
 
 > 面向模型涂装玩家的**漆料资产与调漆工作台**：采购入库 → 仓库管理 → 调漆台（稀释 / 调漆）→ 工作台开涂。
 > 本地优先、离线可用；2.0 起提供**独立桌面应用**（Electron + 固定 origin），视觉为「终末地风味」纸面工业界面。
@@ -7,9 +7,10 @@
 > 2.1.2：按 GSI Creos 官方产品页与色卡补录**郡士 CL 系列（LASCIVUS 肤色 CL01~09 + AURA 发色 CL101~111）共 20 条**，目录 617 → 637。
 > 2.2.0：调漆台**确认即自动入库**（去掉批次的「使用 / 清空 / 入库」动作）；**同配方自动合并容量**，仓库里始终一个瓶；任何扣减后余量 **< 原有容量 20% 或 < 10 ml** 会弹窗提醒并在名称前挂红底白字「容量偏低」，**余量 0 ml 自动删除**；调漆台改为「左取料 + 右上操作 / 右下紧凑配方」，调漆 SOP 支持**总量÷配比**与**各组分用量**两种算法，组分可用调漆产物。
 > 2.2.1：调漆产物名称恢复为**用户自定义**（确认前可填「JW020」等名字，留空才默认「调漆N」）；已入库产物可在仓库详情「改名」，改名可撤销；**调漆产物只显示名称，不再显示基础漆号**（仓库行 / 详情 / 调漆台 / 工作台全部统一）。
-> 2.2.2：按 `paintlab/modkit-swatch`（MIT）把目录从 2 品牌 637 条扩到 **7 品牌 1030 条**（新增盖亚 / 田宫 / 喵酱 / 星影 / 青鸟川）；**辅料补录**（盖亚、田宫的稀释剂 + 郡士 / 匠域既有的官方目录条目）；采购页按 **颜色 / 辅料** 两个货架重排：**底漆 / 补土并入辅料货架**、辅料行第二行改显示类目（「油性 · 稀释剂」）、选「全部」时**按品牌分段**、色值与核验提示收成工具栏摘要 + 行内 ≈ 记号。
+> 2.2.2：按 `paintlab/modkit-swatch`（MIT）把目录从 2 品牌 637 条扩到 **7 品牌 1038 条**（新增盖亚 / 田宫 / 喵酱 / 星影 / 青鸟川）；**辅料补录**（盖亚、田宫的稀释剂 + 郡士 / 匠域既有的官方目录条目）；采购页按 **颜色 / 辅料** 两个货架重排：**底漆 / 补土并入辅料货架**、辅料行第二行改显示类目（「油性 · 稀释剂」）、选「全部」时**按品牌分段**、色值与核验提示收成工具栏摘要 + 行内 ≈ 记号。
+> 2.3.0：按 `endfield-ui` 的动效清单补上**适度、短、硬、机械**的一层动效——打开应用三色条扫过 + 页面通电、换页斜切快门、深浅主题从按钮圆形揭幕、采购结果逐行亮起、弹层通电 / 详情抽屉推入、按钮亮边与按下、状态条回执擦入擦出、库存读数乱码后落定；全部 ≤ 1s、不循环，**减少动态效果时全部关闭**。顺带修了「品牌包加载导致左栏重排」。
 >
-> 设计规格：`docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`；2.1 变更：`docs/PAINTLAB-2.1-改版说明.md`；2.1.1 变更：`docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录：`docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 变更：`docs/PAINTLAB-2.2-改版说明.md`；2.2.1 变更：`docs/PAINTLAB-2.2.1-改版说明.md`；2.2.2 变更：`docs/PAINTLAB-2.2.2-改版说明.md`；
+> 设计规格：`docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`；2.1 变更：`docs/PAINTLAB-2.1-改版说明.md`；2.1.1 变更：`docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录：`docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 变更：`docs/PAINTLAB-2.2-改版说明.md`；2.2.1 变更：`docs/PAINTLAB-2.2.1-改版说明.md`；2.2.2 变更：`docs/PAINTLAB-2.2.2-改版说明.md`；2.3.0 变更：`docs/PAINTLAB-2.3.0-改版说明.md`；
 > 分层与脚本速查：`IMPLEMENTATION.md`。
 
 ---
@@ -86,11 +87,12 @@ npm run launcher       # 重建 release/PAINTLAB.exe（固定端口 8787）
 
 ## 界面（终末地风味）
 
-- 变体卡：`yellow / neutral / standard / grid / standard / calm`——唯一强调色 `#FFFA00`、纸面 `#F4F4F2`、切角 7/8px、32px 网格、标准密度、机械短动效。
-- 浅色为默认主题；深色是一套完整主题（设置页或命令栏右侧切换）。
+- 变体卡（2.3.0）：`yellow / neutral / standard / grid / standard / full`——唯一强调色 `#FFFA00`、纸面 `#F4F4F2`、切角 7/8px、32px 网格、标准密度、机械短动效（2.0–2.2.2 是 `calm`，2.3.0 起补齐入场）。
+- 浅色为默认主题；深色是一套完整主题（设置页或命令栏右侧切换，切换时从按钮处圆形揭幕）。
 - 命令栏（40px，兼作桌面标题栏）+ 三色条 + 状态条（36px）+ 内容区；一级导航 1–5 快捷键。
 - 按钮 44/40/32 三档（主要操作 44），输入 40 / 主参数 44，列表行 68；图标按钮命中区 44。切角 = 可点击，正文/色样直角；无圆角、无投影、无装饰渐变；红色只给删除与「容量偏低」状态牌（2.2 用户明确要求红底白字，属唯一例外）。
 - **不回浮动提示（2.1）**：右下角提示条已删除；回执 / 错误只在状态条（36px）上显示一行原文，4.2 s 自动收起，撤销统一走状态条的撤销栈。
+- **动效（2.3.0）**：短、硬、机械，每个动效对应一次操作或状态变化；出现 `snap`、擦入 / 快门 / 所有退出 `mech`；回应 100–400ms、单个入场 ≤ 650ms、整段入场 ≤ 1s；不做弹跳 / 循环装饰 / 滚动触发的逐段淡入；系统「减少动态效果」打开时全部关闭。清单见 `docs/PAINTLAB-2.3.0-改版说明.md` §2。
 - 稀释小牌：灰底 `(1:N)稀释` + 白字，直角、无圆角；只出现在名称前，不参与点击。
 
 ## 数据（modkit-swatch 色值库 + 官方目录手补）
@@ -115,7 +117,8 @@ npm run launcher       # 重建 release/PAINTLAB.exe（固定端口 8787）
 
 ```bash
 npm run typecheck      # tsc --noEmit，0 错
-npm test              # 35 文件 / 411 用例
+npm test              # 37 文件 / 420 用例
+npm run verify:motion # 动效 24 项（需另开 npm run dev）
 npm run build         # PWA 构建
 npm run build:desktop # 桌面构建（关闭 SW）
 ```
@@ -130,15 +133,15 @@ npm run build:desktop # 桌面构建（关闭 SW）
 
 ```
 desktop/electron/    桌面壳（main / preload / package.json）
-scripts/             make-desktop / make-launcher / 目录管线 / devtools-shot（调试）
-src/styles/          tokens（终末地 token）/ base（基础与部件）/ texture（网点、网格、斜线）
-src/app/             Shell / CommandBar / StatusBar / 路由
+scripts/             make-desktop / make-launcher / 目录管线 / verify-motion / devtools-shot（调试）
+src/styles/          tokens（终末地 token）/ base（基础与部件）/ texture（网点、网格、斜线）/ motion（2.3.0 动效层）
+src/app/             Shell / CommandBar / StatusBar / 路由 / motion（快门、揭幕、读数落定）
 src/core/            领域层（types / schemas / math：dilution + blend / render / rules / history）
 src/data/            db（Dexie v2）/ repos / catalog
 src/store/           切片 + hydrateApp
 src/components/      ui / paint / bottle
 src/features/        procure / depot / mix / workbench / settings
-tests/unit/          core · data · components · features
+tests/unit/          app · core · data · components · features
 ```
 
 ## 已知缺口
@@ -150,9 +153,11 @@ tests/unit/          core · data · components · features
 5. 新增 5 个品牌没有中文漆名（沿用 modkit 上游的日文 / 英文名），中文检索只能命中色号与类目。
 6. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
 7. 自动快照仍未实现（设置页如实标注并提供导出替代）；桌面版目前依赖手动导出留档。
-8. Playwright E2E 未接入；回归靠 411 条单测 + 桌面实机走查。
-9. 打包单 chunk 约 662 KB（gzip 209 KB），未做 manualChunks 拆分。
-7. 桌面壳复用本机 Electron 运行时（`desktop/electron-runtime`，首次构建从 `%LOCALAPPDATA%\electron\Cache` 解压）；换机时需先缓存 Electron 43 的 win32-x64 包。
+8. Playwright E2E 未接入；回归靠 420 条单测 + `verify:motion`（真实浏览器 24 项）+ 桌面实机走查。
+9. 打包单 chunk 约 666 KB（gzip 210 KB），未做 manualChunks 拆分。
+10. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局：390 宽没有文档横向滚动，但左栏 + 工具栏会裁切；本项目定位桌面应用，未做移动端版式。
+11. 换页 / 深浅切换的 View Transition 需要 Chromium 111+（Electron 43 / Chrome / Edge 有）；Firefox 直接切换、不补动画。
+12. 桌面壳复用本机 Electron 运行时（`desktop/electron-runtime`，首次构建从 `%LOCALAPPDATA%\electron\Cache` 解压）；换机时需先缓存 Electron 43 的 win32-x64 包。
 
 ## 字体与许可
 
