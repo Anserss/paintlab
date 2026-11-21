@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+﻿import { useRef } from 'react';
 import { revealTheme } from '@/app/motion';
 import { Segmented } from '@/components/ui';
 import type { Density, LevelMode, Settings, ThemeMode } from '@/core/model/types';
@@ -61,7 +61,7 @@ export function SettingsItemsPanel() {
   return (
     <Panel
       id="settings"
-      code="//02"
+      code="//01"
       title="设置项（白名单）"
       description="改动立即生效并给出回执；设置项不进撤销栈（spec 3.6 不可撤销清单）。"
     >

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAINTLAB · 数据范围与字段级权限</title>
+<style>
+  :root{
+    --paper:#f4f4f2; --ink:#161616; --ink-2:#3b3b3b; --ink-3:#6c6c68;
+    --line:#d8d8d2; --surface:#fbfbf9; --accent:#fffa00; --warn:#b3261e; --ok:#1f6f3f;
+    --mono:"Cascadia Mono","Consolas","JetBrains Mono",ui-monospace,monospace;
+    --sans:"Saira","Segoe UI Variable","Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62}
+  a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink-3)}
+  a:hover{background:var(--accent)}
+  code{font-family:var(--mono);font-size:.86em;background:#eaeae4;padding:.08em .32em;border:1px solid #dedeD6}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px 72px}
+  header.hero{padding:44px 0 28px;border-bottom:2px solid var(--ink)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+  h1{font-size:34px;line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h1 .slash{color:var(--ink-3);font-weight:400}
+  .lede{max-width:70ch;color:var(--ink-2);font-size:14px;margin:0}
+  .stamp{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;border:1px solid var(--ink);padding:3px 8px;background:var(--surface)}
+  .chip.hot{background:var(--accent)}
+  .move{margin-top:22px;border:1px solid var(--ink);background:var(--surface);padding:14px 16px;position:relative}
+  .move::before{content:"//00  迁移说明";position:absolute;top:-9px;left:12px;background:var(--paper);padding:0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-3)}
+  .move p{margin:4px 0}
+  nav.toc{margin:34px 0 10px;border-top:1px solid var(--line)}
+  nav.toc ol{list-style:none;margin:0;padding:0;columns:2;column-gap:40px}
+  @media(max-width:720px){nav.toc ol{columns:1}.wrap{padding:0 18px 56px}h1{font-size:26px}}
+  nav.toc li{break-inside:avoid;border-bottom:1px solid var(--line)}
+  nav.toc a{display:flex;gap:12px;align-items:baseline;padding:8px 2px;border:0}
+  nav.toc .no{font-family:var(--mono);font-size:11px;color:var(--ink-3);min-width:3.2em}
+  nav.toc .ti{font-size:13.5px}
+  section{padding:30px 0 6px;border-bottom:1px solid var(--line)}
+  h2{font-size:20px;margin:0 0 4px;display:flex;gap:12px;align-items:baseline}
+  h2 .no{font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.08em}
+  h3{font-size:14px;margin:22px 0 8px;font-family:var(--mono);letter-spacing:.04em}
+  p{margin:10px 0}
+  .callout{background:var(--accent);color:var(--ink);padding:12px 16px;margin:16px 0;font-weight:600;font-size:15.5px;border:1px solid var(--ink)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);background:var(--surface);padding:14px 16px}
+  .card h4{margin:0 0 6px;font-size:13px;font-family:var(--mono);letter-spacing:.06em;color:var(--ink-2)}
+  .card ul{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+  .card li{margin:3px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0 6px;font-size:13.5px}
+  caption{caption-side:top;text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink-3);padding-bottom:6px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  thead th{font-weight:600;font-size:11.5px;font-family:var(--mono);letter-spacing:.06em;color:var(--ink-2);border-bottom:1px solid var(--ink)}
+  tbody tr:nth-child(even){background:#f0f0ea}
+  td.n{font-family:var(--mono);font-size:12px;white-space:nowrap}
+  td.c{text-align:center;font-family:var(--mono)}
+  .yes{color:var(--ok);font-weight:700}
+  .no{color:var(--ink-3);font-weight:700}
+  .footnote{font-size:12px;color:var(--ink-3)}
+  .kw{background:linear-gradient(transparent 62%,var(--accent) 62%);padding:0 .1em}
+  footer{margin-top:34px;padding-top:16px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  @media print{
+    body{background:#fff;font-size:11pt}
+    .wrap{max-width:none;padding:0}
+    nav.toc{break-after:page}
+    section{break-inside:avoid}
+    .move{background:#fff}
+    a{border:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">PAINTLAB · 说明文档 · docs/data-scope</p>
+    <h1>数据范围与字段级权限<span class="slash"> / </span><span style="font-size:.55em;color:var(--ink-3)">Data Scope &amp; Field-Level Permissions</span></h1>
+    <p class="lede">系统让你写到什么程度、写到哪一层：目录只读，用户数据可写，派生数据只能经由业务动作改变。所有写操作走「一个事务 + 一个 Command」，可撤销，并可回溯到 ledger。</p>
+    <div class="stamp">
+      <span class="chip">版本 PAINTLAB 2.3.0</span>
+      <span class="chip">设计书 §3.7 / AC-12</span>
+      <span class="chip hot">2.3.0 起随应用包发布</span>
+      <span class="chip">2026-11-21</span>
+    </div>
+    <div class="move">
+      <p>这份说明原来占设置页第一屏（<code>//01 数据范围与字段级权限</code> 面板）。2.3.0 起面板不再出现在界面里，
+      完整内容改为随应用包发布的文档：安装目录 <code>docs/数据范围与字段级权限.md</code>（本文为同内容 HTML 版，双击即可阅读）。
+      设置页面板编号相应前移为 <code>//01 设置项 → //02 数据运维 → //03 快捷键 → //04 关于</code>。</p>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="目录">
+    <ol>
+      <li><a href="#s1"><span class="no">//01</span><span class="ti">数据分区（3.7.1）</span></a></li>
+      <li><a href="#s2"><span class="no">//02</span><span class="ti">字段级写入权限（3.7.2）</span></a></li>
+      <li><a href="#s3"><span class="no">//03</span><span class="ti">配额与上限（3.7.3）</span></a></li>
+      <li><a href="#s4"><span class="no">//04</span><span class="ti">写路径与校验</span></a></li>
+      <li><a href="#s5"><span class="no">//05</span><span class="ti">为什么目录只读</span></a></li>
+      <li><a href="#s6"><span class="no">//06</span><span class="ti">变更记录与相关文档</span></a></li>
+    </ol>
+  </nav>
+
+  <section id="s1">
+    <h2><span class="no">//01</span>数据分区</h2>
+    <p class="footnote">对应设计书 3.7.1。分区决定「谁能写」，也决定升级时哪些数据会被版本覆盖。</p>
+    <table>
+      <caption>3.7.1 数据分区</caption>
+      <thead><tr><th>分区</th><th>归属</th><th>可写性</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="n">catalog</td><td>系统（随版本发布）</td><td class="c"><span class="no">只读</span></td><td>品牌、系列、SKU、色值、规格；版本化，随更新合并</td></tr>
+        <tr><td class="n">user</td><td>用户</td><td class="c"><span class="yes">可写</span></td><td>库存条目、分组、工作台、批次、用量记录、设置</td></tr>
+        <tr><td class="n">custom</td><td>用户</td><td class="c"><span class="yes">可写</span></td><td>目录里没有的漆，独立命名空间，带 <code>origin = 'custom'</code></td></tr>
+        <tr><td class="n">derived</td><td>系统计算</td><td class="c"><span class="no">不可直接写</span></td><td>液位、比例读数、库存总计、低库存状态、色环坐标</td></tr>
+      </tbody>
+    </table>
+    <div class="grid2">
+      <div class="card">
+        <h4>目录数据落在哪</h4>
+        <ul>
+          <li><code>public/catalog/index.json</code> + 7 个品牌包</li>
+          <li>随版本发布，构建产物，不进用户库</li>
+          <li>版本号显示在设置页「关于」面板</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>用户数据落在哪</h4>
+        <ul>
+          <li>桌面版：<code>%APPDATA%\PAINTLAB</code>（IndexedDB，固定 origin <code>app://paintlab</code>）</li>
+          <li>浏览器版：同源 IndexedDB</li>
+          <li>升级换版本不换库；导出走设置页「数据运维」</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2><span class="no">//02</span>字段级写入权限</h2>
+    <p>共 22 个字段组：<span class="kw">15 项可写、7 项只读</span>。只读字段在界面上不是可写控件——不是「先让改再回滚」。</p>
+    <table>
+      <caption>3.7.2 字段级写入权限矩阵</caption>
+      <thead><tr><th>实体.字段</th><th>可写</th><th>来源</th><th>校验 / 备注</th></tr></thead>
+      <tbody>
+        <tr><td class="n">Brand.name / shortName / accentHex</td><td class="c"><span class="no">✕</span></td><td>catalog</td><td>只读；用户可覆盖「显示别名」（见下）</td></tr>
+        <tr><td class="n">Brand.displayAlias</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>≤ 16 字，仅本地生效</td></tr>
+        <tr><td class="n">PaintLine.defaultVolumeMl</td><td class="c"><span class="no">✕</span></td><td>catalog</td><td>规格只读；采购时用户可在 0.5–2500 内覆盖 initialMl</td></tr>
+        <tr><td class="n">Paint.code / name / hex / paintClass / category</td><td class="c"><span class="no">✕</span></td><td>catalog</td><td>禁止用户改色值，防止显示语义漂移</td></tr>
+        <tr><td class="n">Paint.sourceUrl / verifiedAt</td><td class="c"><span class="no">✕</span></td><td>catalog</td><td>由维护者写入，用户不可编辑</td></tr>
+        <tr><td class="n">CustomPaint.*</td><td class="c"><span class="yes">✓</span></td><td>custom</td><td>必填品牌名（可自建）、名称、色值、类；hex 必须 #RRGGBB</td></tr>
+        <tr><td class="n">StockItem.volumeMl</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>限「盘点」入口，[0, initialMl]，必须填原因</td></tr>
+        <tr><td class="n">StockItem.initialMl</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>采购时 0.5–2500，1 位小数</td></tr>
+        <tr><td class="n">StockItem.state / ratioN</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>采购时写入；thinned 必须给 ratioN</td></tr>
+        <tr><td class="n">StockItem.note</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>≤ 120 字</td></tr>
+        <tr><td class="n">StockItem.groupId</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>必须存在且 depth ≤ 3</td></tr>
+        <tr><td class="n">Group.name</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>1–16 字，同层不重名</td></tr>
+        <tr><td class="n">Group.parentId</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>不可成环、不可超 3 层</td></tr>
+        <tr><td class="n">Workbench.name</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>1–16 字，全局不重名</td></tr>
+        <tr><td class="n">Workbench.note</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>≤ 60 字</td></tr>
+        <tr><td class="n">Bottle.capacityMl</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>5–250 整数，且 ≥ remainingMl</td></tr>
+        <tr><td class="n">Bottle.ratioN</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>稀释 / 调漆时写入，0–10，步进 0.1</td></tr>
+        <tr><td class="n">Bottle.name</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>≤ 16 字</td></tr>
+        <tr><td class="n">Bottle.remainingMl / baselineMl</td><td class="c"><span class="no">✕</span></td><td>derived + user</td><td>只能通过稀释 / 调漆 / 使用 / 清空改变，禁止表单直改</td></tr>
+        <tr><td class="n">UsageRecord / MixRecord</td><td class="c"><span class="no">✕</span></td><td>system</td><td>只追加，不可编辑、不可删除（可归档）</td></tr>
+        <tr><td class="n">Settings.*</td><td class="c"><span class="yes">✓</span></td><td>user</td><td>白名单枚举（见 2.2）</td></tr>
+        <tr><td class="n">CatalogVersion</td><td class="c"><span class="no">✕</span></td><td>system</td><td>只读</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.1 目录字段只读是怎么保证的</h3>
+    <p>目录字段（品牌名 / 规格 / 色值 / sourceUrl / verifiedAt / CatalogVersion）在本应用里一律渲染为只读文本：
+    DOM 里不是 <code>input</code>、<code>select</code> 或 <code>textarea</code>，并标注 <code>aria-readonly</code>。
+    采购页只能选目录条目，色值来自目录，用户改不了。</p>
+    <p>需要目录之外的颜色，请使用 <code>custom</code> 命名空间的自定义漆料：用户自带色值与名称，
+    <strong>不覆盖 catalog</strong>，也不会污染品牌目录。</p>
+
+    <h3>2.2 用户可写字段白名单</h3>
+    <table>
+      <caption>用户可写字段与入口</caption>
+      <thead><tr><th>字段组</th><th>入口</th><th>约束</th></tr></thead>
+      <tbody>
+        <tr><td class="n">Brand.displayAlias</td><td>品牌别名</td><td>≤ 16 字，仅本地</td></tr>
+        <tr><td class="n">CustomPaint.*</td><td>自定义漆料</td><td>hex #RRGGBB，品牌可自建</td></tr>
+        <tr><td class="n">StockItem.volumeMl</td><td>盘点</td><td>必须填原因，写入 ledger</td></tr>
+        <tr><td class="n">StockItem.initialMl</td><td>采购</td><td>0.5–2500，1 位小数</td></tr>
+        <tr><td class="n">StockItem.state / ratioN</td><td>采购</td><td>thinned 必须带比例</td></tr>
+        <tr><td class="n">StockItem.note</td><td>采购 / 详情</td><td>≤ 120 字</td></tr>
+        <tr><td class="n">StockItem.groupId</td><td>移动至…</td><td>分组必须存在且 depth ≤ 3</td></tr>
+        <tr><td class="n">Group.name / parentId</td><td>分组管理</td><td>不重名、不成环、≤ 3 层</td></tr>
+        <tr><td class="n">Workbench.name / note</td><td>工作台</td><td>不重名，note ≤ 60 字</td></tr>
+        <tr><td class="n">Bottle.capacityMl / ratioN / name</td><td>调漆台 / 详情</td><td>见上表</td></tr>
+        <tr><td class="n">Settings.*</td><td>设置页</td><td>白名单枚举，改完立即生效</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.3 派生数据只能经由业务动作改变</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4>液位</h4>
+        <ul>
+          <li>只能通过稀释、调漆、工作台用量、盘点、清空改变</li>
+          <li>每个动作都是「一个事务 + 一个 Command」，可整体撤销</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>记录与读数</h4>
+        <ul>
+          <li>用量 / 调漆记录只追加，不提供编辑与删除（可归档）</li>
+          <li>总计、比例读数、低库存状态、色环坐标都是现算值</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2><span class="no">//03</span>配额与上限</h2>
+    <p>配额的作用是「提示与兜底」，不是把用户挡在门外：除硬上限外只提示、不阻止写入。</p>
+    <table>
+      <caption>3.7.3 配额与上限</caption>
+      <thead><tr><th>项</th><th>上限</th><th>达到时</th></tr></thead>
+      <tbody>
+        <tr><td>工作台数量</td><td class="n">5</td><td>按钮禁用 + 说明文案</td></tr>
+        <tr><td>分组层级</td><td class="n">3</td><td>禁止新建 / 拖入子级</td></tr>
+        <tr><td>同层分组数</td><td class="n">20（软限）</td><td>提示合并，不阻止</td></tr>
+        <tr><td>自定义漆料</td><td class="n">500 条</td><td>提示并跳转清理</td></tr>
+        <tr><td>单 SKU 库存条目</td><td class="n">20 份</td><td>提示同类条目过多</td></tr>
+        <tr><td>库存条目总量</td><td class="n">3000 条</td><td>提示导出归档，不阻止写入</td></tr>
+        <tr><td>撤销深度</td><td class="n">默认 3，可配 3–20</td><td>超出即丢弃最旧</td></tr>
+        <tr><td>本地存储</td><td class="n">建议 ≤ 30 MB（不含图片）</td><td>占用 &gt; 80% 显示存储警告</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="s4">
+    <h2><span class="no">//04</span>写路径与校验</h2>
+    <table>
+      <caption>实现约定</caption>
+      <thead><tr><th>约定</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="n">一个事务 + 一个 Command</td><td>所有写操作由 store 里的 command 统一提交，失败整体回滚</td></tr>
+        <tr><td class="n">Zod 校验</td><td>写入前校验字段类型、范围与引用完整性（如 groupId 必须存在、比例 0–10）</td></tr>
+        <tr><td class="n">ledger 追加</td><td>每个 Command 记录动作、目标、前后值与时间；界面数值可回溯到记录</td></tr>
+        <tr><td class="n">可撤销</td><td>除设置项外都进撤销栈；设置项改完立即生效并回执，不进撤销栈</td></tr>
+        <tr><td class="n">导入</td><td>覆盖 / 合并 / 跳过；覆盖先清空用户数据表，合并按 id 去重、库存取较大余量</td></tr>
+        <tr><td class="n">导出</td><td>全量 .pigment.json 与库存 CSV（品牌 / 代号 / 名称 / 色值 / 类 / 剩余 ml / 分组 / 工作台）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="s5">
+    <h2><span class="no">//05</span>为什么目录只读</h2>
+    <div class="grid2">
+      <div class="card">
+        <h4>防语义漂移</h4>
+        <ul><li>允许改目录色值，同一个漆号在不同人的库里会显示成不同颜色，社区数据与截图就对不上</li></ul>
+      </div>
+      <div class="card">
+        <h4>可核验</h4>
+        <ul><li>sourceUrl / verifiedAt 由维护者写入，hexEstimated 标记推定色值，界面用 ≈ 与工具栏摘要如实标注</li></ul>
+      </div>
+      <div class="card">
+        <h4>可扩展</h4>
+        <ul><li>目录外需求走 custom：用户自带色值，独立命名空间，不覆盖 catalog</li></ul>
+      </div>
+      <div class="card">
+        <h4>可撤销</h4>
+        <ul><li>用户数据的所有写操作都能整体撤销，并留下 ledger 记录</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="s6">
+    <h2><span class="no">//06</span>变更记录与相关文档</h2>
+    <table>
+      <caption>变更记录</caption>
+      <thead><tr><th>版本</th><th>变更</th></tr></thead>
+      <tbody>
+        <tr><td class="n">2.3.0（2026-11-21）</td><td>从设置页迁出为随包文档；设置页面板编号前移为 //01 设置项 → //02 数据运维 → //03 快捷键 → //04 关于</td></tr>
+        <tr><td class="n">2.0–2.2.2</td><td>作为设置页 //01 面板存在（表格 + 白名单 + 配额）</td></tr>
+      </tbody>
+    </table>
+    <h3>相关文档</h3>
+    <ul style="font-size:13.5px;color:var(--ink-2)">
+      <li>设计书：<code>docs/漆料管理软件-项目设计描述书.md</code> §3.7 / AC-12</li>
+      <li>桌面化与视觉规格：<code>docs/PAINTLAB-2.0-桌面化与视觉重做规格.md</code></li>
+      <li>交付与实现约定：<code>IMPLEMENTATION.md</code></li>
+      <li>目录数据来源与许可：<code>docs/seed/README.md</code></li>
+      <li>本页 Markdown 原文（随包发布的最新版）：<code>docs/数据范围与字段级权限.md</code></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>PAINTLAB 2.3.0 · 数据范围与字段级权限</span>
+    <span>非官方个人项目 · 与任何漆料厂商无隶属关系</span>
+  </footer>
+</div>
+</body>
+</html>

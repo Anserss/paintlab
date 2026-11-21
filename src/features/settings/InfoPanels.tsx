@@ -11,7 +11,7 @@ export function ShortcutsPanel() {
   return (
     <Panel
       id="shortcuts"
-      code="//04"
+      code="//03"
       title="快捷键"
       description="键盘可完成全部关键操作；卡片聚焦时按 Space / Enter 打开详情与移动菜单。"
     >
@@ -45,7 +45,7 @@ export function AboutPanel() {
   return (
     <Panel
       id="about"
-      code="//05"
+      code="//04"
       title="关于"
       description="非官方项目；色值为社区测量值；第三方数据许可与署名。"
     >
@@ -78,6 +78,15 @@ export function AboutPanel() {
           </li>
         ))}
       </ul>
+
+      <div className="mt-4 border-t border-line pt-3">
+        <p className="t-label mb-1">数据范围与字段级权限</p>
+        <p data-note="data-scope-doc" className="text-[11px] leading-snug text-text-3">
+          这部分说明已从设置页迁出，随应用包发布在安装目录的
+          <code className="t-readout mx-1 break-all text-text-2">docs/数据范围与字段级权限.md</code>
+          （同目录另有 .html 版，双击即可用浏览器阅读）。仓库里同名文件是最新版本。
+        </p>
+      </div>
 
       <div className="mt-4 border-t border-line pt-3">
         <p className="t-label mb-1">MIT 署名（原文照抄 docs/seed/README.md）</p>

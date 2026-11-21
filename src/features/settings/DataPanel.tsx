@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { Badge, Button, Dialog, Segmented } from '@/components/ui';
 import type { ImportCounts, ImportMode, StorageEstimate } from '@/data/repos/settings';
@@ -156,7 +156,7 @@ export function DataPanel() {
   return (
     <Panel
       id="data"
-      code="//03"
+      code="//02"
       title="数据运维"
       description="导出全量备份、导出库存报表、导入备份、重置数据与存储占用（spec 3.8）。"
     >

@@ -3,6 +3,10 @@
 > 2.1 变更清单见 `docs/PAINTLAB-2.1-改版说明.md`；2.1.1 见 `docs/PAINTLAB-2.1.1-改版说明.md`；2.1.2 目录补录见 `docs/PAINTLAB-2.1.2-目录补录.md`；2.2.0 见 `docs/PAINTLAB-2.2-改版说明.md`；2.2.1 见 `docs/PAINTLAB-2.2.1-改版说明.md`；2.2.2 见 `docs/PAINTLAB-2.2.2-改版说明.md`；2.3.0（动效层）见 `docs/PAINTLAB-2.3.0-改版说明.md`；视觉与交互规格见 `docs/PAINTLAB-2.0-桌面化与视觉重做规格.md`。
 > 本文件偏目录、分层、脚本与验收命令。
 >
+> **2.3.0 修订（2026-11-21）**：设置页的「数据范围与字段级权限」面板迁出为随应用包发布的
+> `docs/数据范围与字段级权限.md`（同目录另有 `.html` 阅读版）；设置页面板编号前移为
+> `//01 设置项 → //02 数据运维 → //03 快捷键 → //04 关于`。发布包见 GitHub Releases（`PAINTLAB-2.3.0-win64.zip`）。
+>
 > **版本号规则：未经用户明确指示，不得修改版本号**（`package.json` 的 `version` 与 `src/platform.ts` 的兜底值）；改版本前必须先得到用户明确许可。
 
 Vite 5 + React 18 + TypeScript 5.6(strict) + Tailwind 3.4 + Zustand 4 + Dexie 4 + Zod 3，
@@ -17,7 +21,7 @@ npm run build          # PWA 构建
 npm run build:desktop  # 桌面构建（关闭 Service Worker）
 npm run desktop        # 构建 + 安装到 %LOCALAPPDATA%\Programs\PAINTLAB + 快捷方式
 npm run typecheck      # tsc --noEmit，期望 0 错
-npm test               # vitest run，38 文件 / 422 用例（2.3.0 实测）
+npm test               # vitest run，38 文件 / 423 用例（2.3.0 实测）
 npm run verify:motion  # 动效验收（先 npm run dev）：Playwright，24 项
 npm run check          # 目录核验 + 重建 public/catalog（旧 CSV 口径）
 node scripts/build-catalog-2.2.2.mjs   # 2.2.2 目录：modkit-swatch + 手补辅料
@@ -228,7 +232,7 @@ src/app/motion.ts
 
 ```
 npx tsc --noEmit        → 0 error
-npx vitest run          → 38 文件 / 422 用例通过（2.3.0）
+npx vitest run          → 38 文件 / 423 用例通过（2.3.0）
 npx vite build          → ✓（PWA）
 npx vite build --mode desktop → ✓（无 sw.js；CSS 38.83 kB / JS 666.17 kB，gzip 210.12 kB）
 npm run verify:motion   → 24 / 24（Playwright；dev server 5175）
@@ -271,7 +275,7 @@ npm run verify:motion   → 24 / 24（Playwright；dev server 5175）
 5. `JW-A01…A24` 的建模口径已按用户 2026-11-20 拍板为**水性**（`acrylic/acrylic/water`），modkit 上游写的 lacquer 未采纳；若厂方页面确认是 lacquer，改 `scripts/build-catalog-2.2.2.mjs` 的 `LINES.jy` 再重跑即可。
 6. `CLC`（LASCIVUS Decor 粉末）与 `LDL`（粉彩笔）不是瓶装漆，未纳入 `Paint` 模型。
 7. 自动快照未实现（桌面版也是手动导出留档）；设置页如实标注。
-8. Playwright E2E 仍未接入五页业务回归；**2.3.0 只接入了 `verify:motion` 的动效验收（24 项）**，业务回归仍靠 422 条单测 + 桌面实机走查。
+8. Playwright E2E 仍未接入五页业务回归；**2.3.0 只接入了 `verify:motion` 的动效验收（24 项）**，业务回归仍靠 423 条单测 + 桌面实机走查。
 9. 单 chunk 666.17 kB（gzip 210.12 kB），未拆包；2.3.0 动效层使 CSS 增加约 5.6 kB。
 10. 桌面壳依赖本机 Electron 运行时缓存；未做签名与自动更新。
 11. 浏览器窄屏（< 1120）仍是 2.0 的桌面布局（无移动端版式）；390 宽无文档横向滚动，但左栏 / 工具栏会裁切。

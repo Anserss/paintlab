@@ -82,24 +82,26 @@ describe('设置页（spec 3.7 / 3.8 / 3.9 / 10.1）', () => {
     expect(text).toContain('明日方舟');
   });
 
-  it('数据范围面板：目录字段是只读文本（aria-readonly），DOM 里没有输入控件', () => {
+  it('数据范围与字段级权限已迁出设置页：面板不存在，关于面板指向随包说明文档', () => {
     const { container } = render(<SettingsPage />);
-    const scope = container.querySelector('[data-panel="data-scope"]') as HTMLElement | null;
 
-    expect(scope).not.toBeNull();
-    const panel = scope as HTMLElement;
-    expect(panel.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    expect(container.querySelector('[data-panel="data-scope"]')).toBeNull();
+    expect(container.querySelector('[data-field="paint-hex"]')).toBeNull();
+    expect(container.querySelector('[data-quota]')).toBeNull();
+    expect(container.textContent).not.toContain('字段级写入权限');
 
-    for (const id of ['brand-name', 'paint-line-volume', 'paint-hex', 'paint-source']) {
-      const node = panel.querySelector('[data-field="' + id + '"]') as HTMLElement | null;
-      expect(node, '目录只读字段 ' + id).not.toBeNull();
-      expect(node?.tagName).toBe('SPAN');
-      expect(node?.getAttribute('aria-readonly')).toBe('true');
-    }
+    const doc = container.querySelector('[data-note="data-scope-doc"]') as HTMLElement | null;
+    expect(doc).not.toBeNull();
+    expect(doc?.textContent).toContain('docs/数据范围与字段级权限.md');
+  });
 
-    expect(panel.querySelectorAll('[data-writable-field]').length).toBeGreaterThanOrEqual(8);
-    expect(panel.textContent).toContain('Brand.displayAlias');
-    expect(panel.textContent).toContain('禁止用户改色值');
+  it('设置页面板编号连续：//01 设置项 → //02 数据运维 → //03 快捷键 → //04 关于', () => {
+    const { container } = render(<SettingsPage />);
+    const codes = Array.from(container.querySelectorAll('[data-panel] .t-label'))
+      .map((node) => node.textContent?.trim())
+      .filter((text): text is string => Boolean(text && text.startsWith('//')));
+
+    expect(codes).toEqual(['//01', '//02', '//03', '//04']);
   });
 
   it('导出全量生成带日期的 .pigment.json 并触发下载', async () => {
