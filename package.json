@@ -64,5 +64,23 @@
     "vitest": "^1.6.1"
   },
   "license": "MIT",
-  "description": "PAINTLAB 2.1 —— 漆料资产与调漆工作台（桌面版 + 浏览器版）"
+  "author": "Anserss",
+  "description": "PAINTLAB 2.3.0 —— 漆料资产与调漆工作台（桌面版 + 浏览器版）",
+  "homepage": "https://github.com/Anserss/paintlab#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anserss/paintlab.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Anserss/paintlab/issues"
+  },
+  "keywords": [
+    "paintlab",
+    "scale-model",
+    "paint-inventory",
+    "electron",
+    "react",
+    "typescript",
+    "local-first"
+  ]
 }

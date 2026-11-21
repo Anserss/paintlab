@@ -1,3 +1,4 @@
+# 依赖与构建产物
 node_modules
 dist
 dev-dist
@@ -5,9 +6,9 @@ dev-dist
 coverage
 test-results
 playwright-report
-reports/shots/
-.DS_Store
-*.log
+
+# 本机 / 生成物（不进版本库）
+reports/
 .npmcache
 release/
 .launcher-build/
@@ -19,3 +20,15 @@ desktop/electron-clean-test/
 desktop/smoke/
 desktop/smoke3719/
 desktop/paintlab-il-test/
+*.zip
+*.7z
+*.tmp
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+*.log
+
+# 用户数据（绝不入库；桌面版真实数据在 %APPDATA%\PAINTLAB）
+*.pigment.json
+window-state.json
