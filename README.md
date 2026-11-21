@@ -26,8 +26,7 @@ All user data stays on your machine; the downloadable package contains **no user
 - [测试与验收](#测试与验收)
 - [数据与许可](#数据与许可)
 - [文档](#文档)
-- [已知问题](#已知问题)
-- [版本号规则](#版本号规则)
+
 
 ---
 
