@@ -121,6 +121,19 @@ fs.writeFileSync(path.join(appDir, 'package.json'), JSON.stringify(packagedApp, 
 copyDir(dist, path.join(appDir, 'dist'));
 if (fs.existsSync(iconSource)) fs.copyFileSync(iconSource, path.join(installDir, 'icon.ico'));
 
+// 随包说明文档（设置页 //01 数据范围面板已迁出，关于面板指向这里）
+const docsSource = path.join(root, 'docs');
+const installDocs = path.join(installDir, 'docs');
+fs.mkdirSync(installDocs, { recursive: true });
+let docsCopied = 0;
+for (const name of ['数据范围与字段级权限.md', '数据范围与字段级权限.html']) {
+  const from = path.join(docsSource, name);
+  if (!fs.existsSync(from)) continue;
+  fs.copyFileSync(from, path.join(installDocs, name));
+  docsCopied += 1;
+}
+if (docsCopied > 0) log('已复制说明文档到 ' + installDocs);
+
 fs.writeFileSync(path.join(installDir, 'version.txt'), packagedApp.version + '\n');
 log('完成：' + targetExe + '（version ' + packagedApp.version + '）');
 createShortcuts();
